@@ -7,11 +7,13 @@ import dev.hilla.parser.model.MethodClass;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 public class BasicParserTest {
 
@@ -34,7 +36,13 @@ public class BasicParserTest {
         var exampleEndpoint = parserResult.endpoints().stream()
                 .filter(e -> e.name().equals(BasicEndpoint.class.getName()))
                 .findAny().orElseThrow();
-        assertEquals(5, exampleEndpoint.methods().size(), "Method count in endpoint");
+
+        assertEquals(Arrays.stream(BasicEndpoint.class.getMethods())
+                        .filter(m -> m.isAnnotationPresent(ShouldBeParsed.class))
+                        .map(Method::getName)
+                        .sorted().toList(),
+                exampleEndpoint.methods().stream().map(Method::getName).sorted().toList(),
+                "Same methods in endpoint");
 
         assertEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
                         .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
