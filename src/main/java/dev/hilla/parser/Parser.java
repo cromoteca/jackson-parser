@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import dev.hilla.parser.annotations.Endpoint;
+import dev.hilla.parser.annotations.EndpointExposed;
 import dev.hilla.parser.model.EntityClass;
 import dev.hilla.parser.model.MethodClass;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,19 +34,20 @@ public class Parser {
         var endpoints = endpointClasses.stream().map(endpoint -> {
             var methods = Arrays.stream(endpoint.getMethods())
                     .filter(method -> Modifier.isPublic(method.getModifiers()))
-                    .filter(method -> method.getDeclaringClass().isAnnotationPresent(Endpoint.class))
+                    .filter(method -> method.getDeclaringClass().isAnnotationPresent(Endpoint.class)
+                            || method.getDeclaringClass().isAnnotationPresent(EndpointExposed.class))
                     .toList();
-            return new MethodClass(endpoint.getName(), methods);
+            return new MethodClass(endpoint, methods);
         }).toList();
 
         var entities = new HashMap<Class<?>, EntityClass>();
 
-        endpointClasses.stream()
-                .map(this::bean)
-                .flatMap(jt ->
-                        Arrays.stream(jt.getBeanClass().getMethods())
-                                .filter(method -> Modifier.isPublic(method.getModifiers()))
-                                .map(method -> jt.findMethod(method.getName(), method.getParameterTypes())))
+        endpoints.stream()
+                .flatMap(e -> {
+                    var bean = bean(e.type());
+                    return e.methods().stream()
+                            .map(method -> bean.findMethod(method.getName(), method.getParameterTypes()));
+                })
                 .distinct()
                 .flatMap(am -> {
                     if (am == null) {

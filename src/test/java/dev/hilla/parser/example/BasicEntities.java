@@ -71,6 +71,20 @@ public class BasicEntities {
     record PropertyInGenericParameter(String s) {
     }
 
+    record ReturnTypeInNotExposedMethod() {
+    }
+
+    record ParameterTypeInNotExposedMethod() {
+    }
+
+    @ShouldBeParsed
+    record ReturnTypeInExposedMethod() {
+    }
+
+    @ShouldBeParsed
+    record ParameterTypeInExposedMethod() {
+    }
+
     @JsonSerialize(converter = ConverterUsedToSerialize.class)
     @JsonDeserialize(converter = ConverterUsedToDeserialize.class)
     record TypeThatWillBeConvertedByJackson() {

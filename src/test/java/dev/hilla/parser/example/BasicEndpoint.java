@@ -7,7 +7,7 @@ import java.util.List;
 import static dev.hilla.parser.example.BasicEntities.*;
 
 @Endpoint
-public class BasicEndpoint {
+public class BasicEndpoint extends NotExposedSuperclass {
     @ShouldBeParsed
     public List<ListItemInMethodReturnType> listItemInMethodReturnTypes() {
         return List.of(new ListItemInMethodReturnType(List.of(new ListItemInRecordParameter())));
@@ -35,5 +35,12 @@ public class BasicEndpoint {
     @ShouldBeParsed
     public TypeThatWillBeConvertedByJackson getTypeThatWillBeConvertedByJackson() {
         return new TypeThatWillBeConvertedByJackson();
+    }
+
+    @ShouldBeParsed
+    @Override
+    public ReturnTypeInExposedMethod publicMethodOverriddenInEndpoint
+            (ParameterTypeInExposedMethod parameterTypeInExposedMethod) {
+        return new ReturnTypeInExposedMethod();
     }
 }

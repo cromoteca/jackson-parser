@@ -3,7 +3,6 @@ package dev.hilla.parser.example;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.parser.Parser;
 import dev.hilla.parser.model.EntityClass;
-import dev.hilla.parser.model.MethodClass;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -30,11 +29,11 @@ public class BasicParserTest {
         var parserResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
 
         assertEquals(List.of(BasicEndpoint.class.getName()),
-                parserResult.endpoints().stream().map(MethodClass::name).sorted().toList(),
+                parserResult.endpoints().stream().map(e -> e.type().getName()).sorted().toList(),
                 "Same endpoints");
 
         var exampleEndpoint = parserResult.endpoints().stream()
-                .filter(e -> e.name().equals(BasicEndpoint.class.getName()))
+                .filter(e -> e.type().getName().equals(BasicEndpoint.class.getName()))
                 .findAny().orElseThrow();
 
         assertEquals(Arrays.stream(BasicEndpoint.class.getMethods())
