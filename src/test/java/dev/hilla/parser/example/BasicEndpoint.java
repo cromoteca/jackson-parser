@@ -22,4 +22,9 @@ public class BasicEndpoint {
     ReturnTypeOfNonPublicMethod ignored() {
         return new ReturnTypeOfNonPublicMethod();
     }
+
+    public GenericItemInMethodReturnType<GenericParameterInMethodReturnType> genericItemInMethodReturnType
+            (GenericParameterInMethodReturnType genericParameterInMethodReturnType) {
+        return new GenericItemInMethodReturnType<GenericParameterInMethodReturnType>(genericParameterInMethodReturnType);
+    }
 }

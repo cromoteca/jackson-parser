@@ -25,7 +25,7 @@ class BasicParserTest {
         var exampleEndpoint = parserResult.endpoints().stream()
                 .filter(e -> e.name().equals(BasicEndpoint.class.getName()))
                 .findAny().orElseThrow();
-        assertEquals(3, exampleEndpoint.methods().size(), "Method count in endpoint");
+        assertEquals(4, exampleEndpoint.methods().size(), "Method count in endpoint");
 
         assertEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
                         .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))

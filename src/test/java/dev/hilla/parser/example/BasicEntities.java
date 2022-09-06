@@ -52,4 +52,16 @@ public class BasicEntities {
 
     record ReturnTypeOfNonPublicMethod() {
     }
+
+    @ShouldBeParsed
+    record GenericItemInMethodReturnType<T>(T t) {
+    }
+
+    @ShouldBeParsed
+    record GenericParameterInMethodReturnType(PropertyInGenericParameter propertyInGenericParameter) {
+    }
+
+    @ShouldBeParsed
+    record PropertyInGenericParameter(String s) {
+    }
 }
