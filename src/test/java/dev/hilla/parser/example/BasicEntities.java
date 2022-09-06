@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 import java.util.Map;
@@ -92,6 +93,24 @@ public class BasicEntities {
 
     @ShouldBeParsed
     record TypeThatHasBeenConvertedByJackson() {
+    }
+
+    // Using a class since it looks like @JsonIgnore is not applicable to record fields
+    @ShouldBeParsed
+    static class TypeUsingJsonIgnore {
+        private final IgnoredType param;
+
+        TypeUsingJsonIgnore(IgnoredType param) {
+            this.param = param;
+        }
+
+        @JsonIgnore
+        public IgnoredType param() {
+            return param;
+        }
+    }
+
+    record IgnoredType() {
     }
 
     public static class ConverterUsedToSerialize

@@ -43,4 +43,9 @@ public class BasicEndpoint extends NotExposedSuperclass {
             (ParameterTypeInExposedMethod parameterTypeInExposedMethod) {
         return new ReturnTypeInExposedMethod();
     }
+
+    @ShouldBeParsed
+    public TypeUsingJsonIgnore getTypeUsingJsonIgnore() {
+        return new TypeUsingJsonIgnore(new IgnoredType());
+    }
 }
