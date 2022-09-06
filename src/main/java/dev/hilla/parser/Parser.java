@@ -9,8 +9,12 @@ import dev.hilla.parser.model.EntityClass;
 import dev.hilla.parser.model.MethodClass;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Parser {
@@ -56,27 +60,15 @@ public class Parser {
                 .distinct()
                 .forEach(jt -> addType(entities, jt));
 
-/*
-        endpoints.stream()
-                .flatMap(endpoint -> endpoint.methods().stream())
-                .flatMap(method -> Stream.concat(Stream.of(method.getAnnotatedReturnType()),
-                        Arrays.stream(method.getAnnotatedParameterTypes())))
-                .forEach(type -> addType(entities, type));
-*/
-
         return new ParserResult(endpoints, entities.values().stream().toList());
     }
 
     private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
-        if (type instanceof ArrayType) {
-            var arrayType = (ArrayType) type;
+        if (type instanceof ArrayType arrayType) {
             addType(entities, arrayType.getContentType());
         } else {
             addClass(entities, type.getRawClass());
-
-            for (int i = 0; i < type.containedTypeCount(); i++) {
-                addType(entities, type.containedType(i));
-            }
+            IntStream.range(0, type.containedTypeCount()).forEach(i -> addType(entities, type.containedType(i)));
         }
     }
 
@@ -99,13 +91,5 @@ public class Parser {
     }
 
     public static record ParserResult(List<MethodClass> endpoints, List<EntityClass> entities) {
-    }
-
-    @Deprecated
-    private Stream<Class<?>> walkEntities(Class<?> baseEntity) {
-        var type = mapper.getTypeFactory().constructType(baseEntity);
-        var bean = mapper.getSerializationConfig().introspect(type);
-
-        return bean.findProperties().stream().flatMap(p -> walkEntities(p.getRawPrimaryType()));
     }
 }
