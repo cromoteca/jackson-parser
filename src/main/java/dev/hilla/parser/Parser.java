@@ -1,5 +1,6 @@
 package dev.hilla.parser;
 
+import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
@@ -8,6 +9,8 @@ import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.model.EntityClass;
 import dev.hilla.parser.model.MethodClass;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -17,12 +20,13 @@ import java.util.Map;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@Component
 public class Parser {
     private final ObjectMapper mapper;
 
     @Autowired
-    public Parser(ObjectMapper mapper) {
-        this.mapper = mapper;
+    public Parser(MappingJackson2HttpMessageConverter springMvcJacksonConverter) {
+        mapper = springMvcJacksonConverter.getObjectMapper();
     }
 
     public ParserResult parseEndpoints(List<Class<?>> endpointClasses) {
@@ -37,7 +41,7 @@ public class Parser {
         var entities = new HashMap<Class<?>, EntityClass>();
 
         endpointClasses.stream()
-                .map(ec -> mapper.getSerializationConfig().introspect(mapper.getTypeFactory().constructType(ec)))
+                .map(this::bean)
                 .flatMap(jt ->
                         Arrays.stream(jt.getBeanClass().getMethods())
                                 .filter(method -> Modifier.isPublic(method.getModifiers()))
@@ -79,15 +83,35 @@ public class Parser {
         if (cls.isPrimitive()) {
             return;
         }
+
+        var bean = bean(cls);
+
+        if (!bean.getBeanClass().equals(cls)) {
+            addClass(entities, bean.getBeanClass());
+            return;
+        }
         if (cls.getName().startsWith("java.")) {
             return;
         }
 
-        var entity = new EntityClass(cls.getName());
-        entities.put(cls, entity);
+        entities.put(cls, new EntityClass(cls.getName()));
 
+        bean.findProperties().stream()
+                .map(BeanPropertyDefinition::getPrimaryType)
+                .forEach(c -> addType(entities, c));
+    }
+
+    private BeanDescription bean(Class<?> cls) {
         var bean = mapper.getSerializationConfig().introspect(mapper.getTypeFactory().constructType(cls));
-        bean.findProperties().stream().map(BeanPropertyDefinition::getPrimaryType).forEach(c -> addType(entities, c));
+
+        var converter = bean.findSerializationConverter();
+
+        if (converter != null) {
+            var javaType = converter.getOutputType(mapper.getTypeFactory());
+            bean = mapper.getSerializationConfig().introspect(javaType);
+        }
+
+        return bean;
     }
 
     public static record ParserResult(List<MethodClass> endpoints, List<EntityClass> entities) {

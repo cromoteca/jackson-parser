@@ -27,4 +27,8 @@ public class BasicEndpoint {
             (GenericParameterInMethodReturnType genericParameterInMethodReturnType) {
         return new GenericItemInMethodReturnType<GenericParameterInMethodReturnType>(genericParameterInMethodReturnType);
     }
+
+    public TypeThatWillBeConvertedByJackson getTypeThatWillBeConvertedByJackson() {
+        return new TypeThatWillBeConvertedByJackson();
+    }
 }
