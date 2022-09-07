@@ -3,7 +3,6 @@ package dev.hilla.parser;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.EndpointExposed;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -97,11 +97,12 @@ public class Parser {
             return;
         }
 
-        entities.put(cls, new EntityClass(cls.getName()));
-
-        bean.findProperties().parallelStream()
-                .map(BeanPropertyDefinition::getPrimaryType)
-                .forEach(c -> addType(entities, c));
+        // Wanted side effect: add other types while creating entity
+        entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().parallelStream()
+                .map(pd -> {
+                    addType(entities, pd.getPrimaryType());
+                    return (AccessibleObject) pd.getAccessor().getMember();
+                }).toList()));
     }
 
     private BeanDescription bean(Class<?> cls) {
