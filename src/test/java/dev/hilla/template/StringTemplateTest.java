@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StringTemplateTest {
-    private static class BasicTemplateBean {
+    public static class BasicTemplateBean {
         private final String hello;
 
-        private BasicTemplateBean(String hello) {
+        BasicTemplateBean(String hello) {
             this.hello = hello;
         }
 
