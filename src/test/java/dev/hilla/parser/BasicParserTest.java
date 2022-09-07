@@ -1,8 +1,9 @@
-package dev.hilla.parser.example;
+package dev.hilla.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hilla.parser.Parser;
-import dev.hilla.parser.SimpleConsoleOutput;
+import dev.hilla.parser.example.BasicEndpoint;
+import dev.hilla.parser.example.BasicEntities;
+import dev.hilla.parser.example.ShouldBeParsed;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
