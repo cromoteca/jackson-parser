@@ -22,23 +22,6 @@ public class StringTemplate {
         this.mainTemplate = mainTemplate;
     }
 
-    public StringTemplate add(String name, String template) {
-        templates.put(name, template);
-        return this;
-    }
-
-    public String apply(String text) {
-        return doApply(mainTemplate, text);
-    }
-
-    public String apply(String templateName, String text) {
-        return doApply(templates.get(templateName), text);
-    }
-
-    private String doApply(String template, String text) {
-        return null;
-    }
-
     public static String generate(Object bean, String template) {
         var matcher = replacement.matcher(template);
         var output = new StringBuilder();
@@ -65,5 +48,22 @@ public class StringTemplate {
         matcher.appendTail(output);
 
         return output.toString();
+    }
+
+    public StringTemplate add(String name, String template) {
+        templates.put(name, template);
+        return this;
+    }
+
+    public String apply(String text) {
+        return doApply(mainTemplate, text);
+    }
+
+    public String apply(String templateName, String text) {
+        return doApply(templates.get(templateName), text);
+    }
+
+    private String doApply(String template, String text) {
+        return null;
     }
 }
