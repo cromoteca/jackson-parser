@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SimpleConsoleOutput {
-    public static void describe(Parser.ParserResult parserResult) {
+    public static void describe(ScanResult parserResult) {
         System.out.println("Endpoints: " + parserResult.endpoints().size());
         System.out.println("Entities: " + parserResult.entities().size());
 

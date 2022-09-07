@@ -11,7 +11,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Member;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +28,7 @@ public class Parser {
         mapper = springMvcJacksonConverter.getObjectMapper();
     }
 
-    public ParserResult parseEndpoints(List<Class<?>> endpointClasses) {
+    public ScanResult parseEndpoints(List<Class<?>> endpointClasses) {
         // Collect exposed methods for all provided endpoints
         var endpoints = endpointClasses.stream().map(endpoint -> {
             var methods = Arrays.stream(endpoint.getMethods())
@@ -39,11 +38,11 @@ public class Parser {
                     .filter(method -> method.getDeclaringClass().isAnnotationPresent(Endpoint.class)
                             || method.getDeclaringClass().isAnnotationPresent(EndpointExposed.class))
                     .toList();
-            return new EndpointClass(endpoint, methods);
+            return new ScanResult.EndpointClass(endpoint, methods);
         }).toList();
 
         // Will contain all entities found while parsing
-        var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
+        var entities = new ConcurrentHashMap<Class<?>, ScanResult.EntityClass>();
 
         endpoints.stream()
                 .flatMap(e -> {
@@ -78,10 +77,10 @@ public class Parser {
                 .parallel()
                 .forEach(jt -> addType(entities, jt));
 
-        return new ParserResult(endpoints, entities.values().stream().toList());
+        return new ScanResult(endpoints, entities.values().stream().toList());
     }
 
-    private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
+    private void addType(Map<Class<?>, ScanResult.EntityClass> entities, JavaType type) {
         if (type instanceof ArrayType arrayType) {
             // For arrays, let's add the item type instead
             addType(entities, arrayType.getContentType());
@@ -92,7 +91,7 @@ public class Parser {
         }
     }
 
-    private void addClass(Map<Class<?>, EntityClass> entities, Class<?> cls) {
+    private void addClass(Map<Class<?>, ScanResult.EntityClass> entities, Class<?> cls) {
         // Skip already added classes
         if (entities.containsKey(cls)) {
             return;
@@ -123,7 +122,7 @@ public class Parser {
         // We must avoid recursion. That's why a stream is built to be processed *after* the collection insertions
         var builder = Stream.<JavaType>builder();
 
-        entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().stream()
+        entities.put(cls, new ScanResult.EntityClass(cls.getName(), bean.findProperties().stream()
                 .map(pd -> {
                     builder.add(pd.getPrimaryType());
                     return (Member) pd.getAccessor().getMember();
@@ -150,32 +149,5 @@ public class Parser {
         }
 
         return bean;
-    }
-
-    /**
-     * Scan result
-     *
-     * @param endpoints the endpoints
-     * @param entities  the entities
-     */
-    public record ParserResult(List<EndpointClass> endpoints, List<EntityClass> entities) {
-    }
-
-    /**
-     * An endpoint, as part of scan result
-     *
-     * @param type    the endpoint class
-     * @param methods exposed methods
-     */
-    public record EndpointClass(Class<?> type, List<Method> methods) {
-    }
-
-    /**
-     * An entity, as part of scan result
-     *
-     * @param name              entity name
-     * @param propertyAccessors getters or fields used to read properties
-     */
-    public record EntityClass(String name, List<? extends Member> propertyAccessors) {
     }
 }

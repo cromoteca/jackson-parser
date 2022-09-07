@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static dev.hilla.parser.Parser.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -49,7 +48,7 @@ public class BasicParserTest {
         assertStreamEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
                         .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
                         .map(Class::getName),
-                parserResult.entities().stream().map(EntityClass::name),
+                parserResult.entities().stream().map(ScanResult.EntityClass::name),
                 "Same entities");
     }
 
