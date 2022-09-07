@@ -50,7 +50,12 @@ public class BasicEntities {
     }
 
     @ShouldBeParsed
-    record ComplexType(Map<Class<?>, List<ArrayTypeInListInMap>> map) {
+    record ComplexType(Map<Class<?>, List<ArrayTypeInListInMap>> map, BasicEnum enumItem) {
+    }
+
+    @ShouldBeParsed
+    enum BasicEnum {
+        A, B, C;
     }
 
     @ShouldBeParsed
