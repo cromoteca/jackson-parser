@@ -1,7 +1,7 @@
 package dev.hilla.parser.model;
 
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Member;
 import java.util.List;
 
-public record EntityClass(String name, List<AccessibleObject> propertyAccessors) {
+public record EntityClass(String name, List<? extends Member> propertyAccessors) {
 }

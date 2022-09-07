@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
+import dev.hilla.parser.annotations.Nullable;
 import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
@@ -66,7 +67,7 @@ public class BasicEntities {
     }
 
     @ShouldBeParsed
-    record GenericItemInMethodReturnType<T>(T t) {
+    record GenericItemInMethodReturnType<T>(T genericParam) {
     }
 
     @ShouldBeParsed
@@ -152,5 +153,10 @@ public class BasicEntities {
         public JavaType getOutputType(TypeFactory typeFactory) {
             return typeFactory.constructType(TypeThatWillBeConvertedByJackson.class);
         }
+    }
+
+    // Also used to test a "recursive" type
+    @ShouldBeParsed
+    public record NullableType(@Nullable NullableType nullableParameter) {
     }
 }

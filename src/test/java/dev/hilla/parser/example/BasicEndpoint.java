@@ -1,6 +1,7 @@
 package dev.hilla.parser.example;
 
 import dev.hilla.parser.annotations.Endpoint;
+import dev.hilla.parser.annotations.Nullable;
 
 import java.util.List;
 
@@ -47,5 +48,10 @@ public class BasicEndpoint extends NotExposedSuperclass {
     @ShouldBeParsed
     public TypeUsingJsonIgnore getTypeUsingJsonIgnore() {
         return new TypeUsingJsonIgnore(new IgnoredType());
+    }
+
+    @ShouldBeParsed
+    public @Nullable NullableType everythingIsNullableHere(@Nullable NullableType nullableParam1, @Nullable NullableType nullableParam2) {
+        return new NullableType(new NullableType(new NullableType(null)));
     }
 }

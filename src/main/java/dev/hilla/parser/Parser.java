@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -97,12 +97,15 @@ public class Parser {
             return;
         }
 
-        // Wanted side effect: add other types while creating entity
-        entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().parallelStream()
+        var builder = Stream.<JavaType>builder();
+
+        entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().stream()
                 .map(pd -> {
-                    addType(entities, pd.getPrimaryType());
-                    return (AccessibleObject) pd.getAccessor().getMember();
+                    builder.add(pd.getPrimaryType());
+                    return (Member) pd.getAccessor().getMember();
                 }).toList()));
+
+        builder.build().distinct().parallel().forEach(jt -> addType(entities, jt));
     }
 
     private BeanDescription bean(Class<?> cls) {

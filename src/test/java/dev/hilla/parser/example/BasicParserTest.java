@@ -2,6 +2,7 @@ package dev.hilla.parser.example;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.parser.Parser;
+import dev.hilla.parser.SimpleConsoleOutput;
 import dev.hilla.parser.model.EntityClass;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -29,6 +30,7 @@ public class BasicParserTest {
     @Test
     void basicParsing() {
         var parserResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
+        SimpleConsoleOutput.describe(parserResult);
 
         assertEquals(List.of(BasicEndpoint.class.getName()),
                 parserResult.endpoints().stream().map(e -> e.type().getName()).sorted().toList(),
