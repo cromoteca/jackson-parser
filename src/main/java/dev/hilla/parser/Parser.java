@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -40,7 +40,7 @@ public class Parser {
             return new MethodClass(endpoint, methods);
         }).toList();
 
-        var entities = new HashMap<Class<?>, EntityClass>();
+        var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
 
         endpoints.stream()
                 .flatMap(e -> {
@@ -64,6 +64,7 @@ public class Parser {
                     return types.build();
                 })
                 .distinct()
+                .parallel()
                 .forEach(jt -> addType(entities, jt));
 
         return new ParserResult(endpoints, entities.values().stream().toList());
@@ -98,7 +99,7 @@ public class Parser {
 
         entities.put(cls, new EntityClass(cls.getName()));
 
-        bean.findProperties().stream()
+        bean.findProperties().parallelStream()
                 .map(BeanPropertyDefinition::getPrimaryType)
                 .forEach(c -> addType(entities, c));
     }
