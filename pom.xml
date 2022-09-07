@@ -9,9 +9,9 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>dev.hilla</groupId>
-    <artifactId>parser</artifactId>
+    <artifactId>jackson-parser</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>parser</name>
+    <name>Jackson-based Parser</name>
     <description>Spring Boot application that parses Java code using Jackson</description>
     <properties>
         <java.version>17</java.version>
