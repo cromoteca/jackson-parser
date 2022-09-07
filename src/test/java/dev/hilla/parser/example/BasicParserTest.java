@@ -9,6 +9,8 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -36,17 +38,22 @@ public class BasicParserTest {
                 .filter(e -> e.type().getName().equals(BasicEndpoint.class.getName()))
                 .findAny().orElseThrow();
 
-        assertEquals(Arrays.stream(BasicEndpoint.class.getMethods())
+        assertStreamEquals(Arrays.stream(BasicEndpoint.class.getMethods())
                         .filter(m -> m.isAnnotationPresent(ShouldBeParsed.class))
-                        .map(Method::getName)
-                        .sorted().toList(),
-                exampleEndpoint.methods().stream().map(Method::getName).sorted().toList(),
+                        .map(Method::getName),
+                exampleEndpoint.methods().stream().map(Method::getName),
                 "Same methods in endpoint");
 
-        assertEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
+        assertStreamEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
                         .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
-                        .map(Class::getName).sorted().toList(),
-                parserResult.entities().stream().map(EntityClass::name).sorted().toList(),
+                        .map(Class::getName),
+                parserResult.entities().stream().map(EntityClass::name),
                 "Same entities");
+    }
+
+    private void assertStreamEquals(Stream<? extends CharSequence> expected,
+                                    Stream<? extends CharSequence> actual, String message) {
+        assertEquals(expected.sorted().collect(Collectors.joining("\n")),
+                actual.sorted().collect(Collectors.joining("\n")), message);
     }
 }
