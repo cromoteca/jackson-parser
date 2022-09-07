@@ -3,12 +3,41 @@ package dev.hilla.template;
 import org.apache.commons.beanutils.PropertyUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringTemplate {
-    private static final Pattern replacement = Pattern.compile("(\\$+)\\{\\s*(\\w+)\\s*}");
+    private static final Pattern replacement = Pattern.compile("(\\$+)\\{\\s*(\\w+)(#\\w+)?\\s*}");
+    private final String mainTemplate;
+    private final Map<String, String> templates = new HashMap<>();
+
+    public StringTemplate() {
+        mainTemplate = null;
+    }
+
+    public StringTemplate(String mainTemplate) {
+        this.mainTemplate = mainTemplate;
+    }
+
+    public StringTemplate add(String name, String template) {
+        templates.put(name, template);
+        return this;
+    }
+
+    public String apply(String text) {
+        return doApply(mainTemplate, text);
+    }
+
+    public String apply(String templateName, String text) {
+        return doApply(templates.get(templateName), text);
+    }
+
+    private String doApply(String template, String text) {
+        return null;
+    }
 
     public static String generate(Object bean, String template) {
         var matcher = replacement.matcher(template);
