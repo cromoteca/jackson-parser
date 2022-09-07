@@ -6,13 +6,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.EndpointExposed;
-import dev.hilla.parser.model.EntityClass;
-import dev.hilla.parser.model.MethodClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -31,29 +30,40 @@ public class Parser {
     }
 
     public ParserResult parseEndpoints(List<Class<?>> endpointClasses) {
+        // Collect exposed methods for all provided endpoints
         var endpoints = endpointClasses.stream().map(endpoint -> {
             var methods = Arrays.stream(endpoint.getMethods())
+                    // only public methods
                     .filter(method -> Modifier.isPublic(method.getModifiers()))
+                    // only methods in annotated classes
                     .filter(method -> method.getDeclaringClass().isAnnotationPresent(Endpoint.class)
                             || method.getDeclaringClass().isAnnotationPresent(EndpointExposed.class))
                     .toList();
-            return new MethodClass(endpoint, methods);
+            return new EndpointClass(endpoint, methods);
         }).toList();
 
+        // Will contain all entities found while parsing
         var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
 
         endpoints.stream()
                 .flatMap(e -> {
+                    // Although technically not necessary, let's use a Jackson BeanDescription to get information about
+                    // endpoint methods, so that the code used to parse them will be the same as for entity accessors
                     var bean = bean(e.type());
                     return e.methods().stream()
+                            // for each endpoint method, find its corresponding AnnotatedMethod
                             .map(method -> bean.findMethod(method.getName(), method.getParameterTypes()));
                 })
                 .distinct()
+                // Methods are "flattened" to their types
                 .flatMap(am -> {
+                    // It happened...
                     if (am == null) {
                         return Stream.of();
                     }
 
+                    // Rather that concatenating streams, it is better to build one by adding return type and
+                    // parameter types one by one
                     var types = Stream.<JavaType>builder();
                     types.add(am.getType());
 
@@ -64,6 +74,7 @@ public class Parser {
                     return types.build();
                 })
                 .distinct()
+                // Parallelize type parsing
                 .parallel()
                 .forEach(jt -> addType(entities, jt));
 
@@ -72,31 +83,44 @@ public class Parser {
 
     private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
         if (type instanceof ArrayType arrayType) {
+            // For arrays, let's add the item type instead
             addType(entities, arrayType.getContentType());
         } else {
             addClass(entities, type.getRawClass());
+            // Let's deal with generics (recursion will work here)
             IntStream.range(0, type.containedTypeCount()).forEach(i -> addType(entities, type.containedType(i)));
         }
     }
 
     private void addClass(Map<Class<?>, EntityClass> entities, Class<?> cls) {
+        // Skip already added classes
         if (entities.containsKey(cls)) {
             return;
         }
+        // Skip primitive types
         if (cls.isPrimitive()) {
             return;
         }
 
+        // Get the Jackson BeanDescription for this class
         var bean = bean(cls);
 
+        // If the BeanDescription class does not correspond, it has been remapped using a Jackson converter
         if (!bean.getBeanClass().equals(cls)) {
+            // Call `addClass` again with the converted type
             addClass(entities, bean.getBeanClass());
+            // Stop treating this class, it has been replaced
             return;
         }
+
+        // Skip Java types (should add other packages here)
+        // Do this after conversion check in case a Java type has been remapped
         if (cls.getName().startsWith("java.")) {
             return;
         }
 
+        // Here we have to do two things: finally add the class to the entities collection, but also add dependencies.
+        // We must avoid recursion. That's why a stream is built to be processed *after* the collection insertions
         var builder = Stream.<JavaType>builder();
 
         entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().stream()
@@ -105,9 +129,16 @@ public class Parser {
                     return (Member) pd.getAccessor().getMember();
                 }).toList()));
 
+        // Dependencies are added in parallel
         builder.build().distinct().parallel().forEach(jt -> addType(entities, jt));
     }
 
+    /**
+     * Creates a `BeanDescription` for a class, taking converters into account.
+     *
+     * @param cls the class
+     * @return the bean description
+     */
     private BeanDescription bean(Class<?> cls) {
         var bean = mapper.getSerializationConfig().introspect(mapper.getTypeFactory().constructType(cls));
 
@@ -121,6 +152,30 @@ public class Parser {
         return bean;
     }
 
-    public static record ParserResult(List<MethodClass> endpoints, List<EntityClass> entities) {
+    /**
+     * Scan result
+     *
+     * @param endpoints the endpoints
+     * @param entities  the entities
+     */
+    public record ParserResult(List<EndpointClass> endpoints, List<EntityClass> entities) {
+    }
+
+    /**
+     * An endpoint, as part of scan result
+     *
+     * @param type    the endpoint class
+     * @param methods exposed methods
+     */
+    public record EndpointClass(Class<?> type, List<Method> methods) {
+    }
+
+    /**
+     * An entity, as part of scan result
+     *
+     * @param name              entity name
+     * @param propertyAccessors getters or fields used to read properties
+     */
+    public record EntityClass(String name, List<? extends Member> propertyAccessors) {
     }
 }

@@ -3,7 +3,6 @@ package dev.hilla.parser.example;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.parser.Parser;
 import dev.hilla.parser.SimpleConsoleOutput;
-import dev.hilla.parser.model.EntityClass;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static dev.hilla.parser.Parser.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
