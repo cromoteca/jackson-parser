@@ -95,12 +95,12 @@ public class BasicEntities {
     record TypeThatHasBeenConvertedByJackson() {
     }
 
-    // Using a class since it looks like @JsonIgnore is not applicable to record fields
+    // Using a class since it looks like @JsonIgnore is not applicable to record components
     @ShouldBeParsed
     static class TypeUsingJsonIgnore {
         private final IgnoredType param;
 
-        TypeUsingJsonIgnore(IgnoredType param) {
+        public TypeUsingJsonIgnore(IgnoredType param) {
             this.param = param;
         }
 
