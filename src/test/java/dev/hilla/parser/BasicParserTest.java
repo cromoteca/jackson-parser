@@ -28,15 +28,15 @@ public class BasicParserTest {
 
     @Test
     void basicParsing() {
-        var parserResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
-        SimpleConsoleOutput.describe(parserResult);
+        var scanResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
+        // SimpleConsoleOutput.describe(scanResult);
 
-        assertEquals(List.of(BasicEndpoint.class.getName()),
-                parserResult.endpoints().stream().map(e -> e.type().getName()).sorted().toList(),
+        assertStreamEquals(Stream.of(BasicEndpoint.class.getName()),
+                scanResult.endpoints().stream().map(e -> e.type().getName()),
                 "Same endpoints");
 
-        var exampleEndpoint = parserResult.endpoints().stream()
-                .filter(e -> e.type().getName().equals(BasicEndpoint.class.getName()))
+        var exampleEndpoint = scanResult.endpoints().stream()
+                .filter(e -> e.type().equals(BasicEndpoint.class))
                 .findAny().orElseThrow();
 
         assertStreamEquals(Arrays.stream(BasicEndpoint.class.getMethods())
@@ -48,13 +48,16 @@ public class BasicParserTest {
         assertStreamEquals(Arrays.stream(BasicEntities.class.getDeclaredClasses())
                         .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
                         .map(Class::getName),
-                parserResult.entities().stream().map(ScanResult.EntityClass::name),
+                scanResult.entities().stream().map(ScanResult.EntityClass::name),
                 "Same entities");
     }
 
     private void assertStreamEquals(Stream<? extends CharSequence> expected,
                                     Stream<? extends CharSequence> actual, String message) {
-        assertEquals(expected.sorted().collect(Collectors.joining("\n")),
-                actual.sorted().collect(Collectors.joining("\n")), message);
+        assertEquals(toString(expected), toString(actual), message);
+    }
+
+    private static String toString(Stream<? extends CharSequence> expected) {
+        return expected.sorted().collect(Collectors.joining("\n"));
     }
 }
