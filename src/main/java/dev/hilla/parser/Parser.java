@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +17,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static dev.hilla.parser.ScanResult.*;
 
 @Component
 public class Parser {
@@ -38,11 +39,11 @@ public class Parser {
                     .filter(method -> method.getDeclaringClass().isAnnotationPresent(Endpoint.class)
                             || method.getDeclaringClass().isAnnotationPresent(EndpointExposed.class))
                     .toList();
-            return new ScanResult.EndpointClass(endpoint, methods);
+            return new EndpointClass(endpoint, methods);
         }).toList();
 
         // Will contain all entities found while parsing
-        var entities = new ConcurrentHashMap<Class<?>, ScanResult.EntityClass>();
+        var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
 
         endpoints.stream()
                 .flatMap(e -> {
@@ -56,7 +57,7 @@ public class Parser {
                 .distinct()
                 // Methods are "flattened" to their types
                 .flatMap(am -> {
-                    // It happened...
+                    // It happens for certain methods, maybe we shouldn't use Jackson directly on methods
                     if (am == null) {
                         return Stream.of();
                     }
@@ -80,7 +81,7 @@ public class Parser {
         return new ScanResult(endpoints, entities.values().stream().toList());
     }
 
-    private void addType(Map<Class<?>, ScanResult.EntityClass> entities, JavaType type) {
+    private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
         if (type instanceof ArrayType arrayType) {
             // For arrays, let's add the item type instead
             addType(entities, arrayType.getContentType());
@@ -91,7 +92,7 @@ public class Parser {
         }
     }
 
-    private void addClass(Map<Class<?>, ScanResult.EntityClass> entities, Class<?> cls) {
+    private void addClass(Map<Class<?>, EntityClass> entities, Class<?> cls) {
         // Skip already added classes
         if (entities.containsKey(cls)) {
             return;
@@ -122,10 +123,10 @@ public class Parser {
         // We must avoid recursion. That's why a stream is built to be processed *after* the collection insertions
         var builder = Stream.<JavaType>builder();
 
-        entities.put(cls, new ScanResult.EntityClass(cls.getName(), bean.findProperties().stream()
+        entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().stream()
                 .map(pd -> {
                     builder.add(pd.getPrimaryType());
-                    return (Member) pd.getAccessor().getMember();
+                    return pd.getAccessor().getMember();
                 }).toList()));
 
         // Dependencies are added in parallel
