@@ -123,8 +123,10 @@ public class Parser {
         // We must avoid recursion. That's why a stream is built to be processed *after* the collection insertions
         var builder = Stream.<JavaType>builder();
 
+        // Call to `findProperties` is expensive: it took 885 ms for 190 hits
         entities.put(cls, new EntityClass(cls.getName(), bean.findProperties().stream()
                 .map(pd -> {
+                    // Call to `getPrimaryType` is expensive: it took 350 ms for 133 hits
                     builder.add(pd.getPrimaryType());
                     return pd.getAccessor().getMember();
                 }).toList()));
