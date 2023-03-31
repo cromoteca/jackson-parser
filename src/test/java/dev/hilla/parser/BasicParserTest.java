@@ -1,9 +1,13 @@
 package dev.hilla.parser;
 
+import java.io.IOException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.hilla.parser.example.BasicEndpoint;
 import dev.hilla.parser.example.BasicEntities;
 import dev.hilla.parser.example.ShouldBeParsed;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
@@ -15,6 +19,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
+import dev.hilla.parser.example.ShouldBeGenerated;
 
 public class BasicParserTest {
 
@@ -29,7 +35,7 @@ public class BasicParserTest {
     @Test
     void basicParsing() {
         var scanResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
-        // SimpleConsoleOutput.describe(scanResult);
+        SimpleConsoleOutput.describe(scanResult);
 
         assertStreamEquals(Stream.of(BasicEndpoint.class.getName()),
                 scanResult.endpoints().stream().map(e -> e.type().getName()),
@@ -50,6 +56,18 @@ public class BasicParserTest {
                         .map(Class::getName),
                 scanResult.entities().stream().map(ScanResult.EntityClass::name),
                 "Same entities");
+    }
+
+    @Test
+    void basicGeneration() throws IOException {
+        var generated = Arrays.stream(BasicEndpoint.class.getMethods())
+                .filter(m -> m.isAnnotationPresent(ShouldBeGenerated.class))
+                .map(Method::getName).collect(Collectors.joining("\n"));
+
+        // get the contents of the resource file
+        var expected = new String(getClass().getResourceAsStream("expected/BasicEndpoint.ts").readAllBytes());
+
+        assertEquals(expected, generated, "Same generated methods");
     }
 
     private void assertStreamEquals(Stream<? extends CharSequence> expected,

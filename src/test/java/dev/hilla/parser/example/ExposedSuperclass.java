@@ -20,7 +20,7 @@ public class ExposedSuperclass<T, U> {
     }
 
     @ShouldBeParsed
-    public T getBackParameterizedObject(T object) {
+    public T getBackParameterizedType(T object) {
         return object;
     }
 

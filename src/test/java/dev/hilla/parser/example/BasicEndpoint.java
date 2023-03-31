@@ -11,6 +11,12 @@ import static dev.hilla.parser.example.BasicEntities.*;
 @Endpoint
 public class BasicEndpoint extends NotExposedSuperclass<String> {
     @ShouldBeParsed
+    @ShouldBeGenerated
+    public String simpleMethod(String argument) {
+        return argument;
+    }
+
+    @ShouldBeParsed
     public List<ListItemInMethodReturnType> listItemInMethodReturnTypes() {
         return List.of(new ListItemInMethodReturnType(List.of(new ListItemInRecordParameter())));
     }
