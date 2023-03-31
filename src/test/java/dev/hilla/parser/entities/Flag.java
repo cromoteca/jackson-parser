@@ -1,25 +1,24 @@
 package dev.hilla.parser.entities;
 
 public class Flag<T> {
-    private Loneliness opinion;
-    private Cupboard armchair;
+  private Loneliness opinion;
+  private Cupboard armchair;
 
-    public Flag() {
-    }
+  public Flag() {}
 
-    public Loneliness getOpinion() {
-        return opinion;
-    }
+  public Loneliness getOpinion() {
+    return opinion;
+  }
 
-    public void setOpinion(Loneliness opinion) {
-        this.opinion = opinion;
-    }
+  public void setOpinion(Loneliness opinion) {
+    this.opinion = opinion;
+  }
 
-    public Cupboard getArmchair() {
-        return armchair;
-    }
+  public Cupboard getArmchair() {
+    return armchair;
+  }
 
-    public void setArmchair(Cupboard armchair) {
-        this.armchair = armchair;
-    }
+  public void setArmchair(Cupboard armchair) {
+    this.armchair = armchair;
+  }
 }

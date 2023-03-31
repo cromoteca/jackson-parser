@@ -1,106 +1,109 @@
 package dev.hilla.parser.entities;
 
 import dev.hilla.parser.annotations.Nonnull;
-
 import java.math.BigInteger;
 import java.util.Set;
 
 public class Bucket<T> {
-    private final Hatred frog;
-    private final Double drum;
-    private final Fame<Detective, Strenght<Set<Cleverness>>> access;
-    private final Character hatred;
-    private Cleverness ball;
-    private Blouse<Sanity<Love<Double>>> honey;
-    private Equipment<BigInteger, Detective, Access<Long>> dentist;
-    private Detective danger;
-    private Detective compassion;
-    private Satisfaction snowboard;
-    private Blood blood;
+  private final Hatred frog;
+  private final Double drum;
+  private final Fame<Detective, Strenght<Set<Cleverness>>> access;
+  private final Character hatred;
+  private Cleverness ball;
+  private Blouse<Sanity<Love<Double>>> honey;
+  private Equipment<BigInteger, Detective, Access<Long>> dentist;
+  private Detective danger;
+  private Detective compassion;
+  private Satisfaction snowboard;
+  private Blood blood;
 
-    public Bucket(Hatred frog, Double drum, Fame<Detective, Strenght<Set<Cleverness>>> access, Character hatred) {
-        this.frog = frog;
-        this.drum = drum;
-        this.access = access;
-        this.hatred = hatred;
-    }
+  public Bucket(
+      Hatred frog,
+      Double drum,
+      Fame<Detective, Strenght<Set<Cleverness>>> access,
+      Character hatred) {
+    this.frog = frog;
+    this.drum = drum;
+    this.access = access;
+    this.hatred = hatred;
+  }
 
-    @Nonnull
-    public Cleverness getBall() {
-        return ball;
-    }
+  @Nonnull
+  public Cleverness getBall() {
+    return ball;
+  }
 
-    public void setBall(Cleverness ball) {
-        this.ball = ball;
-    }
+  public void setBall(Cleverness ball) {
+    this.ball = ball;
+  }
 
-    @Nonnull
-    public Blouse<Sanity<Love<Double>>> getHoney() {
-        return honey;
-    }
+  @Nonnull
+  public Blouse<Sanity<Love<Double>>> getHoney() {
+    return honey;
+  }
 
-    public void setHoney(Blouse<Sanity<Love<Double>>> honey) {
-        this.honey = honey;
-    }
+  public void setHoney(Blouse<Sanity<Love<Double>>> honey) {
+    this.honey = honey;
+  }
 
-    @Nonnull
-    public Hatred getFrog() {
-        return frog;
-    }
+  @Nonnull
+  public Hatred getFrog() {
+    return frog;
+  }
 
-    public Equipment<BigInteger, Detective, Access<Long>> getDentist() {
-        return dentist;
-    }
+  public Equipment<BigInteger, Detective, Access<Long>> getDentist() {
+    return dentist;
+  }
 
-    public void setDentist(Equipment<BigInteger, Detective, Access<Long>> dentist) {
-        this.dentist = dentist;
-    }
+  public void setDentist(Equipment<BigInteger, Detective, Access<Long>> dentist) {
+    this.dentist = dentist;
+  }
 
-    public Double getDrum() {
-        return drum;
-    }
+  public Double getDrum() {
+    return drum;
+  }
 
-    @Nonnull
-    public Detective getDanger() {
-        return danger;
-    }
+  @Nonnull
+  public Detective getDanger() {
+    return danger;
+  }
 
-    public void setDanger(Detective danger) {
-        this.danger = danger;
-    }
+  public void setDanger(Detective danger) {
+    this.danger = danger;
+  }
 
-    @Nonnull
-    public Fame<Detective, Strenght<Set<Cleverness>>> getAccess() {
-        return access;
-    }
+  @Nonnull
+  public Fame<Detective, Strenght<Set<Cleverness>>> getAccess() {
+    return access;
+  }
 
-    @Nonnull
-    public Detective getCompassion() {
-        return compassion;
-    }
+  @Nonnull
+  public Detective getCompassion() {
+    return compassion;
+  }
 
-    public void setCompassion(Detective compassion) {
-        this.compassion = compassion;
-    }
+  public void setCompassion(Detective compassion) {
+    this.compassion = compassion;
+  }
 
-    public Character getHatred() {
-        return hatred;
-    }
+  public Character getHatred() {
+    return hatred;
+  }
 
-    public Satisfaction getSnowboard() {
-        return snowboard;
-    }
+  public Satisfaction getSnowboard() {
+    return snowboard;
+  }
 
-    public void setSnowboard(Satisfaction snowboard) {
-        this.snowboard = snowboard;
-    }
+  public void setSnowboard(Satisfaction snowboard) {
+    this.snowboard = snowboard;
+  }
 
-    @Nonnull
-    public Blood getBlood() {
-        return blood;
-    }
+  @Nonnull
+  public Blood getBlood() {
+    return blood;
+  }
 
-    public void setBlood(Blood blood) {
-        this.blood = blood;
-    }
+  public void setBlood(Blood blood) {
+    this.blood = blood;
+  }
 }

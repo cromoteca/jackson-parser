@@ -1,55 +1,54 @@
 package dev.hilla.parser.entities;
 
 import dev.hilla.parser.annotations.Nonnull;
-
 import java.util.List;
 
 public class Light<T, U> {
-    private final Charlie courage;
-    private List<Satisfaction> insanity;
-    private Byte flag;
-    private T aircraft;
-    private Beauty wariness;
+  private final Charlie courage;
+  private List<Satisfaction> insanity;
+  private Byte flag;
+  private T aircraft;
+  private Beauty wariness;
 
-    public Light(Charlie courage) {
-        this.courage = courage;
-    }
+  public Light(Charlie courage) {
+    this.courage = courage;
+  }
 
-    @Nonnull
-    public Charlie getCourage() {
-        return courage;
-    }
+  @Nonnull
+  public Charlie getCourage() {
+    return courage;
+  }
 
-    @Nonnull
-    public List<Satisfaction> getInsanity() {
-        return insanity;
-    }
+  @Nonnull
+  public List<Satisfaction> getInsanity() {
+    return insanity;
+  }
 
-    public void setInsanity(List<Satisfaction> insanity) {
-        this.insanity = insanity;
-    }
+  public void setInsanity(List<Satisfaction> insanity) {
+    this.insanity = insanity;
+  }
 
-    public Byte getFlag() {
-        return flag;
-    }
+  public Byte getFlag() {
+    return flag;
+  }
 
-    public void setFlag(Byte flag) {
-        this.flag = flag;
-    }
+  public void setFlag(Byte flag) {
+    this.flag = flag;
+  }
 
-    public T getAircraft() {
-        return aircraft;
-    }
+  public T getAircraft() {
+    return aircraft;
+  }
 
-    public void setAircraft(T aircraft) {
-        this.aircraft = aircraft;
-    }
+  public void setAircraft(T aircraft) {
+    this.aircraft = aircraft;
+  }
 
-    public Beauty getWariness() {
-        return wariness;
-    }
+  public Beauty getWariness() {
+    return wariness;
+  }
 
-    public void setWariness(Beauty wariness) {
-        this.wariness = wariness;
-    }
+  public void setWariness(Beauty wariness) {
+    this.wariness = wariness;
+  }
 }
