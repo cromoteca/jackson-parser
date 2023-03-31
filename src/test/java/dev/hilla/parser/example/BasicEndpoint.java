@@ -3,12 +3,13 @@ package dev.hilla.parser.example;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.List;
 
 import static dev.hilla.parser.example.BasicEntities.*;
 
 @Endpoint
-public class BasicEndpoint extends NotExposedSuperclass {
+public class BasicEndpoint extends NotExposedSuperclass<String> {
     @ShouldBeParsed
     public List<ListItemInMethodReturnType> listItemInMethodReturnTypes() {
         return List.of(new ListItemInMethodReturnType(List.of(new ListItemInRecordParameter())));
@@ -53,5 +54,21 @@ public class BasicEndpoint extends NotExposedSuperclass {
     @ShouldBeParsed
     public @Nullable NullableType everythingIsNullableHere(@Nullable NullableType nullableParam1, @Nullable NullableType nullableParam2) {
         return new NullableType(new NullableType(new NullableType(null)));
+    }
+
+    @ShouldBeParsed
+    @Override
+    public int collectionSize(Collection<String> collection) {
+        return collection.size();
+    }
+
+    @ShouldBeParsed
+    public SetterOnly setterOnly() {
+        return new SetterOnly();
+    }
+
+    @ShouldBeParsed
+    public AnnotationMess annotationMess() {
+        return new AnnotationMess();
     }
 }

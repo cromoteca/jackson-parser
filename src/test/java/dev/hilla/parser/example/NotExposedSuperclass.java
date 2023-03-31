@@ -2,7 +2,7 @@ package dev.hilla.parser.example;
 
 import static dev.hilla.parser.example.BasicEntities.*;
 
-public class NotExposedSuperclass extends ExposedSuperclass {
+public class NotExposedSuperclass<T> extends ExposedSuperclass<T, String> {
     public ReturnTypeInNotExposedMethod publicMethodInNotExposedSuperclass
             (ParameterTypeInNotExposedMethod parameterTypeInNotExposedMethod) {
         return new ReturnTypeInNotExposedMethod();

@@ -14,6 +14,7 @@ import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -128,7 +129,8 @@ public class Parser {
                 .map(pd -> {
                     // Call to `getPrimaryType` is expensive: it took 350 ms for 133 hits
                     builder.add(pd.getPrimaryType());
-                    return pd.getAccessor().getMember();
+                    var primaryMember = Objects.requireNonNullElseGet(pd.getAccessor(), () -> pd.getMutator());
+                    return primaryMember.getMember();
                 }).toList()));
 
         // Dependencies are added in parallel

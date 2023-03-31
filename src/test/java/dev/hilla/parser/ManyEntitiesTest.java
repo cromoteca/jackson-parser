@@ -3,10 +3,7 @@ package dev.hilla.parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.Nonnull;
-import dev.hilla.parser.entities.Airline;
 import dev.hilla.parser.entities.Bear;
-import dev.hilla.parser.entities.Equipment;
-import dev.hilla.parser.entities.Everybody;
 import dev.hilla.parser.entities.Group;
 import dev.hilla.parser.entities.Notebook;
 import dev.hilla.parser.entities.Strictness;
@@ -25,6 +22,12 @@ public class ManyEntitiesTest {
         var messageConverter = mock(MappingJackson2HttpMessageConverter.class);
         doReturn(new ObjectMapper()).when(messageConverter).getObjectMapper();
         parser = new Parser(messageConverter);
+    }
+
+    public static void main(String[] args) {
+        long millis = System.currentTimeMillis();
+        new ManyEntitiesTest().shouldFindAllEntitiesInPackage();
+        System.out.println((System.currentTimeMillis() - millis) / 1000.0);
     }
 
     @Test

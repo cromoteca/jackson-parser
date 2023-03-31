@@ -57,7 +57,7 @@ public class BasicParserTest {
         assertEquals(toString(expected), toString(actual), message);
     }
 
-    private static String toString(Stream<? extends CharSequence> expected) {
-        return expected.sorted().collect(Collectors.joining("\n"));
+    private static String toString(Stream<? extends CharSequence> result) {
+        return result.sorted().collect(Collectors.joining("\n"));
     }
 }

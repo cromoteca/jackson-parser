@@ -11,6 +11,10 @@ import net.minidev.json.annotate.JsonIgnore;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.lang.NonNull;
+
+import dev.hilla.parser.annotations.Nonnull;
+
 public class BasicEntities {
 
     @ShouldBeParsed
@@ -158,5 +162,34 @@ public class BasicEntities {
     // Also used to test a "recursive" type
     @ShouldBeParsed
     public record NullableType(@Nullable NullableType nullableParameter) {
+    }
+
+    @ShouldBeParsed
+    public static class SetterOnly {
+        private String value = "";
+
+        public void setValue(@Nonnull String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+    }
+
+    @ShouldBeParsed
+    public static class AnnotationMess {
+        @NonNull
+        private String value;
+
+        @Nonnull
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(@Nullable String value) {
+            this.value = value;
+        }
     }
 }
