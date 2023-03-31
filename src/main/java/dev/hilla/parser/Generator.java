@@ -17,7 +17,7 @@ public class Generator {
     %s
 
     const %s = {
-        %s
+    %s
     };
 
     export default %s;
@@ -32,20 +32,20 @@ public class Generator {
   private String generateMethodImplementations(ScanResult.EndpointClass result) {
     return result.methods().stream()
         .map(method -> generateMethod(method, result.type().getBeanClass().getName()))
-        .collect(Collectors.joining(""));
+        .collect(Collectors.joining("\n\n"));
   }
 
   private String generateMethodList(ScanResult.EndpointClass result) {
     return result.methods().stream()
         .map(method -> """
-        %s,""".formatted(method.getName()))
-        .collect(Collectors.joining(""));
+        \s   %s,""".formatted(method.getName()))
+        .collect(Collectors.joining("\n"));
   }
 
   private String generateMethod(AnnotatedMethod method, String className) {
     return """
         const %s = async (%s): Promise<%s> => {
-            return _client.call('%s', '%s', { %s }, init);
+            return _client.call('%s', '%s', {%s}, init);
         };"""
         .formatted(
             method.getName(),
@@ -79,12 +79,18 @@ public class Generator {
   }
 
   private String generateParamNameList(AnnotatedMethod method) {
-    return Arrays.stream(method.getAnnotated().getParameters())
-        .map(param -> param.getName())
-        .collect(Collectors.joining(", "));
+    var params =
+        Arrays.stream(method.getAnnotated().getParameters())
+            .map(param -> param.getName())
+            .collect(Collectors.joining(", "));
+    return params.isEmpty() ? "" : ' ' + params + ' ';
   }
 
   private String generateType(JavaType type) {
+    if (type.isCollectionLikeType()) {
+      return generateType(type.getContentType()) + "[]";
+    }
+
     return mapType(type.getRawClass().getName());
   }
 

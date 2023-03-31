@@ -24,9 +24,8 @@ public class BasicGeneratorTest {
   @Test
   public void basicGeneration() throws IOException {
     var scanResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
-    // read the BasicEndpoint.ts resource as bytes and convert to string
     var expected =
-        new String(getClass().getResourceAsStream("expected/BasicEndpoint.ts").readAllBytes());
+        new String(getClass().getResourceAsStream("example/BasicEndpoint.ts").readAllBytes());
     var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
     assertEquals(expected, actual, "BasicEndpoint");
   }
