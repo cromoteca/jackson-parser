@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 public class Generator {
@@ -31,12 +32,14 @@ public class Generator {
 
   private String generateMethodImplementations(ScanResult.EndpointClass result) {
     return result.methods().stream()
+        .sorted(Comparator.comparing(AnnotatedMethod::getName))
         .map(method -> generateMethod(method, result.type().getBeanClass().getName()))
         .collect(Collectors.joining("\n\n"));
   }
 
   private String generateMethodList(ScanResult.EndpointClass result) {
     return result.methods().stream()
+        .sorted(Comparator.comparing(AnnotatedMethod::getName))
         .map(method -> """
         \s   %s,""".formatted(method.getName()))
         .collect(Collectors.joining("\n"));
@@ -45,7 +48,7 @@ public class Generator {
   private String generateMethod(AnnotatedMethod method, String className) {
     return """
         const %s = async (%s): Promise<%s> => {
-            return _client.call('%s', '%s', {%s}, init);
+            return _client.call('%s', '%s', {%s}, %s);
         };"""
         .formatted(
             method.getName(),
@@ -53,27 +56,20 @@ public class Generator {
             generateType(method.getType()),
             className,
             method.getName(),
-            generateParamNameList(method));
+            generateParamNameList(method),
+            chooseInitParamName(method));
   }
 
   private String generateParamList(AnnotatedMethod method) {
     var params = new ArrayList<String>();
-    var paramNames = new ArrayList<String>();
 
     for (var i = 0; i < method.getParameterCount(); i++) {
       var param = method.getParameter(i);
       var javaParam = method.getAnnotated().getParameters()[i];
-      paramNames.add(javaParam.getName());
       params.add(javaParam.getName() + ": " + generateType(param.getType()));
     }
 
-    var initParam = "init";
-
-    while (paramNames.contains(initParam)) {
-      initParam = '_' + initParam;
-    }
-
-    params.add(initParam + "?: EndpointRequestInit");
+    params.add(chooseInitParamName(method) + "?: EndpointRequestInit");
 
     return String.join(", ", params);
   }
@@ -86,9 +82,35 @@ public class Generator {
     return params.isEmpty() ? "" : ' ' + params + ' ';
   }
 
+  private String chooseInitParamName(AnnotatedMethod method) {
+    var initParam = "init";
+    var names =
+        Arrays.stream(method.getAnnotated().getParameters())
+            .map(param -> param.getName())
+            .collect(Collectors.toList());
+
+    while (names.contains(initParam)) {
+      initParam = '_' + initParam;
+    }
+
+    return initParam;
+  }
+
   private String generateType(JavaType type) {
     if (type.isCollectionLikeType()) {
       return generateType(type.getContentType()) + "[]";
+    }
+
+    if (type.isArrayType()) {
+      return generateType(type.getContentType()) + "[]";
+    }
+
+    if (type.isMapLikeType()) {
+      return "Map<"
+          + generateType(type.getKeyType())
+          + ", "
+          + generateType(type.getContentType())
+          + '>';
     }
 
     return mapType(type.getRawClass().getName());
@@ -97,6 +119,7 @@ public class Generator {
   private String mapType(String typeName) {
     return switch (typeName) {
       case "java.lang.String" -> "string";
+      case "int", "long", "float", "double" -> "number";
       default -> typeName;
     };
   }
