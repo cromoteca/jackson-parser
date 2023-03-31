@@ -4,11 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import dev.hilla.parser.example.BasicEndpoint;
 import dev.hilla.parser.example.BasicEntities;
-import dev.hilla.parser.example.ShouldBeGenerated;
 import dev.hilla.parser.example.ShouldBeParsed;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -30,16 +29,15 @@ public class BasicParserTest {
   @Test
   void basicParsing() {
     var scanResult = parser.parseEndpoints(List.of(BasicEndpoint.class));
-    SimpleConsoleOutput.describe(scanResult);
 
     assertStreamEquals(
         Stream.of(BasicEndpoint.class.getName()),
-        scanResult.endpoints().stream().map(e -> e.type().getName()),
+        scanResult.endpoints().stream().map(e -> e.type().getBeanClass().getName()),
         "Same endpoints");
 
     var exampleEndpoint =
         scanResult.endpoints().stream()
-            .filter(e -> e.type().equals(BasicEndpoint.class))
+            .filter(e -> e.type().getBeanClass().equals(BasicEndpoint.class))
             .findAny()
             .orElseThrow();
 
@@ -47,30 +45,15 @@ public class BasicParserTest {
         Arrays.stream(BasicEndpoint.class.getMethods())
             .filter(m -> m.isAnnotationPresent(ShouldBeParsed.class))
             .map(Method::getName),
-        exampleEndpoint.methods().stream().map(Method::getName),
+        exampleEndpoint.methods().stream().map(AnnotatedMethod::getName),
         "Same methods in endpoint");
 
     assertStreamEquals(
         Arrays.stream(BasicEntities.class.getDeclaredClasses())
             .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
             .map(Class::getName),
-        scanResult.entities().stream().map(ScanResult.EntityClass::name),
+        scanResult.entities().stream().map(e -> e.type().getRawClass().getName()),
         "Same entities");
-  }
-
-  @Test
-  void basicGeneration() throws IOException {
-    var generated =
-        Arrays.stream(BasicEndpoint.class.getMethods())
-            .filter(m -> m.isAnnotationPresent(ShouldBeGenerated.class))
-            .map(Method::getName)
-            .collect(Collectors.joining("\n"));
-
-    // Get the contents of the resource file.
-    var expected =
-        new String(getClass().getResourceAsStream("expected/BasicEndpoint.ts").readAllBytes());
-
-    assertEquals(expected, generated, "Same generated methods");
   }
 
   private void assertStreamEquals(

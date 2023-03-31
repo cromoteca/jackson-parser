@@ -5,14 +5,12 @@ import static dev.hilla.parser.ScanResult.*;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.ArrayType;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.EndpointExposed;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,6 +33,7 @@ public class Parser {
         endpointClasses.stream()
             .map(
                 endpoint -> {
+                  var bean = bean(mapper.getTypeFactory().constructType(endpoint));
                   var methods =
                       Arrays.stream(endpoint.getMethods())
                           // Only public methods.
@@ -46,25 +45,19 @@ public class Parser {
                                       || method
                                           .getDeclaringClass()
                                           .isAnnotationPresent(EndpointExposed.class))
+                          .map(
+                              method ->
+                                  bean.findMethod(method.getName(), method.getParameterTypes()))
                           .toList();
-                  return new EndpointClass(endpoint, methods);
+                  return new EndpointClass(bean, methods);
                 })
             .toList();
 
     // Will contain all entities found while parsing.
-    var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
+    var entities = new ConcurrentHashMap<JavaType, EntityClass>();
 
     endpoints.stream()
-        .flatMap(
-            e -> {
-              // Although technically not necessary, let's use a Jackson BeanDescription to get
-              // information about endpoint methods, so that the code used to parse them will be the
-              // same as for entity accessors.
-              var bean = bean(e.type());
-              return e.methods().stream()
-                  // For each endpoint method, find its corresponding AnnotatedMethod.
-                  .map(method -> bean.findMethod(method.getName(), method.getParameterTypes()));
-            })
+        .flatMap(e -> e.methods().stream())
         .distinct()
         // Methods are "flattened" to their types.
         .flatMap(
@@ -86,26 +79,25 @@ public class Parser {
               return types.build();
             })
         .distinct()
-        // Parallelize type parsing.
         .parallel()
         .forEach(jt -> addType(entities, jt));
 
     return new ScanResult(endpoints, entities.values().stream().toList());
   }
 
-  private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
-    if (type instanceof ArrayType arrayType) {
+  private void addType(Map<JavaType, EntityClass> entities, JavaType type) {
+    if (type.isArrayType()) {
       // For arrays, let's add the item type instead.
-      addType(entities, arrayType.getContentType());
+      addType(entities, type.getContentType());
     } else {
-      addClass(entities, type.getRawClass());
+      addClass(entities, type);
       // Let's deal with generics (recursion will work here).
       IntStream.range(0, type.containedTypeCount())
           .forEach(i -> addType(entities, type.containedType(i)));
     }
   }
 
-  private void addClass(Map<Class<?>, EntityClass> entities, Class<?> cls) {
+  private void addClass(Map<JavaType, EntityClass> entities, JavaType cls) {
     // Skip already added classes.
     if (entities.containsKey(cls)) {
       return;
@@ -120,43 +112,23 @@ public class Parser {
 
     // If the BeanDescription class does not correspond, it has been remapped using a Jackson
     // converter.
-    if (!bean.getBeanClass().equals(cls)) {
+    if (!bean.getType().equals(cls)) {
       // Call `addClass` again with the converted type.
-      addClass(entities, bean.getBeanClass());
+      addClass(entities, bean.getType());
       // Stop treating this class, it has been replaced.
       return;
     }
 
     // Skip Java types (should add other packages here).
     // Do this after conversion check in case a Java type has been remapped.
-    if (cls.getName().startsWith("java.")) {
+    if (cls.getRawClass().getName().startsWith("java.")) {
       return;
     }
 
-    // Here we have to do two things: finally add the class to the entities collection, but also add
-    // dependencies.
-    // We must avoid recursion. That's why a stream is built to be processed *after* the collection
-    // insertions.
-    var builder = Stream.<JavaType>builder();
-
     // Call to `findProperties` is expensive: it took 885 ms for 190 hits.
-    entities.put(
-        cls,
-        new EntityClass(
-            cls.getName(),
-            bean.findProperties().stream()
-                .map(
-                    pd -> {
-                      // Call to `getPrimaryType` is expensive: it took 350 ms for 133 hits.
-                      builder.add(pd.getPrimaryType());
-                      var primaryMember =
-                          Objects.requireNonNullElseGet(pd.getAccessor(), () -> pd.getMutator());
-                      return primaryMember.getMember();
-                    })
-                .toList()));
-
-    // Dependencies are added in parallel.
-    builder.build().distinct().parallel().forEach(jt -> addType(entities, jt));
+    var properties = bean.findProperties();
+    entities.put(cls, new EntityClass(cls, properties));
+    properties.stream().parallel().forEach(p -> addType(entities, p.getPrimaryType()));
   }
 
   /**
@@ -165,9 +137,8 @@ public class Parser {
    * @param cls the class
    * @return the bean description
    */
-  private BeanDescription bean(Class<?> cls) {
-    var bean =
-        mapper.getSerializationConfig().introspect(mapper.getTypeFactory().constructType(cls));
+  private BeanDescription bean(JavaType cls) {
+    var bean = mapper.getSerializationConfig().introspect(cls);
 
     var converter = bean.findSerializationConverter();
 

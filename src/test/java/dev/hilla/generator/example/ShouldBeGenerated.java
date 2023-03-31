@@ -1,4 +1,4 @@
-package dev.hilla.parser.example;
+package dev.hilla.generator.example;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
