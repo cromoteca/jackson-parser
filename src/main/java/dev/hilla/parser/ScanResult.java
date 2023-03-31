@@ -19,7 +19,13 @@ public record ScanResult(List<EndpointClass> endpoints, List<EntityClass> entiti
    * @param type the endpoint class
    * @param methods exposed methods
    */
-  public record EndpointClass(BeanDescription type, List<AnnotatedMethod> methods) {}
+  public record EndpointClass(BeanDescription type, List<AnnotatedMethod> methods)
+      implements ParserResult {
+    @Override
+    public String getName() {
+      return type.getBeanClass().getSimpleName();
+    }
+  }
 
   /**
    * An entity, as part of scan result
@@ -27,5 +33,15 @@ public record ScanResult(List<EndpointClass> endpoints, List<EntityClass> entiti
    * @param name entity name
    * @param properties entity properties
    */
-  public record EntityClass(JavaType type, List<BeanPropertyDefinition> properties) {}
+  public record EntityClass(JavaType type, List<BeanPropertyDefinition> properties)
+      implements ParserResult {
+    @Override
+    public String getName() {
+      return type.getRawClass().getSimpleName();
+    }
+  }
+
+  public interface ParserResult {
+    String getName();
+  }
 }
