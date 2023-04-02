@@ -306,7 +306,18 @@ public class Generator {
                           .collect(Collectors.joining(", ", "<", ">")))
               .map(params -> rawType + params);
 
-      return genericType.orElse(rawType);
+      boolean nullable;
+
+      if (type.hasRawClass(Optional.class)) {
+        nullable = true;
+      } else if (type.isPrimitive()) {
+        nullable = false;
+      } else {
+        nullable = true;
+      }
+
+      var result = genericType.orElse(rawType);
+      return nullable ? result + " | undefined" : result;
     }
 
     private String mapType(String typeName) {
@@ -314,7 +325,14 @@ public class Generator {
           switch (typeName) {
             case "java.lang.String" -> "string";
             case "java.lang.Object" -> "unknown";
-            case "int", "long", "float", "double" -> "number";
+            case "int",
+                "long",
+                "float",
+                "double",
+                "java.lang.Integer",
+                "java.lang.Long",
+                "java.lang.Float",
+                "java.lang.Double" -> "number";
             default -> typeName;
           };
 
