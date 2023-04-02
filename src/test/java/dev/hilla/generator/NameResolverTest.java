@@ -10,11 +10,11 @@ public class NameResolverTest {
     assertArrayEquals(
         new String[] {"", "CustomTypesEndpoint"}, NameResolver.split("CustomTypesEndpoint"));
     assertArrayEquals(
-        new String[] {"dev.hilla.generator.example", "CustomTypesEndpoint"},
-        NameResolver.split("dev.hilla.generator.example.CustomTypesEndpoint"));
+        new String[] {"dev.hilla.generator.basic", "CustomTypesEndpoint"},
+        NameResolver.split("dev.hilla.generator.basic.CustomTypesEndpoint"));
     assertArrayEquals(
-        new String[] {"dev.hilla.generator.example.CustomTypesEndpoint", "MyCustomType"},
-        NameResolver.split("dev.hilla.generator.example.CustomTypesEndpoint$MyCustomType"));
+        new String[] {"dev.hilla.generator.basic.CustomTypesEndpoint", "MyCustomType"},
+        NameResolver.split("dev.hilla.generator.basic.CustomTypesEndpoint$MyCustomType"));
   }
 
   @Test
@@ -22,14 +22,14 @@ public class NameResolverTest {
     assertEquals(
         "./CustomTypesEndpoint/MyCustomType",
         NameResolver.resolve(
-            "dev.hilla.generator.example.CustomTypesEndpoint$MyCustomType",
-            "dev.hilla.generator.example"));
+            "dev.hilla.generator.basic.CustomTypesEndpoint$MyCustomType",
+            "dev.hilla.generator.basic"));
 
     assertEquals(
         "../../../../connect-client.default.js",
-        NameResolver.resolve("/connect-client.default.js", "dev.hilla.generator.example"));
+        NameResolver.resolve("/connect-client.default.js", "dev.hilla.generator.basic"));
 
     assertEquals(
-        "@hilla/frontend", NameResolver.resolve("@hilla/frontend", "dev.hilla.generator.example"));
+        "@hilla/frontend", NameResolver.resolve("@hilla/frontend", "dev.hilla.generator.basic"));
   }
 }

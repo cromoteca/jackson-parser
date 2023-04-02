@@ -1,9 +1,10 @@
-package dev.hilla.generator;
+package dev.hilla.generator.basic;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.hilla.generator.Generator;
 import dev.hilla.parser.Parser;
 import dev.hilla.parser.annotations.Endpoint;
 import java.io.IOException;
@@ -31,8 +32,7 @@ public class BasicGeneratorTest {
   public void basicGeneration(Class<?> endpoint) throws IOException {
     var name = endpoint.getSimpleName();
     var scanResult = parser.parseEndpoints(List.of(endpoint));
-    var expected =
-        new String(getClass().getResourceAsStream("example/" + name + ".ts").readAllBytes());
+    var expected = new String(getClass().getResourceAsStream(name + ".ts").readAllBytes());
     var actual =
         new Generator(mapper.getTypeFactory()).generateEndpoint(scanResult.endpoints().get(0));
     assertEquals(expected, actual, name);

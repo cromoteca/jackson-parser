@@ -1,4 +1,4 @@
-package dev.hilla.generator.example;
+package dev.hilla.generator.basic;
 
 import dev.hilla.parser.annotations.Endpoint;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 @Endpoint
 public class NameClashesEndpoint {
   public List<MyOtherType> fromTypeToTypeWithSameName(
-      dev.hilla.generator.example.entities.MyOtherType argument) {
+      dev.hilla.generator.basic.entities.MyOtherType argument) {
     return null;
   }
 

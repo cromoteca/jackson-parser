@@ -5,15 +5,15 @@ import type { MyOtherType } from './entities/MyOtherType.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
 const clashWithEndpointRequestInitAndClientName: { (client: EndpointRequestInit1, init?: EndpointRequestInit): Promise<void> } = async (client, init) => {
-    return client3.call('dev.hilla.generator.example.NameClashesEndpoint', 'clashWithEndpointRequestInitAndClientName', { client }, init);
+    return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'clashWithEndpointRequestInitAndClientName', { client }, init);
 };
 
 const doubleClient: { (client1: string, client2: string, init?: EndpointRequestInit): Promise<string> } = async (client1, client2, init) => {
-    return client3.call('dev.hilla.generator.example.NameClashesEndpoint', 'doubleClient', { client1, client2 }, init);
+    return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'doubleClient', { client1, client2 }, init);
 };
 
 const fromTypeToTypeWithSameName: { (argument: MyOtherType, init?: EndpointRequestInit): Promise<MyOtherType1[]> } = async (argument, init) => {
-    return client3.call('dev.hilla.generator.example.NameClashesEndpoint', 'fromTypeToTypeWithSameName', { argument }, init);
+    return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'fromTypeToTypeWithSameName', { argument }, init);
 };
 
 const NameClashesEndpoint = {

@@ -1,4 +1,4 @@
-package dev.hilla.generator.example.entities;
+package dev.hilla.generator.basic.entities;
 
 public class MyOtherType {
   private String field;

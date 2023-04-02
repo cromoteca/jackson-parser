@@ -1,4 +1,4 @@
-package dev.hilla.generator.example;
+package dev.hilla.generator.basic;
 
 import dev.hilla.parser.annotations.Endpoint;
 import java.util.List;
