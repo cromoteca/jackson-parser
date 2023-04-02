@@ -4,16 +4,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hilla.generator.example.BasicEndpoint;
-import dev.hilla.generator.example.CustomTypesEndpoint;
-import dev.hilla.generator.example.GenericsEndpoint;
-import dev.hilla.generator.example.NameClashesEndpoint;
 import dev.hilla.parser.Parser;
+import dev.hilla.parser.annotations.Endpoint;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 public class BasicGeneratorTest {
@@ -39,10 +39,18 @@ public class BasicGeneratorTest {
   }
 
   private static Stream<Class<?>> basicGeneration() {
-    return Stream.of(
-        BasicEndpoint.class,
-        CustomTypesEndpoint.class,
-        NameClashesEndpoint.class,
-        GenericsEndpoint.class);
+    var scanner = new ClassPathScanningCandidateComponentProvider(false);
+    scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
+
+    return scanner.findCandidateComponents(BasicGeneratorTest.class.getPackageName()).stream()
+        .map(BasicGeneratorTest::getClassFromBeanDefinition);
+  }
+
+  private static Class<?> getClassFromBeanDefinition(BeanDefinition bd) {
+    try {
+      return Class.forName(bd.getBeanClassName());
+    } catch (ClassNotFoundException ex) {
+      throw new RuntimeException(ex);
+    }
   }
 }
