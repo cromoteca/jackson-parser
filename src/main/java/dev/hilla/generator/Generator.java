@@ -264,6 +264,12 @@ public class Generator {
     }
 
     private String generateType(JavaType type, Type generic) {
+      if (type.hasRawClass(Optional.class)) {
+        var itemType =
+            castIfPossible(generic, ParameterizedType.class)
+                .map(p -> p.getActualTypeArguments()[0]);
+        return generateType(type.getBindings().getBoundType(0), itemType.orElse(null));
+      }
       if (type.isCollectionLikeType()) {
         var itemType =
             castIfPossible(generic, ParameterizedType.class)
@@ -348,7 +354,7 @@ public class Generator {
     if (object instanceof Optional<?> optional) {
       return optional.map(o -> cls.isInstance(o) ? cls.cast(o) : null);
     }
-    return Optional.ofNullable(cls.isInstance(object) ? cls.cast(object) : null);
+    return cls.isInstance(object) ? Optional.of(cls.cast(object)) : Optional.empty();
   }
 
   private record Import(
