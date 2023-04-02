@@ -18,11 +18,16 @@ const toNestedGenericClass: { <T>(value: GenericClass<T>, init?: EndpointRequest
     return client.call('dev.hilla.generator.example.GenericsEndpoint', 'toNestedGenericClass', { value }, init);
 };
 
+const tooComplex: { <T, U, V>(p1: GenericClass<unknown[]>, p2: Map<U, GenericClass<GenericClass<GenericClass<unknown>>>>, init?: EndpointRequestInit): Promise<Map<GenericClass<T[]>, Map<unknown, GenericClass<GenericClass<GenericClass<V>>>>>> } = async (p1, p2, init) => {
+    return client.call('dev.hilla.generator.example.GenericsEndpoint', 'tooComplex', { p1, p2 }, init);
+};
+
 const GenericsEndpoint = {
     toList,
     toListOfMyType,
     toMap,
     toNestedGenericClass,
+    tooComplex,
 };
 
 export default GenericsEndpoint;

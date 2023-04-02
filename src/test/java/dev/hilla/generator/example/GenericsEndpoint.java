@@ -23,6 +23,12 @@ public class GenericsEndpoint {
     return new GenericClass<>();
   }
 
+  public <T, U, V>
+      Map<GenericClass<List<T>>, Map<?, GenericClass<GenericClass<GenericClass<V>>>>> tooComplex(
+          GenericClass<List<?>> p1, Map<U, GenericClass<GenericClass<GenericClass<?>>>> p2) {
+    return null;
+  }
+
   public static class GenericClass<T> {
     public T value;
   }
