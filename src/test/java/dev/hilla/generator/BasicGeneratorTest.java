@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.generator.example.BasicEndpoint;
 import dev.hilla.generator.example.CustomTypesEndpoint;
+import dev.hilla.generator.example.NameClashesEndpoint;
 import dev.hilla.parser.Parser;
 import java.io.IOException;
 import java.util.List;
@@ -35,6 +36,6 @@ public class BasicGeneratorTest {
   }
 
   private static Stream<Class<?>> basicGeneration() {
-    return Stream.of(BasicEndpoint.class, CustomTypesEndpoint.class);
+    return Stream.of(BasicEndpoint.class, CustomTypesEndpoint.class, NameClashesEndpoint.class);
   }
 }
