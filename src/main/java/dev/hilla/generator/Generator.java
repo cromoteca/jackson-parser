@@ -2,12 +2,20 @@ package dev.hilla.generator;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import dev.hilla.parser.ScanResult;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
@@ -15,6 +23,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Generator {
+  private final TypeFactory typeFactory;
+
+  public Generator(TypeFactory typeFactory) {
+    this.typeFactory = typeFactory;
+  }
 
   public String generateEndpoint(ScanResult.EndpointClass result) {
     var worker = new Worker(result);
@@ -38,7 +51,7 @@ public class Generator {
             result.getName());
   }
 
-  private static class Worker {
+  private class Worker {
 
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
@@ -52,12 +65,11 @@ public class Generator {
       result
           .methods()
           .forEach(
-              method -> {
-                Arrays.stream(method.getAnnotated().getParameters())
-                    .forEach(p -> keywords.add(p.getName()));
-              });
-      initTypeName = addImport("EndpointRequestInit", "@hilla/frontend", false);
-      clientVariableName = addImport("client", "/connect-client.default", true);
+              method ->
+                  Arrays.stream(method.getAnnotated().getParameters())
+                      .forEach(p -> keywords.add(p.getName())));
+      initTypeName = addImport("EndpointRequestInit", "@hilla/frontend", false, true);
+      clientVariableName = addImport("client", "/connect-client.default", true, false);
       endpointPackageName = result.type().getBeanClass().getPackageName();
       methodImplementations = generateMethodImplementations(result);
       methodList = generateMethodList(result);
@@ -70,6 +82,7 @@ public class Generator {
           .collect(Collectors.groupingBy(i -> i.from))
           .forEach(
               (from, sameFrom) -> {
+                var type = sameFrom.stream().anyMatch(i -> i.isType) ? "type " : "";
                 var defaultImport = sameFrom.stream().filter(i -> i.isDefault).findFirst();
                 var namedImports =
                     sameFrom.stream()
@@ -96,31 +109,33 @@ public class Generator {
                 groupedImports.put(
                     relativePath,
                     """
-                    import %s from '%s';"""
+                    import %s%s from '%s';"""
                         .formatted(
+                            type,
                             imported,
                             relativePath.startsWith("@") ? relativePath : relativePath + ".js"));
               });
 
-      return groupedImports.values().stream().collect(Collectors.joining("\n"));
+      return String.join("\n", groupedImports.values());
     }
 
     String methodImplementations() {
-      return methodImplementations.stream().collect(Collectors.joining("\n\n"));
+      return String.join("\n\n", methodImplementations);
     }
 
     String methodList() {
-      return methodList.stream().collect(Collectors.joining("\n"));
+      return String.join("\n", methodList);
     }
 
-    private String addImport(String variable, String from, boolean isDefault) {
+    private String addImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
           imports.stream()
               .filter(
                   i ->
                       i.variable.equals(variable)
                           && i.from.equals(from)
-                          && i.isDefault == isDefault)
+                          && i.isDefault == isDefault
+                          && i.isType == isType)
               .findFirst();
 
       return existing.orElseGet(
@@ -131,7 +146,7 @@ public class Generator {
                   alias = incrementSuffix(alias);
                 }
 
-                var newImport = new Import(variable, from, isDefault, alias);
+                var newImport = new Import(variable, from, isDefault, isType, alias);
                 imports.add(newImport);
                 keywords.add(alias);
                 return newImport;
@@ -182,18 +197,28 @@ public class Generator {
 
     private String generateMethod(AnnotatedMethod method, String className) {
       return """
-        const %s = async (%s): Promise<%s> => {
+        const %s: { %s(%s): Promise<%s> } = async (%s) => {
             return %s.call('%s', '%s', {%s}, %s);
         };"""
           .formatted(
               method.getName(),
+              generateTypeParams(method.getAnnotated().getTypeParameters()),
               generateParamList(method),
-              generateType(method.getType()),
+              generateType(method.getType(), method.getAnnotated().getGenericReturnType()),
+              generateParamNameList(method),
               clientVariableName,
               className,
               method.getName(),
-              generateParamNameList(method),
+              generateParamNameObject(method),
               chooseInitParamName(method));
+    }
+
+    private String generateTypeParams(TypeVariable<Method>[] typeParameters) {
+      return typeParameters.length == 0
+          ? ""
+          : Arrays.stream(typeParameters)
+              .map(TypeVariable::getName)
+              .collect(Collectors.joining(", ", "<", ">"));
     }
 
     private String generateParamList(AnnotatedMethod method) {
@@ -201,8 +226,9 @@ public class Generator {
 
       for (var i = 0; i < method.getParameterCount(); i++) {
         var param = method.getParameter(i);
+        var generic = method.getAnnotated().getGenericParameterTypes()[i];
         var javaParam = method.getAnnotated().getParameters()[i];
-        params.add(javaParam.getName() + ": " + generateType(param.getType()));
+        params.add(javaParam.getName() + ": " + generateType(param.getType(), generic));
       }
 
       params.add(chooseInitParamName(method) + "?: " + initTypeName);
@@ -211,9 +237,16 @@ public class Generator {
     }
 
     private String generateParamNameList(AnnotatedMethod method) {
+      return Stream.concat(
+              Arrays.stream(method.getAnnotated().getParameters()).map(Parameter::getName),
+              Stream.of(chooseInitParamName(method)))
+          .collect(Collectors.joining(", "));
+    }
+
+    private String generateParamNameObject(AnnotatedMethod method) {
       var params =
           Arrays.stream(method.getAnnotated().getParameters())
-              .map(param -> param.getName())
+              .map(Parameter::getName)
               .collect(Collectors.joining(", "));
       return params.isEmpty() ? "" : ' ' + params + ' ';
     }
@@ -221,9 +254,7 @@ public class Generator {
     private String chooseInitParamName(AnnotatedMethod method) {
       var initParam = "init";
       var names =
-          Arrays.stream(method.getAnnotated().getParameters())
-              .map(param -> param.getName())
-              .collect(Collectors.toList());
+          Arrays.stream(method.getAnnotated().getParameters()).map(Parameter::getName).toList();
 
       while (names.contains(initParam)) {
         initParam = '_' + initParam;
@@ -232,41 +263,76 @@ public class Generator {
       return initParam;
     }
 
-    private String generateType(JavaType type) {
+    private String generateType(JavaType type, Type generic) {
       if (type.isCollectionLikeType()) {
-        return generateType(type.getContentType()) + "[]";
+        var itemType =
+            castIfPossible(generic, ParameterizedType.class)
+                .map(p -> p.getActualTypeArguments()[0]);
+        return generateType(type.getContentType(), itemType.orElse(null)) + "[]";
       }
 
       if (type.isArrayType()) {
-        return generateType(type.getContentType()) + "[]";
+        var itemType =
+            castIfPossible(generic, GenericArrayType.class)
+                .map(GenericArrayType::getGenericComponentType);
+        return generateType(type.getContentType(), itemType.orElse(null)) + "[]";
       }
 
       if (type.isMapLikeType()) {
+        var itemTypes =
+            castIfPossible(generic, ParameterizedType.class)
+                .map(ParameterizedType::getActualTypeArguments);
         return "Map<"
-            + generateType(type.getKeyType())
+            + generateType(type.getKeyType(), itemTypes.map(i -> i[0]).orElse(null))
             + ", "
-            + generateType(type.getContentType())
+            + generateType(type.getContentType(), itemTypes.map(i -> i[1]).orElse(null))
             + '>';
       }
 
-      return mapType(type.getRawClass().getName());
+      var rawType =
+          Optional.ofNullable(generic)
+              .flatMap(g -> castIfPossible(g, TypeVariable.class))
+              .map(TypeVariable::getName)
+              .orElse(mapType(type.getRawClass().getName()));
+
+      var genericType =
+          Optional.ofNullable(generic)
+              .flatMap(g -> castIfPossible(g, ParameterizedType.class))
+              .map(ParameterizedType::getActualTypeArguments)
+              .map(
+                  types ->
+                      Arrays.stream(types)
+                          .map(t -> generateType(typeFactory.constructType(t), t))
+                          .collect(Collectors.joining(", ", "<", ">")))
+              .map(params -> rawType + params);
+
+      return genericType.orElse(rawType);
     }
 
     private String mapType(String typeName) {
       var type =
           switch (typeName) {
             case "java.lang.String" -> "string";
+            case "java.lang.Object" -> "unknown";
             case "int", "long", "float", "double" -> "number";
             default -> typeName;
           };
 
       if (type.contains(".")) {
-        type = addImport(type.replaceAll(".*[\\.\\$]", ""), type, false);
+        type = addImport(type.replaceAll(".*[.$]", ""), type, false, true);
       }
 
       return type;
     }
   }
 
-  private record Import(String variable, String from, boolean isDefault, String alias) {}
+  private static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
+    if (object instanceof Optional<?> optional) {
+      return optional.map(o -> cls.isInstance(o) ? cls.cast(o) : null);
+    }
+    return Optional.ofNullable(cls.isInstance(object) ? cls.cast(object) : null);
+  }
+
+  private record Import(
+      String variable, String from, boolean isDefault, boolean isType, String alias) {}
 }

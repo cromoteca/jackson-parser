@@ -1,23 +1,23 @@
 import client from '../../../../connect-client.default.js';
-import { EndpointRequestInit } from '@hilla/frontend';
+import type { EndpointRequestInit } from '@hilla/frontend';
 
-const fromArrayOfStringsToNothing = async (argument: string[], init?: EndpointRequestInit): Promise<void> => {
+const fromArrayOfStringsToNothing: { (argument: string[], init?: EndpointRequestInit): Promise<void> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.BasicEndpoint', 'fromArrayOfStringsToNothing', { argument }, init);
 };
 
-const fromNothingToListOfStrings = async (init?: EndpointRequestInit): Promise<string[]> => {
+const fromNothingToListOfStrings: { (init?: EndpointRequestInit): Promise<string[]> } = async (init) => {
     return client.call('dev.hilla.generator.example.BasicEndpoint', 'fromNothingToListOfStrings', {}, init);
 };
 
-const fromPrimitiveToPrimitiveArray = async (argument: number, init?: EndpointRequestInit): Promise<number[]> => {
+const fromPrimitiveToPrimitiveArray: { (argument: number, init?: EndpointRequestInit): Promise<number[]> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.BasicEndpoint', 'fromPrimitiveToPrimitiveArray', { argument }, init);
 };
 
-const fromStringToString = async (argument: string, init?: EndpointRequestInit): Promise<string> => {
+const fromStringToString: { (argument: string, init?: EndpointRequestInit): Promise<string> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.BasicEndpoint', 'fromStringToString', { argument }, init);
 };
 
-const fromTwoToMapOfStringsToList = async (init: string, end: string, _init?: EndpointRequestInit): Promise<Map<string, string[]>> => {
+const fromTwoToMapOfStringsToList: { (init: string, end: string, _init?: EndpointRequestInit): Promise<Map<string, string[]>> } = async (init, end, _init) => {
     return client.call('dev.hilla.generator.example.BasicEndpoint', 'fromTwoToMapOfStringsToList', { init, end }, _init);
 };
 

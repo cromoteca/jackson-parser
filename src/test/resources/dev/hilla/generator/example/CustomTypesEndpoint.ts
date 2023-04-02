@@ -1,18 +1,18 @@
-import { MyLibraryType } from '../../../../com/example/library/MyLibraryType.js';
+import type { MyLibraryType } from '../../../../com/example/library/MyLibraryType.js';
 import client from '../../../../connect-client.default.js';
-import { MyCustomType } from './CustomTypesEndpoint/MyCustomType.js';
-import { MyOtherType } from './entities/MyOtherType.js';
-import { EndpointRequestInit } from '@hilla/frontend';
+import type { MyCustomType } from './CustomTypesEndpoint/MyCustomType.js';
+import type { MyOtherType } from './entities/MyOtherType.js';
+import type { EndpointRequestInit } from '@hilla/frontend';
 
-const externalLibraryType = async (argument: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> => {
+const externalLibraryType: { (argument: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.CustomTypesEndpoint', 'externalLibraryType', { argument }, init);
 };
 
-const fromArrayOfCustomsToCustom = async (argument: MyOtherType[], init?: EndpointRequestInit): Promise<MyOtherType> => {
+const fromArrayOfCustomsToCustom: { (argument: MyOtherType[], init?: EndpointRequestInit): Promise<MyOtherType> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.CustomTypesEndpoint', 'fromArrayOfCustomsToCustom', { argument }, init);
 };
 
-const fromCustomToListOfCustoms = async (argument: MyCustomType, init?: EndpointRequestInit): Promise<MyCustomType[]> => {
+const fromCustomToListOfCustoms: { (argument: MyCustomType, init?: EndpointRequestInit): Promise<MyCustomType[]> } = async (argument, init) => {
     return client.call('dev.hilla.generator.example.CustomTypesEndpoint', 'fromCustomToListOfCustoms', { argument }, init);
 };
 
