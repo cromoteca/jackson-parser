@@ -24,7 +24,7 @@ public class NameResolver {
     var namePath =
         Path.of(name.contains("/") ? name : '/' + String.join("/", name.split("\\.|\\$")));
     var packagePath = Path.of('/' + String.join("/", packageName.split("\\.")));
-    var relativePath = packagePath.relativize(namePath).toString();
+    var relativePath = packagePath.relativize(namePath).toString().replace('\\', '/');
 
     return relativePath.startsWith(".") ? relativePath : "./" + relativePath;
   }
