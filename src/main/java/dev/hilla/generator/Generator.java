@@ -200,7 +200,7 @@ public class Generator {
 
     private String generateMethod(AnnotatedMethod method, String className) {
       return """
-        const %s: { %s(%s): Promise<%s> } = async (%s) => {
+        async function %s%s(%s): Promise<%s> {
             return %s.call('%s', '%s', {%s}, %s);
         };"""
           .formatted(
@@ -212,7 +212,6 @@ public class Generator {
                       method.getType(),
                       method.getAnnotated().getAnnotatedReturnType(),
                       nonNullApi)),
-              generateParamNameList(method),
               clientVariableName,
               className,
               method.getName(),
@@ -244,13 +243,6 @@ public class Generator {
       params.add(chooseInitParamName(method) + "?: " + initTypeName);
 
       return String.join(", ", params);
-    }
-
-    private String generateParamNameList(AnnotatedMethod method) {
-      return Stream.concat(
-              Arrays.stream(method.getAnnotated().getParameters()).map(Parameter::getName),
-              Stream.of(chooseInitParamName(method)))
-          .collect(Collectors.joining(", "));
     }
 
     private String generateParamNameObject(AnnotatedMethod method) {

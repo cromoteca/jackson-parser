@@ -1,15 +1,15 @@
 import client from '../../../../connect-client.default.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
-const box: { (n: number, init?: EndpointRequestInit): Promise<number | undefined> } = async (n, init) => {
+async function box(n: number, init?: EndpointRequestInit): Promise<number | undefined> {
     return client.call('dev.hilla.generator.nullability.BasicEndpoint', 'box', { n }, init);
 };
 
-const nonNullListOfNonNullStrings: { (argument: string[], init?: EndpointRequestInit): Promise<void> } = async (argument, init) => {
+async function nonNullListOfNonNullStrings(argument: string[], init?: EndpointRequestInit): Promise<void> {
     return client.call('dev.hilla.generator.nullability.BasicEndpoint', 'nonNullListOfNonNullStrings', { argument }, init);
 };
 
-const notNull: { (init?: EndpointRequestInit): Promise<string> } = async (init) => {
+async function notNull(init?: EndpointRequestInit): Promise<string> {
     return client.call('dev.hilla.generator.nullability.BasicEndpoint', 'notNull', {}, init);
 };
 

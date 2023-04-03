@@ -4,15 +4,15 @@ import type { MyCustomType } from './CustomTypesEndpoint/MyCustomType.js';
 import type { MyOtherType } from './entities/MyOtherType.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
-const externalLibraryType: { (argument: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> } = async (argument, init) => {
+async function externalLibraryType(argument: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> {
     return client.call('dev.hilla.generator.basic.CustomTypesEndpoint', 'externalLibraryType', { argument }, init);
 };
 
-const fromArrayOfCustomsToCustom: { (argument: MyOtherType[], init?: EndpointRequestInit): Promise<MyOtherType> } = async (argument, init) => {
+async function fromArrayOfCustomsToCustom(argument: MyOtherType[], init?: EndpointRequestInit): Promise<MyOtherType> {
     return client.call('dev.hilla.generator.basic.CustomTypesEndpoint', 'fromArrayOfCustomsToCustom', { argument }, init);
 };
 
-const fromCustomToListOfCustoms: { (argument: MyCustomType, init?: EndpointRequestInit): Promise<MyCustomType[]> } = async (argument, init) => {
+async function fromCustomToListOfCustoms(argument: MyCustomType, init?: EndpointRequestInit): Promise<MyCustomType[]> {
     return client.call('dev.hilla.generator.basic.CustomTypesEndpoint', 'fromCustomToListOfCustoms', { argument }, init);
 };
 
