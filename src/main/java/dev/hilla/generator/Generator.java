@@ -202,7 +202,7 @@ public class Generator {
       return """
         async function %s%s(%s): Promise<%s> {
             return %s.call('%s', '%s', {%s}, %s);
-        };"""
+        }"""
           .formatted(
               method.getName(),
               generateTypeParams(method.getAnnotated().getTypeParameters()),

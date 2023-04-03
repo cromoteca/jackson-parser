@@ -6,15 +6,15 @@ import type { EndpointRequestInit } from '@hilla/frontend';
 
 async function clashWithEndpointRequestInitAndClientName(client: EndpointRequestInit1, init?: EndpointRequestInit): Promise<void> {
     return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'clashWithEndpointRequestInitAndClientName', { client }, init);
-};
+}
 
 async function doubleClient(client1: string, client2: string, init?: EndpointRequestInit): Promise<string> {
     return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'doubleClient', { client1, client2 }, init);
-};
+}
 
 async function fromTypeToTypeWithSameName(argument: MyOtherType, init?: EndpointRequestInit): Promise<MyOtherType1[]> {
     return client3.call('dev.hilla.generator.basic.NameClashesEndpoint', 'fromTypeToTypeWithSameName', { argument }, init);
-};
+}
 
 const NameClashesEndpoint = {
     clashWithEndpointRequestInitAndClientName,
