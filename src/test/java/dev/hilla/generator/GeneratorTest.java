@@ -16,21 +16,22 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 
 public class GeneratorTest {
   private final Parser parser;
-  private final ObjectMapper mapper = new ObjectMapper();
 
   protected GeneratorTest() {
     var messageConverter = mock(MappingJackson2HttpMessageConverter.class);
-    doReturn(mapper).when(messageConverter).getObjectMapper();
+    doReturn(new ObjectMapper()).when(messageConverter).getObjectMapper();
     parser = new Parser(messageConverter);
   }
 
   protected void testEndpoint(Class<?> endpoint) throws IOException {
     var name = endpoint.getSimpleName();
     var scanResult = parser.parseEndpoints(List.of(endpoint));
-    var expected = new String(getClass().getResourceAsStream(name + ".ts").readAllBytes());
-    var actual =
-        new Generator(mapper.getTypeFactory()).generateEndpoint(scanResult.endpoints().get(0));
-    assertEquals(expected, actual, name);
+
+    try (var typeScriptFile = getClass().getResourceAsStream(name + ".ts")) {
+      var expected = new String(typeScriptFile.readAllBytes());
+      var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
+      assertEquals(expected, actual, name);
+    }
   }
 
   protected static Stream<Class<?>> findEndpoints(String packageName) {
