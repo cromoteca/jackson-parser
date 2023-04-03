@@ -23,4 +23,6 @@ public class BasicEndpoint {
   public Map<String, List<String>> fromTwoToMapOfStringsToList(String init, String end) {
     return Map.of();
   }
+
+  public void threeParameters(int a, int b, int c) {}
 }

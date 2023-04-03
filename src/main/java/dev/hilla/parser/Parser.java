@@ -5,12 +5,14 @@ import static dev.hilla.parser.ScanResult.*;
 import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import dev.hilla.parser.annotations.Endpoint;
 import dev.hilla.parser.annotations.EndpointExposed;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -34,6 +36,7 @@ public class Parser {
             .map(
                 endpoint -> {
                   var bean = bean(mapper.getTypeFactory().constructType(endpoint));
+                  var typeContext = bean.getClassInfo();
                   var methods =
                       Arrays.stream(endpoint.getMethods())
                           // Only public methods.
@@ -47,7 +50,11 @@ public class Parser {
                                           .isAnnotationPresent(EndpointExposed.class))
                           .map(
                               method ->
-                                  bean.findMethod(method.getName(), method.getParameterTypes()))
+                                  Optional.ofNullable(
+                                          bean.findMethod(
+                                              method.getName(), method.getParameterTypes()))
+                                      // FIXME: collect annotations if needed
+                                      .orElse(new AnnotatedMethod(typeContext, method, null, null)))
                           .toList();
                   return new EndpointClass(bean, methods);
                 })
@@ -62,11 +69,6 @@ public class Parser {
         // Methods are "flattened" to their types.
         .flatMap(
             am -> {
-              // It happens for certain methods, maybe we shouldn't use Jackson directly on methods.
-              if (am == null) {
-                return Stream.of();
-              }
-
               // Rather that concatenating streams, it is better to build one by adding return type
               // and parameter types one by one.
               var types = Stream.<JavaType>builder();

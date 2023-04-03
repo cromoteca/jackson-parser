@@ -21,12 +21,17 @@ async function fromTwoToMapOfStringsToList(init: string, end: string, _init?: En
     return client.call('dev.hilla.generator.basic.BasicEndpoint', 'fromTwoToMapOfStringsToList', { init, end }, _init);
 };
 
+async function threeParameters(a: number, b: number, c: number, init?: EndpointRequestInit): Promise<void> {
+    return client.call('dev.hilla.generator.basic.BasicEndpoint', 'threeParameters', { a, b, c }, init);
+};
+
 const BasicEndpoint = {
     fromArrayOfStringsToNothing,
     fromNothingToListOfStrings,
     fromPrimitiveToPrimitiveArray,
     fromStringToString,
     fromTwoToMapOfStringsToList,
+    threeParameters,
 };
 
 export default BasicEndpoint;

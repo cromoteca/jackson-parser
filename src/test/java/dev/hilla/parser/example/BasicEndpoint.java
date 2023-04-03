@@ -77,4 +77,7 @@ public class BasicEndpoint extends NotExposedSuperclass<String> {
   public AnnotationMess annotationMess() {
     return new AnnotationMess();
   }
+
+  @ShouldBeParsed
+  public void threeParameters(int a, int b, int c) {}
 }
