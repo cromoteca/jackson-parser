@@ -21,6 +21,7 @@ import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.lang.NonNullApi;
 
 public class Generator {
   private final TypeFactory typeFactory;
@@ -60,8 +61,13 @@ public class Generator {
     private final String initTypeName;
     private final String clientVariableName;
     private final String endpointPackageName;
+    private final Boolean nonNullApi;
 
     Worker(ScanResult.EndpointClass result) {
+      nonNullApi =
+          result.type().getType().getRawClass().getPackage().isAnnotationPresent(NonNullApi.class)
+              ? false
+              : null;
       result
           .methods()
           .forEach(
@@ -204,7 +210,8 @@ public class Generator {
               method.getName(),
               generateTypeParams(method.getAnnotated().getTypeParameters()),
               generateParamList(method),
-              generateType(method.getType(), method.getAnnotated().getGenericReturnType()),
+              generateType(
+                  method.getType(), method.getAnnotated().getGenericReturnType(), nonNullApi),
               generateParamNameList(method),
               clientVariableName,
               className,
@@ -228,7 +235,7 @@ public class Generator {
         var param = method.getParameter(i);
         var generic = method.getAnnotated().getGenericParameterTypes()[i];
         var javaParam = method.getAnnotated().getParameters()[i];
-        params.add(javaParam.getName() + ": " + generateType(param.getType(), generic));
+        params.add(javaParam.getName() + ": " + generateType(param.getType(), generic, nonNullApi));
       }
 
       params.add(chooseInitParamName(method) + "?: " + initTypeName);
@@ -263,25 +270,26 @@ public class Generator {
       return initParam;
     }
 
-    private String generateType(JavaType type, Type generic) {
+    private String generateType(JavaType type, Type generic, Boolean nullableContext) {
       if (type.hasRawClass(Optional.class)) {
         var itemType =
             castIfPossible(generic, ParameterizedType.class)
                 .map(p -> p.getActualTypeArguments()[0]);
-        return generateType(type.getBindings().getBoundType(0), itemType.orElse(null));
+        return generateType(
+            type.getBindings().getBoundType(0), itemType.orElse(null), nullableContext);
       }
       if (type.isCollectionLikeType()) {
         var itemType =
             castIfPossible(generic, ParameterizedType.class)
                 .map(p -> p.getActualTypeArguments()[0]);
-        return generateType(type.getContentType(), itemType.orElse(null)) + "[]";
+        return generateType(type.getContentType(), itemType.orElse(null), nullableContext) + "[]";
       }
 
       if (type.isArrayType()) {
         var itemType =
             castIfPossible(generic, GenericArrayType.class)
                 .map(GenericArrayType::getGenericComponentType);
-        return generateType(type.getContentType(), itemType.orElse(null)) + "[]";
+        return generateType(type.getContentType(), itemType.orElse(null), nullableContext) + "[]";
       }
 
       if (type.isMapLikeType()) {
@@ -289,32 +297,37 @@ public class Generator {
             castIfPossible(generic, ParameterizedType.class)
                 .map(ParameterizedType::getActualTypeArguments);
         return "Map<"
-            + generateType(type.getKeyType(), itemTypes.map(i -> i[0]).orElse(null))
+            + generateType(
+                type.getKeyType(), itemTypes.map(i -> i[0]).orElse(null), nullableContext)
             + ", "
-            + generateType(type.getContentType(), itemTypes.map(i -> i[1]).orElse(null))
+            + generateType(
+                type.getContentType(), itemTypes.map(i -> i[1]).orElse(null), nullableContext)
             + '>';
       }
 
-      var rawType =
+      var rawTypeFromGeneric =
           Optional.ofNullable(generic)
               .flatMap(g -> castIfPossible(g, TypeVariable.class))
-              .map(TypeVariable::getName)
-              .orElse(mapType(type.getRawClass().getName()));
+              .map(TypeVariable::getName);
+      var rawType = rawTypeFromGeneric.orElse(mapType(type.getRawClass().getName()));
 
+      var parameterizedType =
+          Optional.ofNullable(generic).flatMap(g -> castIfPossible(g, ParameterizedType.class));
       var genericType =
-          Optional.ofNullable(generic)
-              .flatMap(g -> castIfPossible(g, ParameterizedType.class))
+          parameterizedType
               .map(ParameterizedType::getActualTypeArguments)
               .map(
                   types ->
                       Arrays.stream(types)
-                          .map(t -> generateType(typeFactory.constructType(t), t))
+                          .map(t -> generateType(typeFactory.constructType(t), t, nullableContext))
                           .collect(Collectors.joining(", ", "<", ">")))
               .map(params -> rawType + params);
 
       boolean nullable;
 
-      if (type.hasRawClass(Optional.class)) {
+      if (nullableContext != null) {
+        nullable = nullableContext;
+      } else if (type.hasRawClass(Optional.class)) {
         nullable = true;
       } else if (type.isPrimitive()) {
         nullable = false;
