@@ -35,7 +35,7 @@ public class Parser {
         endpointClasses.stream()
             .map(
                 endpoint -> {
-                  var bean = bean(mapper.getTypeFactory().constructType(endpoint));
+                  var bean = bean(endpoint);
                   var typeContext = bean.getClassInfo();
                   var methods =
                       Arrays.stream(endpoint.getMethods())
@@ -61,7 +61,7 @@ public class Parser {
             .toList();
 
     // Will contain all entities found while parsing.
-    var entities = new ConcurrentHashMap<JavaType, EntityClass>();
+    var entities = new ConcurrentHashMap<Class<?>, EntityClass>();
 
     endpoints.stream()
         .flatMap(e -> e.methods().stream())
@@ -87,19 +87,19 @@ public class Parser {
     return new ScanResult(endpoints, entities.values().stream().toList());
   }
 
-  private void addType(Map<JavaType, EntityClass> entities, JavaType type) {
+  private void addType(Map<Class<?>, EntityClass> entities, JavaType type) {
     if (type.isArrayType()) {
       // For arrays, let's add the item type instead.
       addType(entities, type.getContentType());
     } else {
-      addClass(entities, type);
+      addClass(entities, type.getRawClass());
       // Let's deal with generics (recursion will work here).
       IntStream.range(0, type.containedTypeCount())
           .forEach(i -> addType(entities, type.containedType(i)));
     }
   }
 
-  private void addClass(Map<JavaType, EntityClass> entities, JavaType cls) {
+  private void addClass(Map<Class<?>, EntityClass> entities, Class<?> cls) {
     // Skip already added classes.
     if (entities.containsKey(cls)) {
       return;
@@ -114,16 +114,16 @@ public class Parser {
 
     // If the BeanDescription class does not correspond, it has been remapped using a Jackson
     // converter.
-    if (!bean.getType().equals(cls)) {
+    if (!bean.getType().getRawClass().equals(cls)) {
       // Call `addClass` again with the converted type.
-      addClass(entities, bean.getType());
+      addClass(entities, bean.getType().getRawClass());
       // Stop treating this class, it has been replaced.
       return;
     }
 
     // Skip Java types (should add other packages here).
     // Do this after conversion check in case a Java type has been remapped.
-    if (cls.getRawClass().getName().startsWith("java.")) {
+    if (cls.getName().startsWith("java.")) {
       return;
     }
 
@@ -139,9 +139,8 @@ public class Parser {
    * @param cls the class
    * @return the bean description
    */
-  private BeanDescription bean(JavaType cls) {
-    var bean = mapper.getSerializationConfig().introspect(cls);
-
+  private BeanDescription bean(Class<?> cls) {
+    var bean = mapper.getSerializationConfig().introspect(mapper.constructType(cls));
     var converter = bean.findSerializationConverter();
 
     if (converter != null) {

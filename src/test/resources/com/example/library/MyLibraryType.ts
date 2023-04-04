@@ -1,5 +1,5 @@
 interface MyLibraryType {
-    field: string;
+    field: string | undefined;
 }
 
 export default MyLibraryType;

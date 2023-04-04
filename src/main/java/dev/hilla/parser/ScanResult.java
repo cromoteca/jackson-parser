@@ -1,7 +1,6 @@
 package dev.hilla.parser;
 
 import com.fasterxml.jackson.databind.BeanDescription;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.List;
@@ -30,14 +29,14 @@ public record ScanResult(List<EndpointClass> endpoints, List<EntityClass> entiti
   /**
    * An entity, as part of scan result
    *
-   * @param name entity name
+   * @param type entity type
    * @param properties entity properties
    */
-  public record EntityClass(JavaType type, List<BeanPropertyDefinition> properties)
+  public record EntityClass(Class<?> type, List<BeanPropertyDefinition> properties)
       implements ParserResult {
     @Override
     public String getName() {
-      return type.getRawClass().getSimpleName();
+      return type.getSimpleName();
     }
   }
 

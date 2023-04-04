@@ -52,7 +52,7 @@ public class BasicParserTest {
         Arrays.stream(BasicEntities.class.getDeclaredClasses())
             .filter(c -> c.isAnnotationPresent(ShouldBeParsed.class))
             .map(Class::getName),
-        scanResult.entities().stream().map(e -> e.type().getRawClass().getName()),
+        scanResult.entities().stream().map(e -> e.type().getName()),
         "Same entities");
   }
 

@@ -24,13 +24,23 @@ public class GeneratorTest {
   }
 
   protected void testEndpoint(Class<?> endpoint) throws IOException {
-    var name = endpoint.getSimpleName();
+    var endpointName = endpoint.getSimpleName();
     var scanResult = parser.parseEndpoints(List.of(endpoint));
 
-    try (var typeScriptFile = getClass().getResourceAsStream(name + ".ts")) {
+    try (var typeScriptFile = getClass().getResourceAsStream(endpointName + ".ts")) {
       var expected = new String(typeScriptFile.readAllBytes());
       var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
-      assertEquals(expected, actual, name);
+      assertEquals(expected, actual, endpointName);
+    }
+
+    for (var entity : scanResult.entities()) {
+      var entityName = '/' + entity.type().getName().replaceAll("[.$]", "/");
+
+      try (var typeScriptFile = getClass().getResourceAsStream(entityName + ".ts")) {
+        var expected = new String(typeScriptFile.readAllBytes());
+        var actual = new Generator().generateEntity(entity);
+        assertEquals(expected, actual, endpointName);
+      }
     }
   }
 

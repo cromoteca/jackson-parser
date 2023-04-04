@@ -4,7 +4,6 @@ import dev.hilla.parser.annotations.Endpoint;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Endpoint
@@ -28,11 +27,11 @@ public class GenericsEndpoint {
   public <T, U, V>
       Map<GenericClass<List<T>>, Map<?, GenericClass<GenericClass<GenericClass<V>>>>> tooComplex(
           GenericClass<List<?>> p1, Map<U, GenericClass<GenericClass<GenericClass<?>>>> p2) {
-    return null;
+    return Map.of();
   }
 
-  public Optional<String> toString(Optional<?> object) {
-    return object.map(Objects::toString);
+  public Optional<String> opt() {
+    return Optional.empty();
   }
 
   public static class GenericClass<T> {
