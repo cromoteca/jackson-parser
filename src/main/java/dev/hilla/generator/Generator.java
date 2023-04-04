@@ -322,7 +322,7 @@ public class Generator {
           };
 
       if (type.contains(".")) {
-        type = addImport(type.replaceAll(".*[.$]", ""), type, false, true);
+        type = addImport(type.replaceAll(".*[.$]", ""), type, true, true);
       }
 
       return type;

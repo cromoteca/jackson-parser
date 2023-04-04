@@ -1,7 +1,7 @@
 import client3 from '../../../../connect-client.default.js';
-import type { EndpointRequestInit as EndpointRequestInit1 } from './NameClashesEndpoint/EndpointRequestInit.js';
-import type { MyOtherType as MyOtherType1 } from './NameClashesEndpoint/MyOtherType.js';
-import type { MyOtherType } from './entities/MyOtherType.js';
+import type EndpointRequestInit1 from './NameClashesEndpoint/EndpointRequestInit.js';
+import type MyOtherType1 from './NameClashesEndpoint/MyOtherType.js';
+import type MyOtherType from './entities/MyOtherType.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
 async function clashWithEndpointRequestInitAndClientName(client: EndpointRequestInit1, init?: EndpointRequestInit): Promise<void> {

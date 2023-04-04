@@ -1,5 +1,5 @@
 import client from '../../../../connect-client.default.js';
-import type { GenericClass } from './GenericsEndpoint/GenericClass.js';
+import type GenericClass from './GenericsEndpoint/GenericClass.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
 async function toList<T>(value: T[], init?: EndpointRequestInit): Promise<T[]> {
