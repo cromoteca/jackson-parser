@@ -20,6 +20,13 @@ class FullType {
     _generic = generic;
   }
 
+  static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
+    if (object instanceof Optional<?> optional) {
+      return optional.map(o -> cls.isInstance(o) ? cls.cast(o) : null);
+    }
+    return cls.isInstance(object) ? Optional.of(cls.cast(object)) : Optional.empty();
+  }
+
   boolean isOptional() {
     return _type.hasRawClass(Optional.class);
   }
@@ -42,7 +49,7 @@ class FullType {
 
   FullType[] getMapTypes() {
     var itemTypes =
-        Generator.castIfPossible(_generic, AnnotatedParameterizedType.class)
+        castIfPossible(_generic, AnnotatedParameterizedType.class)
             .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments);
     return new FullType[] {
       new FullType(_type.getKeyType(), itemTypes.map(i -> i[0]).orElse(null)),
@@ -52,21 +59,21 @@ class FullType {
 
   FullType getBoundType() {
     var itemType =
-        Generator.castIfPossible(_generic, AnnotatedParameterizedType.class)
+        castIfPossible(_generic, AnnotatedParameterizedType.class)
             .map(p -> p.getAnnotatedActualTypeArguments()[0]);
     return new FullType(_type.getBindings().getBoundType(0), itemType.orElse(null));
   }
 
   FullType getContentType() {
     var itemType =
-        Generator.castIfPossible(_generic, AnnotatedParameterizedType.class)
+        castIfPossible(_generic, AnnotatedParameterizedType.class)
             .map(p -> p.getAnnotatedActualTypeArguments()[0]);
     return new FullType(_type.getContentType(), itemType.orElse(null));
   }
 
   FullType getArrayType() {
     var itemType =
-        Generator.castIfPossible(_generic, AnnotatedArrayType.class)
+        castIfPossible(_generic, AnnotatedArrayType.class)
             .map(AnnotatedArrayType::getAnnotatedGenericComponentType);
     return new FullType(_type.getContentType(), itemType.orElse(null));
   }
@@ -100,21 +107,21 @@ class FullType {
   String rawTypeName() {
     var rawTypeFromGeneric =
         Optional.ofNullable(_generic)
-            .flatMap(g -> Generator.castIfPossible(g, TypeVariable.class))
+            .flatMap(g -> castIfPossible(g, TypeVariable.class))
             .map(TypeVariable::getName);
     return rawTypeFromGeneric.orElse(_type.getRawClass().getName());
   }
 
   Optional<String> typeVariableName() {
     return Optional.ofNullable(_generic)
-        .flatMap(g -> Generator.castIfPossible(g, AnnotatedTypeVariable.class))
+        .flatMap(g -> castIfPossible(g, AnnotatedTypeVariable.class))
         .map(AnnotatedTypeVariable::getType)
         .map(Type::getTypeName);
   }
 
   Optional<Stream<FullType>> parameterizedTypes() {
     return Optional.ofNullable(_generic)
-        .flatMap(g -> Generator.castIfPossible(g, AnnotatedParameterizedType.class))
+        .flatMap(g -> castIfPossible(g, AnnotatedParameterizedType.class))
         .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments)
         .map(
             types ->
