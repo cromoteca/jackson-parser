@@ -31,8 +31,7 @@ public class Generator {
     var worker = new Worker(endpoint);
 
     return """
-      %s
-      %s
+      %s%s
 
       const %s = {
       %s
@@ -74,11 +73,12 @@ public class Generator {
     private List<String> methods;
     private String initTypeName;
     private String clientVariableName;
-    private String endpointPackageName;
+    private Class<?> mainClass;
     private List<String> properties;
     private final boolean nonNullApi;
 
     Worker(ScanResult.EndpointClass endpoint) {
+      mainClass = endpoint.type().getBeanClass();
       nonNullApi =
           endpoint
               .type()
@@ -94,12 +94,12 @@ public class Generator {
                       .forEach(p -> keywords.add(p.getName())));
       initTypeName = addImport("EndpointRequestInit", "@hilla/frontend", false, true);
       clientVariableName = addImport("client", "/connect-client.default", true, false);
-      endpointPackageName = endpoint.type().getBeanClass().getPackageName();
       methodImplementations = generateMethodImplementations(endpoint);
       methods = generateMethodList(endpoint);
     }
 
     Worker(ScanResult.EntityClass entity) {
+      mainClass = entity.type();
       nonNullApi = nonNullApi(entity.type());
       entity.properties().forEach(property -> keywords.add(property.getName()));
       keywords.add(entity.getName());
@@ -145,7 +145,7 @@ public class Generator {
                         .filter(s -> !s.isBlank())
                         .collect(Collectors.joining(", "));
 
-                var relativePath = NameResolver.resolve(from, endpointPackageName);
+                var relativePath = NameResolver.resolve(from, mainClass.getPackageName());
 
                 groupedImports.put(
                     relativePath,
@@ -158,7 +158,8 @@ public class Generator {
                             relativePath.startsWith("@") ? relativePath : relativePath + ".js"));
               });
 
-      return String.join("", groupedImports.values());
+      var lines = String.join("", groupedImports.values());
+      return lines.isEmpty() ? lines : lines + '\n';
     }
 
     String methodImplementations() {

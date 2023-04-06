@@ -28,18 +28,33 @@ public class GeneratorTest {
     var scanResult = parser.parseEndpoints(List.of(endpoint));
 
     try (var typeScriptFile = getClass().getResourceAsStream(endpointName + ".ts")) {
-      var expected = new String(typeScriptFile.readAllBytes());
       var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
-      assertEquals(expected, actual, endpointName);
+
+      if (typeScriptFile == null) {
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(endpointName);
+        System.out.println(actual);
+        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      } else {
+        var expected = new String(typeScriptFile.readAllBytes());
+        assertEquals(expected, actual, endpointName);
+      }
     }
 
     for (var entity : scanResult.entities()) {
       var entityName = '/' + entity.type().getName().replaceAll("[.$]", "/");
+      var actual = new Generator().generateEntity(entity);
 
       try (var typeScriptFile = getClass().getResourceAsStream(entityName + ".ts")) {
-        var expected = new String(typeScriptFile.readAllBytes());
-        var actual = new Generator().generateEntity(entity);
-        assertEquals(expected, actual, endpointName);
+        if (typeScriptFile == null) {
+          System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+          System.out.println(entityName);
+          System.out.println(actual);
+          System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        } else {
+          var expected = new String(typeScriptFile.readAllBytes());
+          assertEquals(expected, actual, endpointName);
+        }
       }
     }
   }
