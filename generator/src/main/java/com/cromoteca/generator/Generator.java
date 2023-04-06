@@ -1,15 +1,9 @@
 package com.cromoteca.generator;
 
 import com.cromoteca.ScanResult;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
-import java.lang.reflect.AnnotatedArrayType;
-import java.lang.reflect.AnnotatedParameterizedType;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +16,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.springframework.lang.NonNullApi;
 
@@ -395,7 +388,7 @@ public class Generator {
     }
   }
 
-  private static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
+  public static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
     if (object instanceof Optional<?> optional) {
       return optional.map(o -> cls.isInstance(o) ? cls.cast(o) : null);
     }
@@ -404,217 +397,4 @@ public class Generator {
 
   private record Import(
       String variable, String from, boolean isDefault, boolean isType, String alias) {}
-
-  private static class FullType {
-    private final JavaType _type;
-    private final AnnotatedType _generic;
-
-    private FullType(JavaType type, AnnotatedType generic) {
-      _type = type;
-      _generic = generic;
-    }
-
-    boolean isOptional() {
-      return _type.hasRawClass(Optional.class);
-    }
-
-    boolean isArrayType() {
-      return _type.isArrayType();
-    }
-
-    boolean isPrimitive() {
-      return _type.isPrimitive();
-    }
-
-    boolean isCollectionLikeType() {
-      return _type.isCollectionLikeType();
-    }
-
-    boolean isMapLikeType() {
-      return _type.isMapLikeType();
-    }
-
-    FullType[] getMapTypes() {
-      var itemTypes =
-          castIfPossible(_generic, AnnotatedParameterizedType.class)
-              .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments);
-      return new FullType[] {
-        new FullType(_type.getKeyType(), itemTypes.map(i -> i[0]).orElse(null)),
-        new FullType(_type.getContentType(), itemTypes.map(i -> i[1]).orElse(null))
-      };
-    }
-
-    FullType getBoundType() {
-      var itemType =
-          castIfPossible(_generic, AnnotatedParameterizedType.class)
-              .map(p -> p.getAnnotatedActualTypeArguments()[0]);
-      return new FullType(_type.getBindings().getBoundType(0), itemType.orElse(null));
-    }
-
-    FullType getContentType() {
-      var itemType =
-          castIfPossible(_generic, AnnotatedParameterizedType.class)
-              .map(p -> p.getAnnotatedActualTypeArguments()[0]);
-      return new FullType(_type.getContentType(), itemType.orElse(null));
-    }
-
-    FullType getArrayType() {
-      var itemType =
-          castIfPossible(_generic, AnnotatedArrayType.class)
-              .map(AnnotatedArrayType::getAnnotatedGenericComponentType);
-      return new FullType(_type.getContentType(), itemType.orElse(null));
-    }
-
-    Class<?> getRawClass() {
-      return _type.getRawClass();
-    }
-
-    Boolean nullable() {
-      return Optional.ofNullable(_generic)
-          .map(
-              g -> {
-                Boolean value = null;
-
-                for (var annotation : g.getAnnotations()) {
-                  var name = annotation.annotationType().getSimpleName().toLowerCase();
-
-                  if (name.matches("no[nt]null")) {
-                    value = false;
-                    break;
-                  } else if (name.contains("nullable")) {
-                    value = true;
-                  }
-                }
-
-                return value;
-              })
-          .orElse(null);
-    }
-
-    String rawTypeName() {
-      var rawTypeFromGeneric =
-          Optional.ofNullable(_generic)
-              .flatMap(g -> castIfPossible(g, TypeVariable.class))
-              .map(TypeVariable::getName);
-      return rawTypeFromGeneric.orElse(_type.getRawClass().getName());
-    }
-
-    Optional<String> typeVariableName() {
-      return Optional.ofNullable(_generic)
-          .flatMap(g -> castIfPossible(g, AnnotatedTypeVariable.class))
-          .map(AnnotatedTypeVariable::getType)
-          .map(Type::getTypeName);
-    }
-
-    Optional<Stream<FullType>> parameterizedTypes() {
-      return Optional.ofNullable(_generic)
-          .flatMap(g -> castIfPossible(g, AnnotatedParameterizedType.class))
-          .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments)
-          .map(
-              types ->
-                  IntStream.range(0, types.length)
-                      .mapToObj(i -> new FullType(_type.getBindings().getBoundType(i), types[i])));
-    }
-  }
-
-  private static class MultipleType extends FullType {
-    private final List<FullType> types;
-    private final FullType mainType;
-
-    MultipleType(List<FullType> types) {
-      super(null, null);
-      mainType = types.get(0);
-      this.types =
-          types.stream().filter(t -> mainType.getRawClass().equals(t.getRawClass())).toList();
-    }
-
-    @Override
-    boolean isOptional() {
-      return mainType.isOptional();
-    }
-
-    @Override
-    boolean isArrayType() {
-      return mainType.isArrayType();
-    }
-
-    @Override
-    boolean isPrimitive() {
-      return mainType.isPrimitive();
-    }
-
-    @Override
-    boolean isCollectionLikeType() {
-      return mainType.isCollectionLikeType();
-    }
-
-    @Override
-    boolean isMapLikeType() {
-      return mainType.isMapLikeType();
-    }
-
-    @Override
-    MultipleType[] getMapTypes() {
-      var keyTypes = new ArrayList<FullType>();
-      var valueTypes = new ArrayList<FullType>();
-
-      types.stream()
-          .map(FullType::getMapTypes)
-          .flatMap(Arrays::stream)
-          .forEach(
-              type -> {
-                if (keyTypes.size() > valueTypes.size()) {
-                  valueTypes.add(type);
-                } else {
-                  keyTypes.add(type);
-                }
-              });
-
-      return new MultipleType[] {new MultipleType(keyTypes), new MultipleType(valueTypes)};
-    }
-
-    @Override
-    MultipleType getBoundType() {
-      return new MultipleType(types.stream().map(FullType::getBoundType).toList());
-    }
-
-    @Override
-    FullType getContentType() {
-      return new MultipleType(types.stream().map(FullType::getContentType).toList());
-    }
-
-    @Override
-    FullType getArrayType() {
-      return new MultipleType(types.stream().map(FullType::getArrayType).toList());
-    }
-
-    @Override
-    Class<?> getRawClass() {
-      return mainType.getRawClass();
-    }
-
-    @Override
-    Boolean nullable() {
-      return types.stream()
-          .map(FullType::nullable)
-          .filter(Objects::nonNull)
-          .findFirst()
-          .orElse(null);
-    }
-
-    @Override
-    String rawTypeName() {
-      return mainType.rawTypeName();
-    }
-
-    @Override
-    Optional<String> typeVariableName() {
-      return mainType.typeVariableName();
-    }
-
-    @Override
-    Optional<Stream<FullType>> parameterizedTypes() {
-      return mainType.parameterizedTypes();
-    }
-  }
 }
