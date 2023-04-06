@@ -1,3 +1,4 @@
+import type Simple from '../../../../com/cromoteca/samples/Simple.js';
 import client from '../../../../connect-client.default.js';
 import type Page from '../../../../org/springframework/data/domain/Page.js';
 import type Flux from '../../../../reactor/core/publisher/Flux.js';
@@ -16,10 +17,15 @@ async function page(argument: Page<string[]>, init?: EndpointRequestInit): Promi
     return client.call('dev.hilla.generator.basic.ExternalEntitiesEndpoint', 'page', { argument }, init);
 }
 
+async function simple(argument: Simple, init?: EndpointRequestInit): Promise<void> {
+    return client.call('dev.hilla.generator.basic.ExternalEntitiesEndpoint', 'simple', { argument }, init);
+}
+
 const ExternalEntitiesEndpoint = {
     flux,
     inner,
     page,
+    simple,
 };
 
 export default ExternalEntitiesEndpoint;

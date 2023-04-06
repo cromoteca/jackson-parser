@@ -1,5 +1,6 @@
 package dev.hilla.generator.basic;
 
+import com.cromoteca.samples.Simple;
 import dev.hilla.parser.annotations.Endpoint;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ public class ExternalEntitiesEndpoint {
   public void flux(Flux<List<String>> argument) {}
 
   public void inner(Inner<String> argument) {}
+
+  public void simple(Simple argument) {}
 
   public static class Inner<T> {
     public Page<T> page;
