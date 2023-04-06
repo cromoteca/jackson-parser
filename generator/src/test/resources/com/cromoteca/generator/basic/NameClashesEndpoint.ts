@@ -12,7 +12,7 @@ async function doubleClient(client1: string, client2: string, init?: EndpointReq
     return client3.call('com.cromoteca.generator.basic.NameClashesEndpoint', 'doubleClient', { client1, client2 }, init);
 }
 
-async function fromTypeToTypeWithSameName(argument: MyOtherType, init?: EndpointRequestInit): Promise<MyOtherType1[]> {
+async function fromTypeToTypeWithSameName(argument: MyOtherType, init?: EndpointRequestInit): Promise<Array<MyOtherType1>> {
     return client3.call('com.cromoteca.generator.basic.NameClashesEndpoint', 'fromTypeToTypeWithSameName', { argument }, init);
 }
 

@@ -1,5 +1,5 @@
-declare type MyCustomType = {
+interface MyCustomType {
     field: string;
-};
+}
 
-export { MyCustomType };
+export default MyCustomType;

@@ -23,13 +23,13 @@ class Worker {
 
   private final Set<String> keywords = new HashSet<>();
   private final List<Import> imports = new ArrayList<>();
+  private final Class<?> mainClass;
+  private final boolean nonNullApi;
   private List<String> methodImplementations;
   private List<String> methods;
   private String initTypeName;
   private String clientVariableName;
-  private Class<?> mainClass;
   private List<String> properties;
-  private final boolean nonNullApi;
 
   Worker(ScanResult.EndpointClass endpoint) {
     mainClass = endpoint.type().getBeanClass();
@@ -286,11 +286,11 @@ class Worker {
       return generateType(type.getBoundType());
     }
     if (type.isCollectionLikeType()) {
-      return generateType(type.getContentType()) + "[]";
+      return "Array<" + generateType(type.getContentType()) + '>';
     }
 
     if (type.isArrayType()) {
-      return generateType(type.getArrayType()) + "[]";
+      return "Array<" + generateType(type.getArrayType()) + '>';
     }
 
     if (type.isMapLikeType()) {

@@ -5,7 +5,7 @@ import type Simple from '../../samples/Simple.js';
 import type Inner from './ExternalEntitiesEndpoint/Inner.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
-async function flux(argument: Flux<string[]>, init?: EndpointRequestInit): Promise<void> {
+async function flux(argument: Flux<Array<string>>, init?: EndpointRequestInit): Promise<void> {
     return client.call('com.cromoteca.generator.basic.ExternalEntitiesEndpoint', 'flux', { argument }, init);
 }
 
@@ -13,7 +13,7 @@ async function inner(argument: Inner<string>, init?: EndpointRequestInit): Promi
     return client.call('com.cromoteca.generator.basic.ExternalEntitiesEndpoint', 'inner', { argument }, init);
 }
 
-async function page(argument: Page<string[]>, init?: EndpointRequestInit): Promise<void> {
+async function page(argument: Page<Array<string>>, init?: EndpointRequestInit): Promise<void> {
     return client.call('com.cromoteca.generator.basic.ExternalEntitiesEndpoint', 'page', { argument }, init);
 }
 

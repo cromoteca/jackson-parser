@@ -17,6 +17,8 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 
 public class GeneratorTest {
+  private static final String HEADER =
+      "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
   private final Parser parser;
 
   protected GeneratorTest() {
@@ -26,17 +28,17 @@ public class GeneratorTest {
   }
 
   protected void testEndpoint(Class<?> endpoint) throws IOException {
-    var endpointName = endpoint.getSimpleName();
+    var endpointName = '/' + endpoint.getName().replaceAll("[.$]", "/");
     var scanResult = parser.parseEndpoints(List.of(endpoint));
 
     try (var typeScriptFile = getClass().getResourceAsStream(endpointName + ".ts")) {
       var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
 
       if (typeScriptFile == null) {
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-        System.out.println(endpointName);
+        printHeader(endpointName);
         System.out.println(actual);
-        System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+        System.out.println(HEADER);
+        System.out.println();
       } else {
         var expected = new String(typeScriptFile.readAllBytes());
         assertEquals(expected, actual, endpointName);
@@ -49,10 +51,10 @@ public class GeneratorTest {
 
       try (var typeScriptFile = getClass().getResourceAsStream(entityName + ".ts")) {
         if (typeScriptFile == null) {
-          System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-          System.out.println(entityName);
+          printHeader(entityName);
           System.out.println(actual);
-          System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+          System.out.println(HEADER);
+          System.out.println();
         } else {
           var expected = new String(typeScriptFile.readAllBytes());
           assertEquals(expected, actual, endpointName);
@@ -78,5 +80,13 @@ public class GeneratorTest {
     } catch (ClassNotFoundException ex) {
       throw new RuntimeException(ex);
     }
+  }
+
+  private void printHeader(String title) {
+    System.out.print(HEADER.substring(0, 2));
+    System.out.print(' ');
+    System.out.print(title);
+    System.out.print(' ');
+    System.out.println(HEADER.substring(0, Math.max(0, HEADER.length() - title.length() - 4)));
   }
 }

@@ -1,15 +1,15 @@
 import client from '../../../../connect-client.default.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
-async function fromArrayOfStringsToNothing(argument: string[], init?: EndpointRequestInit): Promise<void> {
+async function fromArrayOfStringsToNothing(argument: Array<string>, init?: EndpointRequestInit): Promise<void> {
     return client.call('com.cromoteca.generator.basic.BasicEndpoint', 'fromArrayOfStringsToNothing', { argument }, init);
 }
 
-async function fromNothingToListOfStrings(init?: EndpointRequestInit): Promise<string[]> {
+async function fromNothingToListOfStrings(init?: EndpointRequestInit): Promise<Array<string>> {
     return client.call('com.cromoteca.generator.basic.BasicEndpoint', 'fromNothingToListOfStrings', {}, init);
 }
 
-async function fromPrimitiveToPrimitiveArray(argument: number, init?: EndpointRequestInit): Promise<number[]> {
+async function fromPrimitiveToPrimitiveArray(argument: number, init?: EndpointRequestInit): Promise<Array<number>> {
     return client.call('com.cromoteca.generator.basic.BasicEndpoint', 'fromPrimitiveToPrimitiveArray', { argument }, init);
 }
 
@@ -17,7 +17,7 @@ async function fromStringToString(argument: string, init?: EndpointRequestInit):
     return client.call('com.cromoteca.generator.basic.BasicEndpoint', 'fromStringToString', { argument }, init);
 }
 
-async function fromTwoToMapOfStringsToList(init: string, end: string, _init?: EndpointRequestInit): Promise<Map<string, string[]>> {
+async function fromTwoToMapOfStringsToList(init: string, end: string, _init?: EndpointRequestInit): Promise<Map<string, Array<string>>> {
     return client.call('com.cromoteca.generator.basic.BasicEndpoint', 'fromTwoToMapOfStringsToList', { init, end }, _init);
 }
 

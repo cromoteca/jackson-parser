@@ -8,11 +8,11 @@ async function externalLibraryType(argument: MyLibraryType, init?: EndpointReque
     return client.call('com.cromoteca.generator.basic.CustomTypesEndpoint', 'externalLibraryType', { argument }, init);
 }
 
-async function fromArrayOfCustomsToCustom(argument: MyOtherType[], init?: EndpointRequestInit): Promise<MyOtherType> {
+async function fromArrayOfCustomsToCustom(argument: Array<MyOtherType>, init?: EndpointRequestInit): Promise<MyOtherType> {
     return client.call('com.cromoteca.generator.basic.CustomTypesEndpoint', 'fromArrayOfCustomsToCustom', { argument }, init);
 }
 
-async function fromCustomToListOfCustoms(argument: MyCustomType, init?: EndpointRequestInit): Promise<MyCustomType[]> {
+async function fromCustomToListOfCustoms(argument: MyCustomType, init?: EndpointRequestInit): Promise<Array<MyCustomType>> {
     return client.call('com.cromoteca.generator.basic.CustomTypesEndpoint', 'fromCustomToListOfCustoms', { argument }, init);
 }
 
