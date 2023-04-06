@@ -2,10 +2,10 @@ package com.cromoteca.parser;
 
 import static org.mockito.Mockito.*;
 
-import com.cromoteca.parser.entities.Bear;
-import com.cromoteca.parser.entities.Group;
-import com.cromoteca.parser.entities.Notebook;
-import com.cromoteca.parser.entities.Strictness;
+import com.cromoteca.entities.Bear;
+import com.cromoteca.entities.Group;
+import com.cromoteca.entities.Notebook;
+import com.cromoteca.entities.Strictness;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.Endpoint;
 import dev.hilla.Nonnull;
