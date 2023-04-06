@@ -3,8 +3,8 @@ package dev.hilla.parser;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hilla.parser.annotations.Endpoint;
-import dev.hilla.parser.annotations.Nonnull;
+import dev.hilla.Endpoint;
+import dev.hilla.Nonnull;
 import dev.hilla.parser.entities.Bear;
 import dev.hilla.parser.entities.Group;
 import dev.hilla.parser.entities.Notebook;

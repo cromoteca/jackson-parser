@@ -1,6 +1,6 @@
 package dev.hilla.parser.entities;
 
-import dev.hilla.parser.annotations.Nonnull;
+import dev.hilla.Nonnull;
 
 public class Duty<T, U, V> {
   private final Calm<Dresser<Freedom<Need, Chest>>> law;

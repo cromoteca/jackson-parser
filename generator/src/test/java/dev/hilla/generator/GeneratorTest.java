@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.hilla.Endpoint;
 import dev.hilla.parser.Parser;
-import dev.hilla.parser.annotations.Endpoint;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -59,11 +61,14 @@ public class GeneratorTest {
     }
   }
 
-  protected static Stream<Class<?>> findEndpoints(String packageName) {
+  protected static Stream<Class<?>> findEndpoints(String... packageNames) {
     var scanner = new ClassPathScanningCandidateComponentProvider(false);
     scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
 
-    return scanner.findCandidateComponents(packageName).stream()
+    return Arrays.stream(packageNames)
+        .map(scanner::findCandidateComponents)
+        .flatMap(Collection::stream)
+        .distinct()
         .map(GeneratorTest::getClassFromBeanDefinition);
   }
 

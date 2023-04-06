@@ -1,6 +1,6 @@
 package dev.hilla.parser.entities;
 
-import dev.hilla.parser.annotations.Nonnull;
+import dev.hilla.Nonnull;
 
 public class Inflation<T, U> {
   private Shoal<Sanity<Dresser<Adulthood>>, Adulthood, Ball> hunger;

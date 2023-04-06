@@ -1,5 +1,6 @@
 package dev.hilla.generator.basic;
 
+import com.cromoteca.samples.DependencyEndpoint;
 import dev.hilla.generator.GeneratorTest;
 import java.io.IOException;
 import java.util.stream.Stream;
@@ -15,6 +16,7 @@ public class BasicGeneratorTest extends GeneratorTest {
   }
 
   private static Stream<Class<?>> testGeneration() {
-    return findEndpoints(BasicGeneratorTest.class.getPackageName());
+    return findEndpoints(
+        BasicGeneratorTest.class.getPackageName(), DependencyEndpoint.class.getPackageName());
   }
 }

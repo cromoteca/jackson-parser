@@ -1,7 +1,7 @@
 package dev.hilla.generator.nullability;
 
-import dev.hilla.parser.annotations.Endpoint;
-import dev.hilla.parser.annotations.Nonnull;
+import dev.hilla.Endpoint;
+import dev.hilla.Nonnull;
 import java.util.List;
 
 @Endpoint

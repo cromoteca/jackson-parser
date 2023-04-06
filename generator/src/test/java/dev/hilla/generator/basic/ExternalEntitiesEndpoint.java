@@ -1,7 +1,7 @@
 package dev.hilla.generator.basic;
 
 import com.cromoteca.samples.Simple;
-import dev.hilla.parser.annotations.Endpoint;
+import dev.hilla.Endpoint;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;

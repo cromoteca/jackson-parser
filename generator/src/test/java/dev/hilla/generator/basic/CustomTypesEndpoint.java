@@ -1,8 +1,8 @@
 package dev.hilla.generator.basic;
 
 import com.example.library.MyLibraryType;
+import dev.hilla.Endpoint;
 import dev.hilla.generator.basic.entities.MyOtherType;
-import dev.hilla.parser.annotations.Endpoint;
 import java.util.List;
 
 @Endpoint

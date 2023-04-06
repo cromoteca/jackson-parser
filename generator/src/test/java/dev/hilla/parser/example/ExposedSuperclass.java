@@ -2,7 +2,7 @@ package dev.hilla.parser.example;
 
 import static dev.hilla.parser.example.BasicEntities.*;
 
-import dev.hilla.parser.annotations.EndpointExposed;
+import dev.hilla.EndpointExposed;
 import java.util.Collection;
 
 @EndpointExposed

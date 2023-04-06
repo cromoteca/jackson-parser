@@ -1,6 +1,6 @@
 package dev.hilla.generator.basic;
 
-import dev.hilla.parser.annotations.Endpoint;
+import dev.hilla.Endpoint;
 import java.util.List;
 
 @Endpoint

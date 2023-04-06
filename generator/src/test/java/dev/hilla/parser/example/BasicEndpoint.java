@@ -2,8 +2,8 @@ package dev.hilla.parser.example;
 
 import static dev.hilla.parser.example.BasicEntities.*;
 
-import dev.hilla.parser.annotations.Endpoint;
-import dev.hilla.parser.annotations.Nullable;
+import dev.hilla.Endpoint;
+import jakarta.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 
