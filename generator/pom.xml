@@ -12,18 +12,6 @@
     <name>Jackson-based Parser for Hilla</name>
     <description>Spring Boot application that parses Java code using Jackson</description>
 
-    <dependencyManagement>
-        <dependencies>
-           <dependency>
-               <groupId>org.springframework.boot</groupId>
-               <artifactId>spring-boot-dependencies</artifactId>
-               <version>3.0.5</version>
-               <type>pom</type>
-               <scope>import</scope>
-           </dependency>
-       </dependencies>
-   </dependencyManagement>
-
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -42,13 +30,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.projectreactor</groupId>
-            <artifactId>reactor-core</artifactId>
+            <groupId>com.cromoteca</groupId>
+            <artifactId>hilla-generator-endpoint-library</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.cromoteca</groupId>
@@ -60,20 +44,6 @@
 
     <build>
         <plugins>
-            <!-- Compile with parameter names -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
@@ -27,7 +29,9 @@ public class GeneratorTest {
     parser = new Parser(messageConverter);
   }
 
-  protected void testEndpoint(Class<?> endpoint) throws IOException {
+  @ParameterizedTest
+  @MethodSource
+  public void testGeneration(Class<?> endpoint) throws IOException {
     var endpointName = '/' + endpoint.getName().replaceAll("[.$]", "/");
     var scanResult = parser.parseEndpoints(List.of(endpoint));
 
@@ -63,6 +67,10 @@ public class GeneratorTest {
     }
   }
 
+  private static Stream<Class<?>> testGeneration() {
+    return findEndpoints("com.cromoteca.samples");
+  }
+
   protected static Stream<Class<?>> findEndpoints(String... packageNames) {
     var scanner = new ClassPathScanningCandidateComponentProvider(false);
     scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
@@ -86,7 +94,7 @@ public class GeneratorTest {
     System.out.print(HEADER.substring(0, 2));
     System.out.print(' ');
     System.out.print(title);
-    System.out.print(' ');
-    System.out.println(HEADER.substring(0, Math.max(0, HEADER.length() - title.length() - 4)));
+    System.out.print(".ts ");
+    System.out.println(HEADER.substring(0, Math.max(0, HEADER.length() - title.length() - 7)));
   }
 }

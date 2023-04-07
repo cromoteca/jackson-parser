@@ -322,16 +322,21 @@ class Worker {
   private String mapType(String typeName) {
     var type =
         switch (typeName) {
-          case "java.lang.String" -> "string";
+          case "char", "java.lang.Character", "java.lang.String" -> "string";
+          case "java.lang.Boolean" -> "boolean";
           case "java.lang.Object" -> "unknown";
           case "int",
               "long",
               "float",
               "double",
+              "byte",
+              "short",
               "java.lang.Integer",
               "java.lang.Long",
               "java.lang.Float",
-              "java.lang.Double" -> "number";
+              "java.lang.Double",
+              "java.lang.Byte",
+              "java.lang.Short" -> "number";
           default -> typeName;
         };
 

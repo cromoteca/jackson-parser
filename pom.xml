@@ -14,6 +14,8 @@
     <modules>
         <module>generator</module>
         <module>sample-library</module>
+        <module>endpoints</module>
+        <module>webapp</module>
         <!-- add more modules as needed -->
     </modules>
 
@@ -22,6 +24,18 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+           <dependency>
+               <groupId>org.springframework.boot</groupId>
+               <artifactId>spring-boot-dependencies</artifactId>
+               <version>3.0.5</version>
+               <type>pom</type>
+               <scope>import</scope>
+           </dependency>
+       </dependencies>
+   </dependencyManagement>
 
     <dependencies>
         <dependency>
