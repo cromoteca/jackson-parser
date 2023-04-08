@@ -54,6 +54,8 @@ public class BasicParserTest {
             .map(Class::getName),
         scanResult.entities().stream().map(e -> e.type().getName()),
         "Same entities");
+
+    assertEquals(1, scanResult.convertedClasses().size());
   }
 
   private void assertStreamEquals(

@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -32,38 +33,36 @@ public class GeneratorTest {
   @ParameterizedTest
   @MethodSource
   public void testGeneration(Class<?> endpoint) throws IOException {
-    var endpointName = '/' + endpoint.getName().replaceAll("[.$]", "/");
-    var scanResult = parser.parseEndpoints(List.of(endpoint));
+    generateAndCheck(List.of(endpoint));
+  }
 
-    try (var typeScriptFile = getClass().getResourceAsStream(endpointName + ".ts")) {
-      var actual = new Generator().generateEndpoint(scanResult.endpoints().get(0));
+  @Test
+  public void testMultipleGeneration() throws IOException {
+    generateAndCheck(findEndpoints("com.cromoteca.samples").toList());
+  }
 
+  private void generateAndCheck(List<Class<?>> endpoints) {
+    var scanResult = parser.parseEndpoints(endpoints);
+    var generator = new Generator(scanResult);
+    generator.generateEndpoints().forEach(this::checkResult);
+    generator.generateEntities().forEach(this::checkResult);
+  }
+
+  private void checkResult(Class<?> cls, String actual) {
+    var className = '/' + cls.getName().replaceAll("[.$]", "/");
+
+    try (var typeScriptFile = getClass().getResourceAsStream(className + ".ts")) {
       if (typeScriptFile == null) {
-        printHeader(endpointName);
+        printHeader(className);
         System.out.println(actual);
         System.out.println(HEADER);
         System.out.println();
       } else {
         var expected = new String(typeScriptFile.readAllBytes());
-        assertEquals(expected, actual, endpointName);
+        assertEquals(expected, actual, className);
       }
-    }
-
-    for (var entity : scanResult.entities()) {
-      var entityName = '/' + entity.type().getName().replaceAll("[.$]", "/");
-      var actual = new Generator().generateEntity(entity);
-
-      try (var typeScriptFile = getClass().getResourceAsStream(entityName + ".ts")) {
-        if (typeScriptFile == null) {
-          printHeader(entityName);
-          System.out.println(actual);
-          System.out.println(HEADER);
-          System.out.println();
-        } else {
-          var expected = new String(typeScriptFile.readAllBytes());
-          assertEquals(expected, actual, endpointName);
-        }
-      }
+    } catch (IOException e) {
+      fail(e);
     }
   }
 

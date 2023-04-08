@@ -1,9 +1,11 @@
 package com.cromoteca;
 
 import com.fasterxml.jackson.databind.BeanDescription;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Scan result
@@ -11,7 +13,11 @@ import java.util.List;
  * @param endpoints the endpoints
  * @param entities the entities
  */
-public record ScanResult(List<EndpointClass> endpoints, List<EntityClass> entities) {
+public record ScanResult(
+    List<EndpointClass> endpoints,
+    List<EntityClass> entities,
+    Map<Class<?>, JavaType> convertedClasses) {
+
   /**
    * An endpoint, as part of scan result
    *
