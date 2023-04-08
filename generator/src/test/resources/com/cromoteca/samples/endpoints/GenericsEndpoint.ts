@@ -2,8 +2,16 @@ import client from '../../../../connect-client.default.js';
 import type GenericClass from './GenericsEndpoint/GenericClass.js';
 import type { EndpointRequestInit } from '@hilla/frontend';
 
-async function opt(init?: EndpointRequestInit): Promise<string> {
+async function opt(init?: EndpointRequestInit): Promise<string | undefined> {
     return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'opt', {}, init);
+}
+
+async function optList(init?: EndpointRequestInit): Promise<Array<string | undefined>> {
+    return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'optList', {}, init);
+}
+
+async function optListT<T>(argument: Array<T | undefined>, init?: EndpointRequestInit): Promise<Array<T>> {
+    return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'optListT', { argument }, init);
 }
 
 async function toList<T>(value: Array<T>, init?: EndpointRequestInit): Promise<Array<T>> {
@@ -28,6 +36,8 @@ async function tooComplex<T, U, V>(p1: GenericClass<Array<unknown>>, p2: Map<U, 
 
 const GenericsEndpoint = {
     opt,
+    optList,
+    optListT,
     toList,
     toListOfMyType,
     toMap,

@@ -282,32 +282,26 @@ class Worker {
   }
 
   private String generateType(FullType type) {
+    String result;
     if (type.isOptional()) {
-      return generateType(type.getBoundType());
-    }
-    if (type.isCollectionLikeType()) {
-      return "Array<" + generateType(type.getContentType()) + '>';
-    }
-
-    if (type.isArrayType()) {
-      return "Array<" + generateType(type.getArrayType()) + '>';
-    }
-
-    if (type.isMapLikeType()) {
+      result = generateType(type.getBoundType());
+    } else if (type.isCollectionLikeType()) {
+      result = "Array<" + generateType(type.getContentType()) + '>';
+    } else if (type.isArrayType()) {
+      result = "Array<" + generateType(type.getArrayType()) + '>';
+    } else if (type.isMapLikeType()) {
       var mapTypes = type.getMapTypes();
-      return "Map<" + generateType(mapTypes[0]) + ", " + generateType(mapTypes[1]) + '>';
+      result = "Map<" + generateType(mapTypes[0]) + ", " + generateType(mapTypes[1]) + '>';
+    } else {
+      result = mapType(type.rawTypeName());
+      var typeVariable = type.typeVariableName();
+      var parameterizedTypes =
+          type.parameterizedTypes()
+              .map(s -> s.map(this::generateType).collect(Collectors.joining(", ", "<", ">")));
+      result = typeVariable.orElse(result + parameterizedTypes.orElse(""));
     }
-
-    var rawType = mapType(type.rawTypeName());
-    var typeVariable = type.typeVariableName();
-    var parameterizedTypes =
-        type.parameterizedTypes()
-            .map(s -> s.map(this::generateType).collect(Collectors.joining(", ", "<", ">")))
-            .map(params -> rawType + params);
-    var result = typeVariable.orElse(parameterizedTypes.orElse(rawType));
 
     boolean nullable;
-
     if (type.isOptional()) {
       nullable = true;
     } else if (type.isPrimitive()) {

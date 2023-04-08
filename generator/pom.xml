@@ -9,8 +9,6 @@
     </parent>
     <artifactId>hilla-generator</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>Jackson-based Parser for Hilla</name>
-    <description>Spring Boot application that parses Java code using Jackson</description>
 
     <dependencies>
         <dependency>

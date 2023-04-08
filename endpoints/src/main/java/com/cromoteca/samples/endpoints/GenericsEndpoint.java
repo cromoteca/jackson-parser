@@ -34,6 +34,14 @@ public class GenericsEndpoint {
     return Optional.empty();
   }
 
+  public List<Optional<String>> optList() {
+    return List.of(Optional.empty());
+  }
+
+  public <T> List<T> optListT(List<Optional<T>> argument) {
+    return List.of();
+  }
+
   public static class GenericClass<T> {
     public T value;
   }
