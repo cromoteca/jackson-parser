@@ -313,25 +313,7 @@ public class Generator {
     }
 
     private String generateProperty(BeanPropertyDefinition property) {
-      var getterType =
-          Optional.ofNullable(property.getGetter())
-              .map(
-                  getter ->
-                      new FullType(
-                          getter.getType(), getter.getAnnotated().getAnnotatedReturnType()));
-      var setterType =
-          Optional.ofNullable(property.getSetter())
-              .map(
-                  setter ->
-                      new FullType(
-                          setter.getParameterType(0),
-                          setter.getAnnotated().getAnnotatedParameterTypes()[0]));
-      var fieldType =
-          Optional.ofNullable(property.getField())
-              .map(field -> new FullType(field.getType(), field.getAnnotated().getAnnotatedType()));
-      var propertyType =
-          new MultipleType(
-              Stream.of(getterType, setterType, fieldType).flatMap(Optional::stream).toList());
+      var propertyType = MultipleType.forProperty(property);
 
       return """
                   \s   %s: %s;"""

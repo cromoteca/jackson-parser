@@ -1,5 +1,6 @@
 package com.cromoteca.generator;
 
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,26 @@ class MultipleType extends FullType {
     mainType = types.get(0);
     this.types =
         types.stream().filter(t -> mainType.getRawClass().equals(t.getRawClass())).toList();
+  }
+
+  public static MultipleType forProperty(BeanPropertyDefinition property) {
+    var getterType =
+        Optional.ofNullable(property.getGetter())
+            .map(
+                getter ->
+                    new FullType(getter.getType(), getter.getAnnotated().getAnnotatedReturnType()));
+    var setterType =
+        Optional.ofNullable(property.getSetter())
+            .map(
+                setter ->
+                    new FullType(
+                        setter.getParameterType(0),
+                        setter.getAnnotated().getAnnotatedParameterTypes()[0]));
+    var fieldType =
+        Optional.ofNullable(property.getField())
+            .map(field -> new FullType(field.getType(), field.getAnnotated().getAnnotatedType()));
+    return new MultipleType(
+        Stream.of(getterType, setterType, fieldType).flatMap(Optional::stream).toList());
   }
 
   @Override
