@@ -50,7 +50,7 @@ public class Generator {
 
                   return StringTemplate.from(
                       """
-                    ${imports}interface ${name}${typeParams} {
+                    ${imports}${construct} ${name}${typeParams} {
                     ${properties}
                     }
 
@@ -59,6 +59,8 @@ public class Generator {
                       Map.of(
                           "imports",
                           worker.getImports(),
+                          "construct",
+                          entity.type().isEnum() ? "enum" : "interface",
                           "name",
                           entity.getName(),
                           "typeParams",
@@ -330,7 +332,17 @@ public class Generator {
     }
 
     private List<String> generateProperties(ScanResult.EntityClass entity) {
-      return entity.properties().stream().map(this::generateProperty).toList();
+      return entity.type().isEnum()
+          ? Arrays.stream(entity.type().getEnumConstants())
+              .map(Object::toString)
+              .map(this::generateEnumConstant)
+              .toList()
+          : entity.properties().stream().map(this::generateProperty).toList();
+    }
+
+    private String generateEnumConstant(String value) {
+      return """
+                  \s   %s = "%s",""".formatted(value, value);
     }
 
     private String generateProperty(BeanPropertyDefinition property) {
