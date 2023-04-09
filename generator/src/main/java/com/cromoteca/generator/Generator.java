@@ -26,21 +26,17 @@ public class Generator {
                 endpoint -> {
                   var worker = new Worker(endpoint);
 
-                  return """
-                    %s%s
+                  return StringTemplate.from(
+                      """
+                    ${imports}${methodImplementations}
 
-                    const %s = {
-                    %s
+                    const ${name} = {
+                    ${methodList}
                     };
 
-                    export default %s;
-                    """
-                      .formatted(
-                          worker.imports(),
-                          worker.methodImplementations(),
-                          endpoint.getName(),
-                          worker.methods(),
-                          endpoint.getName());
+                    export default ${name};
+                          """,
+                      worker);
                 }));
   }
 
@@ -52,35 +48,41 @@ public class Generator {
                 entity -> {
                   var worker = new Worker(entity);
 
-                  return """
-                    %sinterface %s%s {
-                    %s
+                  return StringTemplate.from(
+                      """
+                    ${imports}interface ${name}${typeParams} {
+                    ${properties}
                     }
 
-                    export default %s;
-                    """
-                      .formatted(
-                          worker.imports(),
+                    export default ${name};
+                    """,
+                      Map.of(
+                          "imports",
+                          worker.getImports(),
+                          "name",
                           entity.getName(),
+                          "typeParams",
                           worker.generateTypeParams(entity.type().getTypeParameters()),
-                          worker.properties(),
-                          entity.getName());
+                          "properties",
+                          worker.getProperties()));
                 }));
   }
 
-  private class Worker {
+  public class Worker {
 
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
     private final Class<?> mainClass;
     private final boolean nonNullApi;
+    private final String name;
     private List<String> methodImplementations;
     private List<String> methods;
     private String initTypeName;
     private String clientVariableName;
     private List<String> properties;
 
-    Worker(ScanResult.EndpointClass endpoint) {
+    public Worker(ScanResult.EndpointClass endpoint) {
+      name = endpoint.getName();
       mainClass = endpoint.type().getBeanClass();
       nonNullApi =
           endpoint
@@ -101,7 +103,8 @@ public class Generator {
       methods = generateMethodList(endpoint);
     }
 
-    Worker(ScanResult.EntityClass entity) {
+    public Worker(ScanResult.EntityClass entity) {
+      name = entity.getName();
       mainClass = entity.type();
       nonNullApi = nonNullApi(entity.type());
       entity.properties().forEach(property -> keywords.add(property.getName()));
@@ -119,7 +122,11 @@ public class Generator {
           .anyMatch(pkg -> pkg.isAnnotationPresent(NonNullApi.class));
     }
 
-    String imports() {
+    public String getName() {
+      return name;
+    }
+
+    public String getImports() {
       var groupedImports = new TreeMap<String, String>();
 
       imports.stream()
@@ -152,28 +159,32 @@ public class Generator {
 
                 groupedImports.put(
                     relativePath,
-                    """
-                      import %s%s from '%s';
-                      """
-                        .formatted(
+                    StringTemplate.from(
+                        """
+                      import ${type}${imported} from '${path}';
+                      """,
+                        Map.of(
+                            "type",
                             type,
+                            "imported",
                             imported,
-                            relativePath.startsWith("@") ? relativePath : relativePath + ".js"));
+                            "path",
+                            relativePath.startsWith("@") ? relativePath : relativePath + ".js")));
               });
 
       var lines = String.join("", groupedImports.values());
       return lines.isEmpty() ? lines : lines + '\n';
     }
 
-    String methodImplementations() {
+    public String getMethodImplementations() {
       return String.join("\n\n", methodImplementations);
     }
 
-    String methods() {
+    public String getMethodList() {
       return String.join("\n", methods);
     }
 
-    String properties() {
+    public String getProperties() {
       return String.join("\n", properties);
     }
 
@@ -206,9 +217,9 @@ public class Generator {
     }
 
     // regular expression to match the last numeric suffix
-    static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
+    private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
 
-    static String incrementSuffix(String str) {
+    private static String incrementSuffix(String str) {
 
       // match the last numeric suffix in the string
       var matcher = SUFFIX_REGEX.matcher(str);
@@ -247,24 +258,34 @@ public class Generator {
     }
 
     private String generateMethod(AnnotatedMethod method, String className) {
-      return """
-        async function %s%s(%s): Promise<%s> {
-            return %s.call('%s', '%s', {%s}, %s);
-        }"""
-          .formatted(
+      return StringTemplate.from(
+          """
+        async function ${name}${typeParams}(${paramList}): Promise<${returnType}> {
+            return ${client}.call('${class}', '${method}', {${paramNames}}, ${init});
+        }""",
+          Map.of(
+              "name",
               method.getName(),
+              "typeParams",
               generateTypeParams(method.getAnnotated().getTypeParameters()),
+              "paramList",
               generateParamList(method),
+              "returnType",
               generateType(
                   new FullType(method.getType(), method.getAnnotated().getAnnotatedReturnType())),
+              "client",
               clientVariableName,
+              "class",
               className,
+              "method",
               method.getName(),
+              "paramNames",
               generateParamNameObject(method),
-              chooseInitParamName(method));
+              "init",
+              chooseInitParamName(method)));
     }
 
-    String generateTypeParams(TypeVariable<?>[] typeParameters) {
+    private String generateTypeParams(TypeVariable<?>[] typeParameters) {
       return typeParameters.length == 0
           ? ""
           : Arrays.stream(typeParameters)
