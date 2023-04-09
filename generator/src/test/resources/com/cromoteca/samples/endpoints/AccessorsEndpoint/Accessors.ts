@@ -1,11 +1,11 @@
 interface Accessors {
     propertyWithField: number;
     propertyWithFieldAndGetter: number;
-    propertyWithFieldAndSetter: number;
     propertyWithFieldAndGetterAndSetter: number;
+    propertyWithFieldAndSetter: number;
     propertyWithGetter: number;
-    propertyWithSetter: number;
     propertyWithGetterAndSetter: number;
+    propertyWithSetter: number;
 }
 
 export default Accessors;

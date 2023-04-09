@@ -335,9 +335,13 @@ public class Generator {
       return entity.type().isEnum()
           ? Arrays.stream(entity.type().getEnumConstants())
               .map(Object::toString)
+              .sorted()
               .map(this::generateEnumConstant)
               .toList()
-          : entity.properties().stream().map(this::generateProperty).toList();
+          : entity.properties().stream()
+              .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
+              .map(this::generateProperty)
+              .toList();
     }
 
     private String generateEnumConstant(String value) {
