@@ -1,10 +1,10 @@
 package com.cromoteca.generator;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -13,7 +13,7 @@ class MultipleType extends FullType {
   private final FullType mainType;
 
   MultipleType(List<FullType> types) {
-    super(null, null);
+    super(null, null, null);
     mainType = types.get(0);
     this.types =
         types.stream().filter(t -> mainType.getRawClass().equals(t.getRawClass())).toList();
@@ -24,17 +24,26 @@ class MultipleType extends FullType {
         Optional.ofNullable(property.getGetter())
             .map(
                 getter ->
-                    new FullType(getter.getType(), getter.getAnnotated().getAnnotatedReturnType()));
+                    new FullType(
+                        getter.getType(),
+                        getter.getAnnotated().getAnnotatedReturnType(),
+                        getter.getAnnotated().getReturnType()));
     var setterType =
         Optional.ofNullable(property.getSetter())
             .map(
                 setter ->
                     new FullType(
                         setter.getParameterType(0),
-                        setter.getAnnotated().getAnnotatedParameterTypes()[0]));
+                        setter.getAnnotated().getAnnotatedParameterTypes()[0],
+                        setter.getAnnotated().getParameterTypes()[0]));
     var fieldType =
         Optional.ofNullable(property.getField())
-            .map(field -> new FullType(field.getType(), field.getAnnotated().getAnnotatedType()));
+            .map(
+                field ->
+                    new FullType(
+                        field.getType(),
+                        field.getAnnotated().getAnnotatedType(),
+                        field.getAnnotated()));
     return new MultipleType(
         Stream.of(getterType, setterType, fieldType).flatMap(Optional::stream).toList());
   }
@@ -105,8 +114,11 @@ class MultipleType extends FullType {
   }
 
   @Override
-  Boolean nullable() {
-    return types.stream().map(FullType::nullable).filter(Objects::nonNull).findFirst().orElse(null);
+  Annotation[] getAnnotations() {
+    return types.stream()
+        .flatMap(t -> Arrays.stream(t.getAnnotations()))
+        .distinct()
+        .toArray(Annotation[]::new);
   }
 
   @Override

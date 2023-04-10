@@ -33,7 +33,7 @@ public class MixEndpoint {
       MyEnum[] enumTypeArray,
       Optional<String> optional,
       @Nullable String nullable,
-      @Max(10) @Min(4) int minMax,
+      @Min(4) @Max(10) int minMax,
       @Email String email,
       @NotBlank @Email String notBlankEmail) {}
 

@@ -274,7 +274,10 @@ public class Generator {
               generateParamList(method),
               "returnType",
               generateType(
-                  new FullType(method.getType(), method.getAnnotated().getAnnotatedReturnType())),
+                  new FullType(
+                      method.getType(),
+                      method.getAnnotated().getAnnotatedReturnType(),
+                      method.getAnnotated().getReturnType())),
               "client",
               clientVariableName,
               "class",
@@ -301,7 +304,9 @@ public class Generator {
         var generic = method.getAnnotated().getAnnotatedParameterTypes()[i];
         var javaParam = method.getAnnotated().getParameters()[i];
         params.add(
-            javaParam.getName() + ": " + generateType(new FullType(param.getType(), generic)));
+            javaParam.getName()
+                + ": "
+                + generateType(new FullType(param.getType(), generic, javaParam)));
       }
 
       params.add(chooseInitParamName(method) + "?: " + initTypeName);
@@ -359,7 +364,7 @@ public class Generator {
       String result;
       var converted = scan.convertedClasses().get(type.getRawClass());
       if (converted != null) {
-        result = generateType(new FullType(converted, null));
+        result = generateType(new FullType(converted, null, null));
       } else if (type.isOptional()) {
         result = generateType(type.getBoundType());
       } else if (type.isCollectionLikeType()) {
