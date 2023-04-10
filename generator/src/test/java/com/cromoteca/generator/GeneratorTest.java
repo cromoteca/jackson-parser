@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -33,7 +34,7 @@ public class GeneratorTest {
   @ParameterizedTest
   @MethodSource
   public void testGeneration(Class<?> endpoint) throws IOException {
-    generateAndCheck(List.of(endpoint));
+    assertAll(generateAndCheck(List.of(endpoint)));
   }
 
   @Test
@@ -41,29 +42,34 @@ public class GeneratorTest {
     generateAndCheck(findEndpoints("com.cromoteca.samples").toList());
   }
 
-  private void generateAndCheck(List<Class<?>> endpoints) {
+  private Executable[] generateAndCheck(List<Class<?>> endpoints) {
     var scanResult = parser.parseEndpoints(endpoints);
     var generator = new Generator(scanResult);
-    generator.generateEndpoints().forEach(this::checkResult);
-    generator.generateEntities().forEach(this::checkResult);
+    return Stream.concat(
+            generator.generateEndpoints().entrySet().stream(),
+            generator.generateEntities().entrySet().stream())
+        .map(entry -> checkResult(entry.getKey(), entry.getValue()))
+        .toArray(Executable[]::new);
   }
 
-  private void checkResult(Class<?> cls, String actual) {
-    var className = '/' + cls.getName().replaceAll("[.$]", "/");
+  private Executable checkResult(Class<?> cls, String actual) {
+    return () -> {
+      var className = '/' + cls.getName().replaceAll("[.$]", "/");
 
-    try (var typeScriptFile = getClass().getResourceAsStream(className + ".ts")) {
-      if (typeScriptFile == null) {
-        printHeader(className);
-        System.out.println(actual);
-        System.out.println(HEADER);
-        System.out.println();
-      } else {
-        var expected = new String(typeScriptFile.readAllBytes());
-        assertEquals(expected, actual, className);
+      try (var typeScriptFile = getClass().getResourceAsStream(className + ".ts")) {
+        if (typeScriptFile == null) {
+          printHeader(className);
+          System.out.println(actual);
+          System.out.println(HEADER);
+          System.out.println();
+        } else {
+          var expected = new String(typeScriptFile.readAllBytes());
+          assertEquals(expected, actual, className);
+        }
+      } catch (IOException e) {
+        fail(e);
       }
-    } catch (IOException e) {
-      fail(e);
-    }
+    };
   }
 
   private static Stream<Class<?>> testGeneration() {

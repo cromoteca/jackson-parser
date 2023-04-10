@@ -262,11 +262,11 @@ public class Generator {
     private String generateMethod(AnnotatedMethod method, String className) {
       return StringTemplate.from(
           """
-        async function ${name}${typeParams}(${paramList}): Promise<${returnType}> {
-            return ${client}.call('${class}', '${method}', {${paramNames}}, ${init});
+        async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
+            return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
         }""",
           Map.of(
-              "name",
+              "methodName",
               method.getName(),
               "typeParams",
               generateTypeParams(method.getAnnotated().getTypeParameters()),
@@ -279,8 +279,6 @@ public class Generator {
               clientVariableName,
               "class",
               className,
-              "method",
-              method.getName(),
               "paramNames",
               generateParamNameObject(method),
               "init",

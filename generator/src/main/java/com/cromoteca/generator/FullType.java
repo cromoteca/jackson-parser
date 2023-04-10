@@ -22,9 +22,10 @@ class FullType {
 
   static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
     if (object instanceof Optional<?> optional) {
-      return optional.map(o -> cls.isInstance(o) ? cls.cast(o) : null);
+      return optional.filter(cls::isInstance).map(cls::cast);
+    } else {
+      return Optional.ofNullable(object).filter(cls::isInstance).map(cls::cast);
     }
-    return cls.isInstance(object) ? Optional.of(cls.cast(object)) : Optional.empty();
   }
 
   boolean isOptional() {
