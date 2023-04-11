@@ -41,15 +41,13 @@ public class StringTemplateTest {
         "Unknown property");
     assertEquals(
         """
-                Hello,
-                World!
-                """,
-        StringTemplate.from(
-            """
-                    Hello,
-                    ${hello}!
-                    """,
-            bean),
+        Hello,
+        World!
+        """,
+        StringTemplate.from("""
+            Hello,
+            ${hello}!
+            """, bean),
         "String block");
   }
 }

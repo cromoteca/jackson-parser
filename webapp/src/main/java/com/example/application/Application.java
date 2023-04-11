@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * <p>Use the @PWA annotation make the application installable on phones, tablets and some desktop
  * browsers.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.example.application", "com.cromoteca.samples"})
 @Theme(value = "webapp")
 public class Application implements AppShellConfigurator {
 

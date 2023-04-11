@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -45,26 +46,29 @@ public class GeneratorTest {
   private Executable[] generateAndCheck(List<Class<?>> endpoints) {
     var scanResult = parser.parseEndpoints(endpoints);
     var generator = new Generator(scanResult);
-    return Stream.concat(
-            generator.generateEndpoints().entrySet().stream(),
-            generator.generateEntities().entrySet().stream())
+    return Stream.of(
+            generator.generateEndpoints(), generator.generateEntities()
+            // , generator.generateModels()
+            )
+        .map(Map::entrySet)
+        .flatMap(Collection::stream)
         .map(entry -> checkResult(entry.getKey(), entry.getValue()))
         .toArray(Executable[]::new);
   }
 
-  private Executable checkResult(Class<?> cls, String actual) {
+  private Executable checkResult(String className, String actual) {
     return () -> {
-      var className = '/' + cls.getName().replaceAll("[.$]", "/");
+      var resourceName = '/' + className.replaceAll("[.$]", "/") + ".ts";
 
-      try (var typeScriptFile = getClass().getResourceAsStream(className + ".ts")) {
+      try (var typeScriptFile = getClass().getResourceAsStream(resourceName)) {
         if (typeScriptFile == null) {
-          printHeader(className);
+          printHeader(resourceName);
           System.out.println(actual);
           System.out.println(HEADER);
           System.out.println();
         } else {
           var expected = new String(typeScriptFile.readAllBytes());
-          assertEquals(expected, actual, className);
+          assertEquals(expected, actual, resourceName);
         }
       } catch (IOException e) {
         fail(e);
@@ -99,7 +103,7 @@ public class GeneratorTest {
     System.out.print(HEADER.substring(0, 2));
     System.out.print(' ');
     System.out.print(title);
-    System.out.print(".ts ");
-    System.out.println(HEADER.substring(0, Math.max(0, HEADER.length() - title.length() - 7)));
+    System.out.print(' ');
+    System.out.println(HEADER.substring(0, Math.max(0, HEADER.length() - title.length() - 4)));
   }
 }

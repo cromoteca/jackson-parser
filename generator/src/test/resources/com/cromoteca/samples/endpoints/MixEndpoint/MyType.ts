@@ -1,5 +1,5 @@
-import type MyEnum from './MixEndpoint/MyEnum.js';
-import type MyOtherType from './entities/MyOtherType.js';
+import type MyOtherType from '../entities/MyOtherType.js';
+import type MyEnum from './MyEnum.js';
 
 interface MyType {
     byteArray2D: Array<Array<number>>;

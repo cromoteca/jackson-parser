@@ -1,8 +1,8 @@
 import { Button } from '@hilla/react-components/Button.js';
 import { Notification } from '@hilla/react-components/Notification.js';
 import { TextField } from '@hilla/react-components/TextField.js';
-import { HelloReactEndpoint } from 'Frontend/generated/endpoints.js';
 import { useState } from 'react';
+import HelloReactEndpoint from "Frontend/generated/com/example/application/endpoints/helloreact/HelloReactEndpoint.js";
 
 export default function HelloReactView() {
   const [name, setName] = useState('');

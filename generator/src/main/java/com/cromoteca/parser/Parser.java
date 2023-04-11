@@ -31,6 +31,10 @@ public class Parser {
     mapper = springMvcJacksonConverter.getObjectMapper();
   }
 
+  public Parser(ObjectMapper mapper) {
+    this.mapper = mapper;
+  }
+
   public ScanResult parseEndpoints(List<Class<?>> endpointClasses) {
     return new Worker().parseEndpoints(endpointClasses);
   }

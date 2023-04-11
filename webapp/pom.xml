@@ -49,12 +49,29 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.cromoteca</groupId>
+            <artifactId>hilla-generator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>dev.hilla</groupId>
             <artifactId>hilla-react</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>dev.hilla</groupId>
+                    <artifactId>engine-runtime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>dev.hilla</groupId>
             <artifactId>hilla-spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>dev.hilla</groupId>
+                    <artifactId>engine-runtime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.parttio</groupId>

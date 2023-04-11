@@ -18,44 +18,44 @@ public class Generator {
     this.scan = scan;
   }
 
-  public Map<Class<?>, String> generateEndpoints() {
+  public Map<String, String> generateEndpoints() {
     return scan.endpoints().stream()
         .collect(
             Collectors.toMap(
-                endpoint -> endpoint.type().getBeanClass(),
+                endpoint -> endpoint.type().getBeanClass().getName(),
                 endpoint -> {
                   var worker = new Worker(endpoint);
 
                   return StringTemplate.from(
                       """
-                    ${imports}${methodImplementations}
+                      ${imports}${methodImplementations}
 
-                    const ${name} = {
-                    ${methodList}
-                    };
+                      const ${name} = {
+                      ${methodList}
+                      };
 
-                    export default ${name};
-                          """,
+                      export default ${name};
+                      """,
                       worker);
                 }));
   }
 
-  public Map<Class<?>, String> generateEntities() {
+  public Map<String, String> generateEntities() {
     return scan.entities().stream()
         .collect(
             Collectors.toMap(
-                ScanResult.EntityClass::type,
+                entityClass -> entityClass.type().getName(),
                 entity -> {
-                  var worker = new Worker(entity);
+                  var worker = new Worker(entity, EntityFile.TYPE);
 
                   return StringTemplate.from(
                       """
-                    ${imports}${construct} ${name}${typeParams} {
-                    ${properties}
-                    }
+                      ${imports}${construct} ${name}${typeParams} {
+                      ${properties}
+                      }
 
-                    export default ${name};
-                    """,
+                      export default ${name};
+                      """,
                       Map.of(
                           "imports",
                           worker.getImports(),
@@ -70,11 +70,45 @@ public class Generator {
                 }));
   }
 
+  public Map<String, String> generateModels() {
+    return scan.entities().stream()
+        .collect(
+            Collectors.toMap(
+                entityClass -> entityClass.type().getName() + "Model",
+                entity -> {
+                  var worker = new Worker(entity, EntityFile.MODEL);
+
+                  return StringTemplate.from(
+                      """
+                      ${imports}class ${name}Model<T extends ${name} = ${name}> extends ${objectModel}<T> {
+                          declare static createEmptyValue: () => ${name};
+                      ${properties}
+                      }
+
+                      export default ${name}Model;
+                      """,
+                      Map.of(
+                          "name",
+                          worker.getModelType(),
+                          "imports",
+                          worker.getImports(),
+                          "properties",
+                          worker.getProperties(),
+                          "objectModel",
+                          worker.getObjectModel()));
+                }));
+  }
+
+  enum EntityFile {
+    TYPE,
+    MODEL
+  }
+
   public class Worker {
 
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
-    private final Class<?> mainClass;
+    private final String mainClass;
     private final boolean nonNullApi;
     private final String name;
     private List<String> methodImplementations;
@@ -82,10 +116,12 @@ public class Generator {
     private String initTypeName;
     private String clientVariableName;
     private List<String> properties;
+    private String importedObjectModel;
+    private String importedModelType;
 
     public Worker(ScanResult.EndpointClass endpoint) {
       name = endpoint.getName();
-      mainClass = endpoint.type().getBeanClass();
+      mainClass = endpoint.type().getBeanClass().getPackageName();
       nonNullApi =
           endpoint
               .type()
@@ -105,13 +141,24 @@ public class Generator {
       methods = generateMethodList(endpoint);
     }
 
-    public Worker(ScanResult.EntityClass entity) {
+    public Worker(ScanResult.EntityClass entity, EntityFile file) {
       name = entity.getName();
-      mainClass = entity.type();
+      mainClass = entity.type().getName().replaceFirst("[.$][^.$]+$", "");
       nonNullApi = nonNullApi(entity.type());
       entity.properties().forEach(property -> keywords.add(property.getName()));
-      keywords.add(entity.getName());
-      properties = generateProperties(entity);
+
+      switch (file) {
+        case TYPE -> {
+          keywords.add(entity.getName());
+          properties = generateProperties(entity);
+        }
+        case MODEL -> {
+          importedObjectModel = addImport("ObjectModel", "@hilla/form", false, false);
+          importedModelType = addImport(entity.getName(), entity.type().getName(), true, true);
+          keywords.add("createEmptyValue");
+          properties = generateModelFunctions(entity);
+        }
+      }
     }
 
     private static boolean nonNullApi(Class<?> cls) {
@@ -153,18 +200,19 @@ public class Generator {
                             namedImports.isEmpty()
                                 ? ""
                                 : namedImports.stream()
+                                    .sorted()
                                     .collect(Collectors.joining(", ", "{ ", " }")))
                         .filter(s -> !s.isBlank())
                         .collect(Collectors.joining(", "));
 
-                var relativePath = NameResolver.resolve(from, mainClass.getPackageName());
+                var relativePath = NameResolver.resolve(from, mainClass);
 
                 groupedImports.put(
                     relativePath,
                     StringTemplate.from(
                         """
-                      import ${type}${imported} from '${path}';
-                      """,
+                        import ${type}${imported} from '${path}';
+                        """,
                         Map.of(
                             "type",
                             type,
@@ -188,6 +236,14 @@ public class Generator {
 
     public String getProperties() {
       return String.join("\n", properties);
+    }
+
+    public String getObjectModel() {
+      return importedObjectModel;
+    }
+
+    public String getModelType() {
+      return importedModelType;
     }
 
     private String addImport(String variable, String from, boolean isDefault, boolean isType) {
@@ -255,16 +311,16 @@ public class Generator {
       return result.methods().stream()
           .sorted(Comparator.comparing(AnnotatedMethod::getName))
           .map(method -> """
-            \s   %s,""".formatted(method.getName()))
+              \s   %s,""".formatted(method.getName()))
           .toList();
     }
 
     private String generateMethod(AnnotatedMethod method, String className) {
       return StringTemplate.from(
           """
-        async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
-            return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
-        }""",
+          async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
+              return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
+          }""",
           Map.of(
               "methodName",
               method.getName(),
@@ -347,17 +403,49 @@ public class Generator {
               .toList();
     }
 
+    private List<String> generateModelFunctions(ScanResult.EntityClass entity) {
+      return entity.properties().stream()
+          .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
+          .map(this::generateModelFunction)
+          .toList();
+    }
+
     private String generateEnumConstant(String value) {
       return """
-                  \s   %s = "%s",""".formatted(value, value);
+          \s   %s = "%s",""".formatted(value, value);
     }
 
     private String generateProperty(BeanPropertyDefinition property) {
       var propertyType = MultipleType.forProperty(property);
 
       return """
-                  \s   %s: %s;"""
+          \s   %s: %s;"""
           .formatted(property.getName(), generateType(propertyType));
+    }
+
+    private String generateModelFunction(BeanPropertyDefinition property) {
+      var propertyType = MultipleType.forProperty(property);
+      var getPropertyModel = addImport("_getPropertyModel", "@hilla/form", false, false);
+
+      return StringTemplate.from(
+          """
+
+      \s   get ${name}(): ${modelType} {
+              return this[${getPropertyModel}]('${name}', ${modelType}, [${nullable}]) as ${modelType};
+          }""",
+          Map.of(
+              "name",
+              property.getName(),
+              "modelType",
+              chooseModel(propertyType),
+              "nullable",
+              isNullable(propertyType),
+              "getPropertyModel",
+              getPropertyModel));
+    }
+
+    private String chooseModel(FullType type) {
+      return addImport("StringModel", "@hilla/form", false, false);
     }
 
     private String generateType(FullType type) {
@@ -383,6 +471,10 @@ public class Generator {
         result = typeVariable.orElse(result + parameterizedTypes.orElse(""));
       }
 
+      return isNullable(type) ? result + " | undefined" : result;
+    }
+
+    private boolean isNullable(FullType type) {
       boolean nullable;
       if (type.isOptional()) {
         nullable = true;
@@ -391,8 +483,7 @@ public class Generator {
       } else {
         nullable = Optional.ofNullable(type.nullable()).orElse(!nonNullApi);
       }
-
-      return nullable ? result + " | undefined" : result;
+      return nullable;
     }
 
     private String mapType(String typeName) {

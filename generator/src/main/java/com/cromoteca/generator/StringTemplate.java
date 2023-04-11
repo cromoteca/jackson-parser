@@ -42,15 +42,14 @@ public class StringTemplate {
                         return "";
                       }
                     })
-                .map(Objects::toString)
                 .orElse(""));
   }
 
   public static @NonNull String from(String template, Map<?, ?> map) {
-    return from(template, key -> Objects.toString(map.get(key)));
+    return from(template, map::get);
   }
 
-  public static @NonNull String from(String template, Function<String, String> values) {
+  public static @NonNull String from(String template, Function<String, Object> values) {
     var matcher = EXPRESSION.matcher(template);
     var output = new StringBuilder();
 
