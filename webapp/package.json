@@ -28,10 +28,12 @@
     "@vaadin/vaadin-themable-mixin": "24.0.2",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
+    "formik": "^2.2.9",
     "lit": "2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.4.2"
+    "react-router-dom": "^6.4.2",
+    "yup": "^1.1.0"
   },
   "devDependencies": {
     "@lit-labs/react": "^1.1.0",
@@ -82,7 +84,9 @@
     "@vaadin/vaadin-lumo-styles": "$@vaadin/vaadin-lumo-styles",
     "@hilla/generator-typescript-plugin-backbone": "$@hilla/generator-typescript-plugin-backbone",
     "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
-    "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli"
+    "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli",
+    "formik": "$formik",
+    "yup": "$yup"
   },
   "vaadin": {
     "dependencies": {
@@ -127,6 +131,6 @@
       "workbox-core": "6.5.4",
       "workbox-precaching": "6.5.4"
     },
-    "hash": "6cff7cdded34f70467dfc4d9939accfbff52fdcbcc5f8ea74bd9f20d36583905"
+    "hash": "0cf48f7de29a74adf8deb0ae931ff5b7de562a17a2f02b10381552c32b711a91"
   }
 }
