@@ -8,8 +8,8 @@ import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.AnnotatedTypeVariable;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -17,13 +17,11 @@ import java.util.stream.Stream;
 
 class FullType {
   private final JavaType javaType;
-  private final AnnotatedType annotatedType;
-  private final AnnotatedElement annotatedElement;
+  private final AnnotatedElement[] annotatedElements;
 
-  FullType(JavaType javaType, AnnotatedType annotatedType, AnnotatedElement annotatedElement) {
+  FullType(JavaType javaType, AnnotatedElement... annotatedElements) {
     this.javaType = javaType;
-    this.annotatedType = annotatedType;
-    this.annotatedElement = annotatedElement;
+    this.annotatedElements = annotatedElements;
   }
 
   static <T> Optional<T> castIfPossible(Object object, Class<T> cls) {
@@ -54,36 +52,46 @@ class FullType {
     return javaType.isMapLikeType();
   }
 
-  FullType[] getMapTypes() {
+  private List<AnnotatedType[]> extractAnnotatedActualTypeArguments(int expectedCount) {
     var annotatedTypes =
-        castIfPossible(annotatedType, AnnotatedParameterizedType.class)
-            .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments);
-    // TODO: map annotatedElement
+        Arrays.stream(annotatedElements)
+            .map(e -> castIfPossible(e, AnnotatedParameterizedType.class))
+            .flatMap(Optional::stream)
+            .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments)
+            .filter(a -> a.length == expectedCount)
+            .toList();
+    return IntStream.range(0, expectedCount)
+        .mapToObj(n -> annotatedTypes.stream().map(a -> a[n]).toArray(AnnotatedType[]::new))
+        .toList();
+  }
+
+  FullType[] getMapTypes() {
+    var extracted = extractAnnotatedActualTypeArguments(2);
+
     return new FullType[] {
-      new FullType(javaType.getKeyType(), annotatedTypes.map(i -> i[0]).orElse(null), null),
-      new FullType(javaType.getContentType(), annotatedTypes.map(i -> i[1]).orElse(null), null)
+      new FullType(javaType.getKeyType(), extracted.get(0)),
+      new FullType(javaType.getContentType(), extracted.get(1))
     };
   }
 
   FullType getBoundType() {
-    var itemType =
-        castIfPossible(annotatedType, AnnotatedParameterizedType.class)
-            .map(p -> p.getAnnotatedActualTypeArguments()[0]);
-    return new FullType(javaType.getBindings().getBoundType(0), itemType.orElse(null), null);
+    return new FullType(
+        javaType.getBindings().getBoundType(0), extractAnnotatedActualTypeArguments(1).get(0));
   }
 
   FullType getContentType() {
-    var itemType =
-        castIfPossible(annotatedType, AnnotatedParameterizedType.class)
-            .map(p -> p.getAnnotatedActualTypeArguments()[0]);
-    return new FullType(javaType.getContentType(), itemType.orElse(null), null);
+    return new FullType(javaType.getContentType(), extractAnnotatedActualTypeArguments(1).get(0));
   }
 
   FullType getArrayType() {
-    var itemType =
-        castIfPossible(annotatedType, AnnotatedArrayType.class)
-            .map(AnnotatedArrayType::getAnnotatedGenericComponentType);
-    return new FullType(javaType.getContentType(), itemType.orElse(null), null);
+    var annotatedTypes =
+        Arrays.stream(annotatedElements)
+            .map(e -> castIfPossible(e, AnnotatedArrayType.class))
+            .flatMap(Optional::stream)
+            .map(AnnotatedArrayType::getAnnotatedGenericComponentType)
+            .toArray(AnnotatedElement[]::new);
+
+    return new FullType(javaType.getContentType(), annotatedTypes);
   }
 
   Class<?> getRawClass() {
@@ -109,7 +117,7 @@ class FullType {
   }
 
   Annotation[] getAnnotations() {
-    return Stream.of(annotatedType, annotatedElement)
+    return Arrays.stream(annotatedElements)
         .filter(Objects::nonNull)
         .flatMap(a -> Arrays.stream(a.getAnnotations()))
         .distinct()
@@ -117,28 +125,28 @@ class FullType {
   }
 
   String rawTypeName() {
-    var rawTypeFromGeneric =
-        Optional.ofNullable(annotatedType)
-            .flatMap(g -> castIfPossible(g, TypeVariable.class))
-            .map(TypeVariable::getName);
-    return rawTypeFromGeneric.orElse(javaType.getRawClass().getName());
+    return javaType.getRawClass().getName();
   }
 
   Optional<String> typeVariableName() {
-    return Optional.ofNullable(annotatedType)
-        .flatMap(g -> castIfPossible(g, AnnotatedTypeVariable.class))
+    return Arrays.stream(annotatedElements)
+        .map(e -> castIfPossible(e, AnnotatedTypeVariable.class))
+        .flatMap(Optional::stream)
         .map(AnnotatedTypeVariable::getType)
-        .map(Type::getTypeName);
+        .map(Type::getTypeName)
+        .findFirst();
   }
 
   Optional<Stream<FullType>> parameterizedTypes() {
-    return Optional.ofNullable(annotatedType)
-        .flatMap(g -> castIfPossible(g, AnnotatedParameterizedType.class))
+    return Arrays.stream(annotatedElements)
+        .map(e -> castIfPossible(e, AnnotatedParameterizedType.class))
+        .flatMap(Optional::stream)
         .map(AnnotatedParameterizedType::getAnnotatedActualTypeArguments)
         .map(
             types ->
                 IntStream.range(0, types.length)
                     .mapToObj(
-                        i -> new FullType(javaType.getBindings().getBoundType(i), types[i], null)));
+                        i -> new FullType(javaType.getBindings().getBoundType(i), types[i], null)))
+        .findFirst();
   }
 }

@@ -13,7 +13,7 @@ class MultipleType extends FullType {
   private final FullType mainType;
 
   MultipleType(List<FullType> types) {
-    super(null, null, null);
+    super(null);
     mainType = types.get(0);
     this.types =
         types.stream().filter(t -> mainType.getRawClass().equals(t.getRawClass())).toList();

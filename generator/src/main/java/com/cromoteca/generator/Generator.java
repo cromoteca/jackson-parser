@@ -452,7 +452,7 @@ public class Generator {
       String result;
       var converted = scan.convertedClasses().get(type.getRawClass());
       if (converted != null) {
-        result = generateType(new FullType(converted, null, null));
+        result = generateType(new FullType(converted));
       } else if (type.isOptional()) {
         result = generateType(type.getBoundType());
       } else if (type.isCollectionLikeType()) {
