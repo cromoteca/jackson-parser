@@ -30,7 +30,7 @@ async function toNestedGenericClass<T>(value: GenericClass<T>, init?: EndpointRe
     return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'toNestedGenericClass', { value }, init);
 }
 
-async function tooComplex<T, U, V>(p1: GenericClass<Array<unknown>>, p2: Map<U, GenericClass<GenericClass<GenericClass<unknown>>>>, init?: EndpointRequestInit): Promise<Map<GenericClass<Array<T>>, Map<unknown, GenericClass<GenericClass<GenericClass<V>>>>>> {
+async function tooComplex<T, U, V>(p1: GenericClass<Array<unknown>>, p2: Map<U, GenericClass<GenericClass<GenericClass<unknown>>>>, init?: EndpointRequestInit): Promise<Map<GenericClass<Array<T>>, Map<unknown, GenericClass<GenericClass<GenericClass<V>> | undefined>>>> {
     return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'tooComplex', { p1, p2 }, init);
 }
 

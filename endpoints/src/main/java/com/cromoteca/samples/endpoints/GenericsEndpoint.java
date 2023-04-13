@@ -1,5 +1,6 @@
 package com.cromoteca.samples.endpoints;
 
+import com.cromoteca.samples.annotations.Nullable;
 import dev.hilla.Endpoint;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +26,9 @@ public class GenericsEndpoint {
   }
 
   public <T, U, V>
-      Map<GenericClass<List<T>>, Map<?, GenericClass<GenericClass<GenericClass<V>>>>> tooComplex(
-          GenericClass<List<?>> p1, Map<U, GenericClass<GenericClass<GenericClass<?>>>> p2) {
+      Map<GenericClass<List<T>>, Map<?, GenericClass<@Nullable GenericClass<GenericClass<V>>>>>
+          tooComplex(
+              GenericClass<List<?>> p1, Map<U, GenericClass<GenericClass<GenericClass<?>>>> p2) {
     return Map.of();
   }
 
