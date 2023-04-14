@@ -10,11 +10,16 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import reactor.core.publisher.Flux;
 
 @Endpoint
 public class MixEndpoint {
 
   public void expose(@Nullable MyType arg) {}
+
+  public Flux<MyType> flux(int count) {
+    return Flux.empty();
+  }
 
   public record MyType(
       byte[][] byteArray2D,

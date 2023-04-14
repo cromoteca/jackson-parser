@@ -1,6 +1,12 @@
 package com.cromoteca.generator;
 
 import com.cromoteca.ScanResult;
+import com.cromoteca.generator.types.BooleanTypeHandler;
+import com.cromoteca.generator.types.FluxTypeHandler;
+import com.cromoteca.generator.types.NumberTypeHandler;
+import com.cromoteca.generator.types.StringTypeHandler;
+import com.cromoteca.generator.types.TypeHandler;
+import com.cromoteca.generator.types.UnknownTypeHandler;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.lang.reflect.Parameter;
@@ -13,6 +19,31 @@ import org.springframework.lang.NonNullApi;
 
 public class Generator {
   private final ScanResult scan;
+  private final Map<Class<?>, TypeHandler> typeHandlers =
+      new HashMap<>() {
+        private final TypeHandler defaultTypeHandler = new TypeHandler();
+        private final List<TypeHandler> _typeHandlers =
+            List.of(
+                new NumberTypeHandler(),
+                new BooleanTypeHandler(),
+                new StringTypeHandler(),
+                new UnknownTypeHandler(),
+                new FluxTypeHandler());
+
+        @Override
+        public TypeHandler get(Object key) {
+          if (key instanceof Class<?> cls) {
+            return super.computeIfAbsent(
+                cls,
+                k ->
+                    _typeHandlers.stream()
+                        .filter(h -> h.supportedTypes().contains(k))
+                        .findFirst()
+                        .orElse(defaultTypeHandler));
+          }
+          throw new IllegalArgumentException("key must be a Class<?>");
+        }
+      };
 
   public Generator(ScanResult scan) {
     this.scan = scan;
@@ -105,7 +136,6 @@ public class Generator {
   }
 
   public class Worker {
-
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
     private final String mainClass;
@@ -113,13 +143,12 @@ public class Generator {
     private final String name;
     private List<String> methodImplementations;
     private List<String> methods;
-    private String initTypeName;
     private String clientVariableName;
     private List<String> properties;
     private String importedObjectModel;
     private String importedModelType;
 
-    public Worker(ScanResult.EndpointClass endpoint) {
+    Worker(ScanResult.EndpointClass endpoint) {
       name = endpoint.getName();
       mainClass = endpoint.type().getBeanClass().getPackageName();
       nonNullApi =
@@ -135,13 +164,12 @@ public class Generator {
               method ->
                   Arrays.stream(method.getAnnotated().getParameters())
                       .forEach(p -> keywords.add(p.getName())));
-      initTypeName = addImport("EndpointRequestInit", "@hilla/frontend", false, true);
       clientVariableName = addImport("client", "/connect-client.default", true, false);
       methodImplementations = generateMethodImplementations(endpoint);
       methods = generateMethodList(endpoint);
     }
 
-    public Worker(ScanResult.EntityClass entity, EntityFile file) {
+    Worker(ScanResult.EntityClass entity, EntityFile file) {
       name = entity.getName();
       mainClass = entity.type().getName().replaceFirst("[.$][^.$]+$", "");
       nonNullApi = nonNullApi(entity.type());
@@ -316,32 +344,64 @@ public class Generator {
     }
 
     private String generateMethod(AnnotatedMethod method, String className) {
-      return StringTemplate.from(
-          """
-          async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
-              return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
-          }""",
-          Map.of(
-              "methodName",
-              method.getName(),
-              "typeParams",
-              generateTypeParams(method.getAnnotated().getTypeParameters()),
-              "paramList",
-              generateParamList(method),
-              "returnType",
-              generateType(
-                  new FullType(
-                      method.getType(),
-                      method.getAnnotated().getAnnotatedReturnType(),
-                      method.getAnnotated().getReturnType())),
-              "client",
-              clientVariableName,
-              "class",
-              className,
-              "paramNames",
-              generateParamNameObject(method),
-              "init",
-              chooseInitParamName(method)));
+      var handler = typeHandlers.get(method.getRawType());
+      return switch (handler.methodType()) {
+        case CALL -> StringTemplate.from(
+            """
+            async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
+                return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
+            }""",
+            Map.of(
+                "methodName",
+                method.getName(),
+                "typeParams",
+                generateTypeParams(method.getAnnotated().getTypeParameters()),
+                "paramList",
+                generateParamList(method, true),
+                "returnType",
+                generateType(
+                    new FullType(
+                        method.getType(),
+                        method.getAnnotated().getAnnotatedReturnType(),
+                        method.getAnnotated().getReturnType())),
+                "client",
+                clientVariableName,
+                "class",
+                className,
+                "paramNames",
+                generateParamNameObject(method),
+                "init",
+                chooseInitParamName(method)));
+        case SUBSCRIBE -> StringTemplate.from(
+            """
+            function ${methodName}${typeParams}(${paramList}): ${subscription}<${returnType}> {
+                return ${client}.subscribe('${class}', '${methodName}', {${paramNames}});
+            }""",
+            Map.of(
+                "methodName",
+                method.getName(),
+                "typeParams",
+                generateTypeParams(method.getAnnotated().getTypeParameters()),
+                "paramList",
+                generateParamList(method, false),
+                "subscription",
+                addImport("Subscription", "@hilla/frontend", false, true),
+                "returnType",
+                generateType(
+                    new FullType(
+                            method.getType(),
+                            method.getAnnotated().getAnnotatedReturnType(),
+                            method.getAnnotated().getReturnType())
+                        .parameterizedTypes()
+                        .flatMap(Stream::findFirst)
+                        .orElseThrow()),
+                "client",
+                clientVariableName,
+                "class",
+                className,
+                "paramNames",
+                generateParamNameObject(method)));
+      };
     }
 
     private String generateTypeParams(TypeVariable<?>[] typeParameters) {
@@ -352,7 +412,7 @@ public class Generator {
               .collect(Collectors.joining(", ", "<", ">"));
     }
 
-    private String generateParamList(AnnotatedMethod method) {
+    private String generateParamList(AnnotatedMethod method, boolean hasInit) {
       var params = new ArrayList<String>();
 
       for (var i = 0; i < method.getParameterCount(); i++) {
@@ -365,7 +425,12 @@ public class Generator {
                 + generateType(new FullType(param.getType(), generic, javaParam)));
       }
 
-      params.add(chooseInitParamName(method) + "?: " + initTypeName);
+      if (hasInit) {
+        params.add(
+            chooseInitParamName(method)
+                + "?: "
+                + addImport("EndpointRequestInit", "@hilla/frontend", false, true));
+      }
 
       return String.join(", ", params);
     }
