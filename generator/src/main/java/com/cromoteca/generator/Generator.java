@@ -481,7 +481,7 @@ public class Generator {
       } else if (type.isPrimitive()) {
         nullable = false;
       } else {
-        nullable = Optional.ofNullable(type.nullable()).orElse(!nonNullApi);
+        nullable = Objects.requireNonNullElse(type.nullable(), !nonNullApi);
       }
       return nullable;
     }
