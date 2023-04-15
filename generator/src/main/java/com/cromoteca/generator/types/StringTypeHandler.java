@@ -10,12 +10,12 @@ public class StringTypeHandler extends TypeHandler {
   }
 
   @Override
-  public String generateType(Class<?> type) {
+  public String parameterType(Class<?> type) {
     return "string";
   }
 
   @Override
-  public String generateModelType(Class<?> type) {
+  public String modelType(Class<?> type) {
     return "StringModel";
   }
 

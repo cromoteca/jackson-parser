@@ -345,7 +345,7 @@ public class Generator {
 
     private String generateMethod(AnnotatedMethod method, String className) {
       var handler = typeHandlers.get(method.getRawType());
-      return switch (handler.methodType()) {
+      return switch (handler.endpointMethodType()) {
         case CALL -> StringTemplate.from(
             """
             async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
@@ -528,7 +528,7 @@ public class Generator {
         var mapTypes = type.getMapTypes();
         result = "Map<" + generateType(mapTypes[0]) + ", " + generateType(mapTypes[1]) + '>';
       } else {
-        result = mapType(type.rawTypeName());
+        result = clientType(type.getRawClass());
         var typeVariable = type.typeVariableName();
         var parameterizedTypes =
             type.parameterizedTypes()
@@ -551,32 +551,15 @@ public class Generator {
       return nullable;
     }
 
-    private String mapType(String typeName) {
-      var type =
-          switch (typeName) {
-            case "char", "java.lang.Character", "java.lang.String" -> "string";
-            case "java.lang.Boolean" -> "boolean";
-            case "java.lang.Object" -> "unknown";
-            case "int",
-                "long",
-                "float",
-                "double",
-                "byte",
-                "short",
-                "java.lang.Integer",
-                "java.lang.Long",
-                "java.lang.Float",
-                "java.lang.Double",
-                "java.lang.Byte",
-                "java.lang.Short" -> "number";
-            default -> typeName;
-          };
+    private String clientType(Class<?> type) {
+      var handler = typeHandlers.get(type);
+      var clientType = handler.parameterType(type);
 
-      if (type.contains(".")) {
-        type = addImport(type.replaceAll(".*[.$]", ""), type, true, true);
+      if (clientType.contains(".")) {
+        clientType = addImport(clientType.replaceAll(".*[.$]", ""), clientType, true, true);
       }
 
-      return type;
+      return clientType;
     }
   }
 }
