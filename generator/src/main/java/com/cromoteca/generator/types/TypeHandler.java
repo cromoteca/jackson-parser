@@ -23,6 +23,10 @@ public class TypeHandler {
     return EndpointMethodType.CALL;
   }
 
+  public boolean generateEntity() {
+    return true;
+  }
+
   /**
    * Type representation when the class is used as method return type. By default, it is the same as
    * parameter type.

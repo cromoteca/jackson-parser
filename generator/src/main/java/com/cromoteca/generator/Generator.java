@@ -73,6 +73,7 @@ public class Generator {
 
   public Map<String, String> generateEntities() {
     return scan.entities().stream()
+        .filter(entityClass -> typeHandlers.get(entityClass.type()).generateEntity())
         .collect(
             Collectors.toMap(
                 entityClass -> entityClass.type().getName(),

@@ -20,4 +20,9 @@ public class FluxTypeHandler extends TypeHandler {
   public EndpointMethodType endpointMethodType() {
     return EndpointMethodType.SUBSCRIBE;
   }
+
+  @Override
+  public boolean generateEntity() {
+    return false;
+  }
 }

@@ -3,6 +3,7 @@ import MainLayout from 'Frontend/views/MainLayout.js';
 import { lazy } from 'react';
 import { createBrowserRouter, IndexRouteObject, NonIndexRouteObject, useMatches } from 'react-router-dom';
 import HelloFormView from './views/helloform/HelloFormView.js';
+import ReactiveView from './views/reactive/ReactiveView.js';
 
 const AboutView = lazy(async () => import('Frontend/views/about/AboutView.js'));
 export type MenuProps = Readonly<{
@@ -34,9 +35,10 @@ export const routes: readonly ViewRouteObject[] = [
     element: <MainLayout />,
     handle: { icon: 'null', title: 'Main' },
     children: [
-      { path: '/', element: <HelloFormView />, handle: { icon: 'globe-solid', title: 'Hello Forms' } },
-      { path: '/hello', element: <HelloReactView />, handle: { icon: 'globe-solid', title: 'Hello React' } },
+      { path: '/', element: <HelloFormView />, handle: { icon: 'file', title: 'Hello Forms' } },
+      { path: '/hello', element: <HelloReactView />, handle: { icon: 'file', title: 'Hello React' } },
       { path: '/about', element: <AboutView />, handle: { icon: 'file', title: 'About' } },
+      { path: '/reactive', element: <ReactiveView />, handle: { icon: 'file', title: 'Reactive' } },
     ],
   },
 ];
