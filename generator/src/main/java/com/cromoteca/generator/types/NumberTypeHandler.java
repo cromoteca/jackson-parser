@@ -35,4 +35,9 @@ public class NumberTypeHandler extends TypeHandler {
   public boolean canHaveGenerics() {
     return false;
   }
+
+  @Override
+  public String emptyValue() {
+    return "0";
+  }
 }

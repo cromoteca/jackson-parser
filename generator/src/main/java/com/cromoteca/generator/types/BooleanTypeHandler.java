@@ -23,4 +23,9 @@ public class BooleanTypeHandler extends TypeHandler {
   public boolean canHaveGenerics() {
     return false;
   }
+
+  @Override
+  public String emptyValue() {
+    return "false";
+  }
 }

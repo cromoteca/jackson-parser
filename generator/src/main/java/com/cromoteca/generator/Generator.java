@@ -10,9 +10,14 @@ import com.cromoteca.generator.types.UnknownTypeHandler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -132,9 +137,41 @@ public class Generator {
                 }));
   }
 
+  public Map<String, String> generateYup() {
+    return scan.entities().stream()
+        .filter(entity -> entity.type().getAnnotation(Valid.class) != null)
+        .collect(
+            Collectors.toMap(
+                entityClass -> entityClass.type().getName() + "FormikValidation",
+                entity -> {
+                  var worker = new Worker(entity, EntityFile.YUP);
+
+                  return StringTemplate.from(
+                      """
+                      const emptyValue: ${className} = {
+                        ${emptyValues}
+                      };
+
+                      const validationSchema: ObjectSchema<${className}> = object({
+                        ${validationSchema}
+                      });
+
+                      export { emptyValue, validationSchema };
+                      """,
+                      Map.of(
+                          "className",
+                          entity.getName(),
+                          "emptyValues",
+                          worker.generateEmptyValues(entity),
+                          "validationSchema",
+                          worker.generateValidationSchema(entity)));
+                }));
+  }
+
   enum EntityFile {
     TYPE,
-    MODEL
+    MODEL,
+    YUP
   }
 
   public class Worker {
@@ -499,6 +536,37 @@ public class Generator {
       return """
           \s   %s: %s;"""
           .formatted(property.getName(), generateType(propertyType));
+    }
+
+    String generateEmptyValues(ScanResult.EntityClass entity) {
+      return entity.properties().stream()
+          .map(prop -> typeHandlers.get(prop.getRawPrimaryType()).emptyValue())
+          .collect(Collectors.joining(", "));
+    }
+
+    String generateValidationSchema(ScanResult.EntityClass entity) {
+      return entity.properties().stream()
+          .map(
+              prop -> {
+                var constraints = new HashSet<String>();
+                var annotations =
+                    Arrays.stream(MultipleType.forProperty(prop).getAnnotations())
+                        .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
+
+                var notBlank = (NotBlank) annotations.get(NotBlank.class);
+                if (notBlank != null) {
+                  constraints.add("required()");
+                }
+                var email = (Email) annotations.get(Email.class);
+                if (email != null) {
+                  constraints.add("email()");
+                }
+
+                return constraints.isEmpty()
+                    ? ""
+                    : prop.getName() + "." + String.join(".", constraints);
+              })
+          .collect(Collectors.joining("\n"));
     }
 
     private String generateModelFunction(BeanPropertyDefinition property) {

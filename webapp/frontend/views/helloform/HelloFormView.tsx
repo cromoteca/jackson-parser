@@ -4,8 +4,6 @@ import { Notification } from '@hilla/react-components/Notification.js';
 import { Select } from '@hilla/react-components/Select.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
-import HelloFormEndpoint from 'Frontend/generated/com/example/application/endpoints/helloreact/HelloFormEndpoint.js';
-import RegistrationInfo from 'Frontend/generated/com/example/application/endpoints/helloreact/HelloFormEndpoint/RegistrationInfo.js';
 import { Field, Form, Formik } from 'formik';
 import { ObjectSchema, boolean, object, string } from 'yup';
 

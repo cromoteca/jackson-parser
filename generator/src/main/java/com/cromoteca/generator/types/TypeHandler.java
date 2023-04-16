@@ -27,6 +27,10 @@ public class TypeHandler {
     return true;
   }
 
+  public String emptyValue() {
+    return "undefined";
+  }
+
   /**
    * Type representation when the class is used as method return type. By default, it is the same as
    * parameter type.

@@ -23,4 +23,9 @@ public class StringTypeHandler extends TypeHandler {
   public boolean canHaveGenerics() {
     return false;
   }
+
+  @Override
+  public String emptyValue() {
+    return "''";
+  }
 }
