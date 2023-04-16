@@ -40,7 +40,7 @@ public class GeneratorTest {
 
   @Test
   public void testMultipleGeneration() throws IOException {
-    generateAndCheck(findEndpoints("com.cromoteca.samples").toList());
+    assertAll(generateAndCheck(findEndpoints("com.cromoteca.samples").toList()));
   }
 
   private Executable[] generateAndCheck(List<Class<?>> endpoints) {
