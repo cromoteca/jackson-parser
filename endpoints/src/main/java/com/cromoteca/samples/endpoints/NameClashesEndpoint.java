@@ -18,6 +18,8 @@ public class NameClashesEndpoint {
     return client1 + client2;
   }
 
+  public void initParamNameUsed(String init, String init1, String _init) {}
+
   public static class MyOtherType {
     private String field;
 

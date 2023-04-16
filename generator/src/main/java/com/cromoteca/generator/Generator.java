@@ -7,6 +7,7 @@ import com.cromoteca.generator.types.NumberTypeHandler;
 import com.cromoteca.generator.types.StringTypeHandler;
 import com.cromoteca.generator.types.TypeHandler;
 import com.cromoteca.generator.types.UnknownTypeHandler;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.lang.reflect.Parameter;
@@ -280,8 +281,8 @@ public class Generator {
           imports.stream()
               .filter(
                   i ->
-                      i.variable().equals(variable)
-                          && i.from().equals(from)
+                      Objects.equals(i.variable(), variable)
+                          && Objects.equals(i.from(), from)
                           && i.isDefault() == isDefault
                           && i.isType() == isType)
               .findFirst();
@@ -289,45 +290,43 @@ public class Generator {
       return existing
           .orElseGet(
               () -> {
-                var alias = variable;
-
-                while (keywords.contains(alias)) {
-                  alias = incrementSuffix(alias);
-                }
-
+                String alias = findAlias(variable);
                 var newImport = new Import(variable, from, isDefault, isType, alias);
                 imports.add(newImport);
-                keywords.add(alias);
                 return newImport;
               })
           .alias();
     }
 
+    private String findAlias(String variable) {
+      while (keywords.contains(variable)) {
+        // match the last numeric suffix in the string
+        var matcher = SUFFIX_REGEX.matcher(variable);
+
+        if (matcher.find()) {
+          // extract the base string and the last numeric suffix
+          var base = matcher.group(1);
+          var suffix = matcher.group(2);
+
+          if (suffix == null) {
+            // no numeric suffix found, so add a suffix of "1"
+            variable = base + '1';
+          } else {
+            // increment the numeric suffix and return the modified string
+            variable = base + (Integer.parseInt(suffix) + 1);
+          }
+        } else {
+          // no match found, so return the original string with a suffix of "1"
+          variable += '1';
+        }
+      }
+
+      keywords.add(variable);
+      return variable;
+    }
+
     // regular expression to match the last numeric suffix
     private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
-
-    private static String incrementSuffix(String str) {
-
-      // match the last numeric suffix in the string
-      var matcher = SUFFIX_REGEX.matcher(str);
-
-      if (matcher.find()) {
-        // extract the base string and the last numeric suffix
-        var base = matcher.group(1);
-        var suffix = matcher.group(2);
-
-        if (suffix == null) {
-          // no numeric suffix found, so add a suffix of "1"
-          return base + '1';
-        } else {
-          // increment the numeric suffix and return the modified string
-          return base + (Integer.parseInt(suffix) + 1);
-        }
-      } else {
-        // no match found, so return the original string with a suffix of "1"
-        return str + '1';
-      }
-    }
 
     private List<String> generateMethodImplementations(ScanResult.EndpointClass result) {
       return result.methods().stream()
@@ -457,16 +456,29 @@ public class Generator {
     }
 
     private List<String> generateProperties(ScanResult.EntityClass entity) {
-      return entity.type().isEnum()
-          ? Arrays.stream(entity.type().getEnumConstants())
-              .map(Object::toString)
-              .sorted()
-              .map(this::generateEnumConstant)
-              .toList()
-          : entity.properties().stream()
-              .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
-              .map(this::generateProperty)
-              .toList();
+      if (entity.type().isEnum()) {
+        return Arrays.stream(entity.type().getEnumConstants())
+            .map(Object::toString)
+            .sorted()
+            .map(this::generateEnumConstant)
+            .toList();
+      }
+
+      Stream<BeanPropertyDefinition> propertyStream = entity.properties().stream();
+      JsonIgnoreProperties annotation = entity.type().getAnnotation(JsonIgnoreProperties.class);
+
+      if (!(annotation == null
+          || annotation.value() == null
+          || annotation.allowGetters()
+          || annotation.allowSetters())) {
+        var ignoredProperties = Arrays.asList(annotation.value());
+        propertyStream = propertyStream.filter(prop -> !ignoredProperties.contains(prop.getName()));
+      }
+
+      return propertyStream
+          .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
+          .map(this::generateProperty)
+          .toList();
     }
 
     private List<String> generateModelFunctions(ScanResult.EntityClass entity) {
