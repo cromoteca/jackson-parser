@@ -1,6 +1,7 @@
 package com.cromoteca.samples.endpoints;
 
 import com.cromoteca.samples.endpoints.entities.MyOtherType;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
 import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import reactor.core.publisher.Flux;
 
 @Endpoint
+@AnonymousAllowed
 public class MixEndpoint {
 
   public void expose(@Nullable MyType arg) {}

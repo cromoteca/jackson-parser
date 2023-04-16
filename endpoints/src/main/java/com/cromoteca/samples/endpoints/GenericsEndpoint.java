@@ -1,6 +1,7 @@
 package com.cromoteca.samples.endpoints;
 
 import com.cromoteca.samples.annotations.Nullable;
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Endpoint
+@AnonymousAllowed
 public class GenericsEndpoint {
   public List<GenericClass<String>> toListOfMyType(GenericClass<String> value) {
     return List.of(value);

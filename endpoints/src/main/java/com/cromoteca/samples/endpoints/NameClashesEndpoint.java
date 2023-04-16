@@ -1,9 +1,11 @@
 package com.cromoteca.samples.endpoints;
 
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
 import java.util.List;
 
 @Endpoint
+@AnonymousAllowed
 public class NameClashesEndpoint {
   public List<MyOtherType> fromTypeToTypeWithSameName(
       com.cromoteca.samples.endpoints.entities.MyOtherType argument) {
