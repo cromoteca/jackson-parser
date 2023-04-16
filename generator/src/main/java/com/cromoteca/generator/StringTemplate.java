@@ -34,6 +34,7 @@ public class StringTemplate {
         template,
         key ->
             Optional.ofNullable(values.get(key))
+                // If a property is found, use its getter.
                 .map(
                     method -> {
                       try {
@@ -42,7 +43,16 @@ public class StringTemplate {
                         return "";
                       }
                     })
-                .orElse(""));
+                .orElseGet(
+                    // As a fallback, try to use the property name as a method name with no
+                    // parameters.
+                    () -> {
+                      try {
+                        return bean.getClass().getMethod(key).invoke(bean);
+                      } catch (Exception ex) {
+                        return "";
+                      }
+                    }));
   }
 
   public static @NonNull String from(String template, Map<?, ?> map) {

@@ -15,6 +15,10 @@ public class StringTemplateTest {
     public String getHello() {
       return hello;
     }
+
+    public Object goodbye() {
+      return new StringBuilder().append("Goodbye");
+    }
   }
 
   @Test
@@ -49,5 +53,6 @@ public class StringTemplateTest {
             ${hello}!
             """, bean),
         "String block");
+    assertEquals("Goodbye!", StringTemplate.from("${goodbye}!", bean));
   }
 }
