@@ -15,11 +15,11 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-class FullType {
+public class FullType {
   private final JavaType javaType;
   private final AnnotatedElement[] annotatedElements;
 
-  FullType(JavaType javaType, AnnotatedElement... annotatedElements) {
+  public FullType(JavaType javaType, AnnotatedElement... annotatedElements) {
     this.javaType = javaType;
     this.annotatedElements = annotatedElements;
   }

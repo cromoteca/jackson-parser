@@ -8,13 +8,11 @@ import com.cromoteca.generator.types.StringTypeHandler;
 import com.cromoteca.generator.types.TypeHandler;
 import com.cromoteca.generator.types.UnknownTypeHandler;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.function.Function;
@@ -62,18 +60,8 @@ public class Generator {
                 endpoint -> endpoint.type().getBeanClass().getName(),
                 endpoint -> {
                   var worker = new Worker(endpoint);
-
-                  return StringTemplate.from(
-                      """
-                      ${imports}${methodImplementations}
-
-                      const ${name} = {
-                      ${methodList}
-                      };
-
-                      export default ${name};
-                      """,
-                      worker);
+                  var maker = new EndpointMaker(worker, endpoint);
+                  return maker.generate();
                 }));
   }
 
@@ -174,7 +162,7 @@ public class Generator {
     YUP
   }
 
-  public class Worker {
+  public class Worker implements MakerTools {
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
     private final String mainClass;
@@ -182,7 +170,6 @@ public class Generator {
     private final String name;
     private List<String> methodImplementations;
     private List<String> methods;
-    private String clientVariableName;
     private List<String> properties;
     private String importedObjectModel;
     private String importedModelType;
@@ -190,28 +177,19 @@ public class Generator {
     Worker(ScanResult.EndpointClass endpoint) {
       name = endpoint.getName();
       mainClass = endpoint.type().getBeanClass().getPackageName();
-      nonNullApi =
-          endpoint
-              .type()
-              .getType()
-              .getRawClass()
-              .getPackage()
-              .isAnnotationPresent(NonNullApi.class);
+      nonNullApi = findNonNullApiAnnotation(endpoint.type().getType().getRawClass());
       endpoint
           .methods()
           .forEach(
               method ->
                   Arrays.stream(method.getAnnotated().getParameters())
                       .forEach(p -> keywords.add(p.getName())));
-      clientVariableName = addImport("client", "/connect-client.default", true, false);
-      methodImplementations = generateMethodImplementations(endpoint);
-      methods = generateMethodList(endpoint);
     }
 
     Worker(ScanResult.EntityClass entity, EntityFile file) {
       name = entity.getName();
       mainClass = entity.type().getName().replaceFirst("[.$][^.$]+$", "");
-      nonNullApi = nonNullApi(entity.type());
+      nonNullApi = findNonNullApiAnnotation(entity.type());
       entity.properties().forEach(property -> keywords.add(property.getName()));
 
       switch (file) {
@@ -228,7 +206,7 @@ public class Generator {
       }
     }
 
-    private static boolean nonNullApi(Class<?> cls) {
+    private static boolean findNonNullApiAnnotation(Class<?> cls) {
       var classLoader = cls.getClassLoader();
 
       return Stream.iterate(
@@ -242,6 +220,7 @@ public class Generator {
       return name;
     }
 
+    @Override
     public String getImports() {
       var groupedImports = new TreeMap<String, String>();
 
@@ -313,7 +292,7 @@ public class Generator {
       return importedModelType;
     }
 
-    private String addImport(String variable, String from, boolean isDefault, boolean isType) {
+    public String addImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
           imports.stream()
               .filter(
@@ -365,131 +344,13 @@ public class Generator {
     // regular expression to match the last numeric suffix
     private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
 
-    private List<String> generateMethodImplementations(ScanResult.EndpointClass result) {
-      return result.methods().stream()
-          .sorted(Comparator.comparing(AnnotatedMethod::getName))
-          .map(method -> generateMethod(method, result.type().getBeanClass().getName()))
-          .toList();
-    }
-
-    private List<String> generateMethodList(ScanResult.EndpointClass result) {
-      return result.methods().stream()
-          .sorted(Comparator.comparing(AnnotatedMethod::getName))
-          .map(method -> """
-              \s   %s,""".formatted(method.getName()))
-          .toList();
-    }
-
-    private String generateMethod(AnnotatedMethod method, String className) {
-      var handler = typeHandlers.get(method.getRawType());
-      return switch (handler.endpointMethodType()) {
-        case CALL -> StringTemplate.from(
-            """
-            async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
-                return ${client}.call('${class}', '${methodName}', {${paramNames}}, ${init});
-            }""",
-            Map.of(
-                "methodName",
-                method.getName(),
-                "typeParams",
-                generateTypeParams(method.getAnnotated().getTypeParameters()),
-                "paramList",
-                generateParamList(method, true),
-                "returnType",
-                generateType(
-                    new FullType(
-                        method.getType(),
-                        method.getAnnotated().getAnnotatedReturnType(),
-                        method.getAnnotated().getReturnType())),
-                "client",
-                clientVariableName,
-                "class",
-                className,
-                "paramNames",
-                generateParamNameObject(method),
-                "init",
-                chooseInitParamName(method)));
-        case SUBSCRIBE -> StringTemplate.from(
-            """
-            function ${methodName}${typeParams}(${paramList}): ${subscription}<${returnType}> {
-                return ${client}.subscribe('${class}', '${methodName}', {${paramNames}});
-            }""",
-            Map.of(
-                "methodName",
-                method.getName(),
-                "typeParams",
-                generateTypeParams(method.getAnnotated().getTypeParameters()),
-                "paramList",
-                generateParamList(method, false),
-                "subscription",
-                addImport("Subscription", "@hilla/frontend", false, true),
-                "returnType",
-                generateType(
-                    new FullType(
-                            method.getType(),
-                            method.getAnnotated().getAnnotatedReturnType(),
-                            method.getAnnotated().getReturnType())
-                        .parameterizedTypes()
-                        .flatMap(Stream::findFirst)
-                        .orElseThrow()),
-                "client",
-                clientVariableName,
-                "class",
-                className,
-                "paramNames",
-                generateParamNameObject(method)));
-      };
-    }
-
-    private String generateTypeParams(TypeVariable<?>[] typeParameters) {
+    @Override
+    public String generateTypeParams(TypeVariable<?>[] typeParameters) {
       return typeParameters.length == 0
           ? ""
           : Arrays.stream(typeParameters)
               .map(TypeVariable::getName)
               .collect(Collectors.joining(", ", "<", ">"));
-    }
-
-    private String generateParamList(AnnotatedMethod method, boolean hasInit) {
-      var params = new ArrayList<String>();
-
-      for (var i = 0; i < method.getParameterCount(); i++) {
-        var param = method.getParameter(i);
-        var generic = method.getAnnotated().getAnnotatedParameterTypes()[i];
-        var javaParam = method.getAnnotated().getParameters()[i];
-        params.add(
-            javaParam.getName()
-                + ": "
-                + generateType(new FullType(param.getType(), generic, javaParam)));
-      }
-
-      if (hasInit) {
-        params.add(
-            chooseInitParamName(method)
-                + "?: "
-                + addImport("EndpointRequestInit", "@hilla/frontend", false, true));
-      }
-
-      return String.join(", ", params);
-    }
-
-    private String generateParamNameObject(AnnotatedMethod method) {
-      var params =
-          Arrays.stream(method.getAnnotated().getParameters())
-              .map(Parameter::getName)
-              .collect(Collectors.joining(", "));
-      return params.isEmpty() ? "" : ' ' + params + ' ';
-    }
-
-    private String chooseInitParamName(AnnotatedMethod method) {
-      var initParam = "init";
-      var names =
-          Arrays.stream(method.getAnnotated().getParameters()).map(Parameter::getName).toList();
-
-      while (names.contains(initParam)) {
-        initParam = '_' + initParam;
-      }
-
-      return initParam;
     }
 
     private List<String> generateProperties(ScanResult.EntityClass entity) {
@@ -594,7 +455,13 @@ public class Generator {
       return addImport("StringModel", "@hilla/form", false, false);
     }
 
-    private String generateType(FullType type) {
+    @Override
+    public TypeHandler handlerFor(Class<?> cls) {
+      return typeHandlers.get(cls);
+    }
+
+    @Override
+    public String generateType(FullType type) {
       String result;
       var converted = scan.convertedClasses().get(type.getRawClass());
       if (converted != null) {
