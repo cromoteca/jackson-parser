@@ -7,19 +7,12 @@ import com.cromoteca.generator.types.NumberTypeHandler;
 import com.cromoteca.generator.types.StringTypeHandler;
 import com.cromoteca.generator.types.TypeHandler;
 import com.cromoteca.generator.types.UnknownTypeHandler;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.springframework.lang.NonNullApi;
 
 public class Generator {
   private final ScanResult scan;
@@ -72,7 +65,7 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName(),
                 entity -> {
-                  var worker = new Worker(entity, EntityFile.TYPE);
+                  var worker = new Worker(entity);
                   var maker = new EntityMaker(worker, entity);
                   return maker.generate();
                 }));
@@ -84,122 +77,49 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName() + "Model",
                 entity -> {
-                  var worker = new Worker(entity, EntityFile.MODEL);
-
-                  return StringTemplate.from(
-                      """
-                      ${imports}class ${name}Model<T extends ${name} = ${name}> extends ${objectModel}<T> {
-                          declare static createEmptyValue: () => ${name};
-                      ${properties}
-                      }
-
-                      export default ${name}Model;
-                      """,
-                      Map.of(
-                          "name",
-                          worker.getModelType(),
-                          "imports",
-                          worker.getImports(),
-                          "properties",
-                          worker.getProperties(),
-                          "objectModel",
-                          worker.getObjectModel()));
+                  var worker = new Worker(entity);
+                  var maker = new EntityModelMaker(worker, entity);
+                  return maker.generate();
                 }));
   }
 
-  public Map<String, String> generateYup() {
+  public Map<String, String> generateFormikValidation() {
     return scan.entities().stream()
         .filter(entity -> entity.type().getAnnotation(Valid.class) != null)
         .collect(
             Collectors.toMap(
                 entityClass -> entityClass.type().getName() + "FormikValidation",
                 entity -> {
-                  var worker = new Worker(entity, EntityFile.YUP);
-
-                  return StringTemplate.from(
-                      """
-                      const emptyValue: ${className} = {
-                        ${emptyValues}
-                      };
-
-                      const validationSchema: ObjectSchema<${className}> = object({
-                        ${validationSchema}
-                      });
-
-                      export { emptyValue, validationSchema };
-                      """,
-                      Map.of(
-                          "className",
-                          entity.getName(),
-                          "emptyValues",
-                          worker.generateEmptyValues(entity),
-                          "validationSchema",
-                          worker.generateValidationSchema(entity)));
+                  var worker = new Worker(entity);
+                  var maker = new FormikValidationMaker(worker, entity);
+                  return maker.generate();
                 }));
   }
 
-  enum EntityFile {
-    TYPE,
-    MODEL,
-    YUP
-  }
-
   public class Worker implements MakerTools {
+    // regular expression to match the last numeric suffix
+    private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
+
     private final Set<String> keywords = new HashSet<>();
     private final List<Import> imports = new ArrayList<>();
     private final String mainClass;
     private final boolean nonNullApi;
-    private final String name;
-    private List<String> methodImplementations;
-    private List<String> methods;
-    private List<String> properties;
-    private String importedObjectModel;
-    private String importedModelType;
 
     Worker(ScanResult.EndpointClass endpoint) {
-      name = endpoint.getName();
       mainClass = endpoint.type().getBeanClass().getPackageName();
-      nonNullApi = findNonNullApiAnnotation(endpoint.type().getType().getRawClass());
+      nonNullApi = MakerTools.insideNonNullApi(endpoint.type().getType().getRawClass());
       endpoint
           .methods()
           .forEach(
               method ->
                   Arrays.stream(method.getAnnotated().getParameters())
-                      .forEach(p -> keywords.add(p.getName())));
+                      .forEach(p -> addKeyword(p.getName())));
     }
 
-    Worker(ScanResult.EntityClass entity, EntityFile file) {
-      name = entity.getName();
+    Worker(ScanResult.EntityClass entity) {
       mainClass = entity.type().getName().replaceFirst("[.$][^.$]+$", "");
-      nonNullApi = findNonNullApiAnnotation(entity.type());
-      entity.properties().forEach(property -> keywords.add(property.getName()));
-
-      switch (file) {
-        case TYPE -> {
-          keywords.add(entity.getName());
-          properties = generateProperties(entity);
-        }
-        case MODEL -> {
-          importedObjectModel = addImport("ObjectModel", "@hilla/form", false, false);
-          importedModelType = addImport(entity.getName(), entity.type().getName(), true, true);
-          keywords.add("createEmptyValue");
-          properties = generateModelFunctions(entity);
-        }
-      }
-    }
-
-    private static boolean findNonNullApiAnnotation(Class<?> cls) {
-      var classLoader = cls.getClassLoader();
-
-      return Stream.iterate(
-              cls.getPackageName(), n -> n.contains("."), n -> n.substring(0, n.lastIndexOf('.')))
-          .map(classLoader::getDefinedPackage)
-          .filter(Objects::nonNull)
-          .anyMatch(pkg -> pkg.isAnnotationPresent(NonNullApi.class));
-    }
-
-    public String getName() {
-      return name;
+      nonNullApi = MakerTools.insideNonNullApi(entity.type());
+      entity.properties().forEach(property -> addKeyword(property.getName()));
     }
 
     @Override
@@ -254,26 +174,6 @@ public class Generator {
       return lines.isEmpty() ? lines : lines + '\n';
     }
 
-    public String getMethodImplementations() {
-      return String.join("\n\n", methodImplementations);
-    }
-
-    public String getMethodList() {
-      return String.join("\n", methods);
-    }
-
-    public String getProperties() {
-      return String.join("\n", properties);
-    }
-
-    public String getObjectModel() {
-      return importedObjectModel;
-    }
-
-    public String getModelType() {
-      return importedModelType;
-    }
-
     @Override
     public String addImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
@@ -320,12 +220,14 @@ public class Generator {
         }
       }
 
-      keywords.add(variable);
+      addKeyword(variable);
       return variable;
     }
 
-    // regular expression to match the last numeric suffix
-    private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
+    @Override
+    public void addKeyword(String variable) {
+      keywords.add(variable);
+    }
 
     @Override
     public String generateTypeParams(TypeVariable<?>[] typeParameters) {
@@ -334,96 +236,6 @@ public class Generator {
           : Arrays.stream(typeParameters)
               .map(TypeVariable::getName)
               .collect(Collectors.joining(", ", "<", ">"));
-    }
-
-    private List<String> generateProperties(ScanResult.EntityClass entity) {
-      if (entity.type().isEnum()) {
-        return Arrays.stream(entity.type().getEnumConstants())
-            .map(Object::toString)
-            .sorted()
-            .map(value -> """
-                \s   %s = "%s",""".formatted(value, value))
-            .toList();
-      }
-
-      Stream<BeanPropertyDefinition> propertyStream = entity.properties().stream();
-      JsonIgnoreProperties annotation = entity.type().getAnnotation(JsonIgnoreProperties.class);
-
-      if (!(annotation == null
-          || annotation.value() == null
-          || annotation.allowGetters()
-          || annotation.allowSetters())) {
-        var ignoredProperties = Arrays.asList(annotation.value());
-        propertyStream = propertyStream.filter(prop -> !ignoredProperties.contains(prop.getName()));
-      }
-
-      return propertyStream
-          .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
-          .map(prop -> new PropertyMaker(this, prop).generate())
-          .toList();
-    }
-
-    private List<String> generateModelFunctions(ScanResult.EntityClass entity) {
-      return entity.properties().stream()
-          .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
-          .map(this::generateModelFunction)
-          .toList();
-    }
-
-    String generateEmptyValues(ScanResult.EntityClass entity) {
-      return entity.properties().stream()
-          .map(prop -> typeHandlers.get(prop.getRawPrimaryType()).emptyValue())
-          .collect(Collectors.joining(", "));
-    }
-
-    String generateValidationSchema(ScanResult.EntityClass entity) {
-      return entity.properties().stream()
-          .map(
-              prop -> {
-                var constraints = new HashSet<String>();
-                var annotations =
-                    Arrays.stream(MultipleType.forProperty(prop).getAnnotations())
-                        .collect(Collectors.toMap(Annotation::annotationType, Function.identity()));
-
-                var notBlank = (NotBlank) annotations.get(NotBlank.class);
-                if (notBlank != null) {
-                  constraints.add("required()");
-                }
-                var email = (Email) annotations.get(Email.class);
-                if (email != null) {
-                  constraints.add("email()");
-                }
-
-                return constraints.isEmpty()
-                    ? ""
-                    : prop.getName() + "." + String.join(".", constraints);
-              })
-          .collect(Collectors.joining("\n"));
-    }
-
-    private String generateModelFunction(BeanPropertyDefinition property) {
-      var propertyType = MultipleType.forProperty(property);
-      var getPropertyModel = addImport("_getPropertyModel", "@hilla/form", false, false);
-
-      return StringTemplate.from(
-          """
-
-      \s   get ${name}(): ${modelType} {
-              return this[${getPropertyModel}]('${name}', ${modelType}, [${nullable}]) as ${modelType};
-          }""",
-          Map.of(
-              "name",
-              property.getName(),
-              "modelType",
-              chooseModel(propertyType),
-              "nullable",
-              isNullable(propertyType),
-              "getPropertyModel",
-              getPropertyModel));
-    }
-
-    private String chooseModel(FullType type) {
-      return addImport("StringModel", "@hilla/form", false, false);
     }
 
     @Override

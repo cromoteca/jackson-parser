@@ -15,6 +15,7 @@ public class EntityMaker {
   public EntityMaker(MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
+    tools.addKeyword(entity.getName());
     properties = generateProperties();
   }
 
