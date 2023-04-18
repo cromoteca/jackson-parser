@@ -73,26 +73,8 @@ public class Generator {
                 entityClass -> entityClass.type().getName(),
                 entity -> {
                   var worker = new Worker(entity, EntityFile.TYPE);
-
-                  return StringTemplate.from(
-                      """
-                      ${imports}${construct} ${name}${typeParams} {
-                      ${properties}
-                      }
-
-                      export default ${name};
-                      """,
-                      Map.of(
-                          "imports",
-                          worker.getImports(),
-                          "construct",
-                          entity.type().isEnum() ? "enum" : "interface",
-                          "name",
-                          entity.getName(),
-                          "typeParams",
-                          worker.generateTypeParams(entity.type().getTypeParameters()),
-                          "properties",
-                          worker.getProperties()));
+                  var maker = new EntityMaker(worker, entity);
+                  return maker.generate();
                 }));
   }
 
@@ -292,6 +274,7 @@ public class Generator {
       return importedModelType;
     }
 
+    @Override
     public String addImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
           imports.stream()
@@ -358,7 +341,8 @@ public class Generator {
         return Arrays.stream(entity.type().getEnumConstants())
             .map(Object::toString)
             .sorted()
-            .map(this::generateEnumConstant)
+            .map(value -> """
+                \s   %s = "%s",""".formatted(value, value))
             .toList();
       }
 
@@ -375,7 +359,7 @@ public class Generator {
 
       return propertyStream
           .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
-          .map(this::generateProperty)
+          .map(prop -> new PropertyMaker(this, prop).generate())
           .toList();
     }
 
@@ -384,19 +368,6 @@ public class Generator {
           .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
           .map(this::generateModelFunction)
           .toList();
-    }
-
-    private String generateEnumConstant(String value) {
-      return """
-          \s   %s = "%s",""".formatted(value, value);
-    }
-
-    private String generateProperty(BeanPropertyDefinition property) {
-      var propertyType = MultipleType.forProperty(property);
-
-      return """
-          \s   %s: %s;"""
-          .formatted(property.getName(), generateType(propertyType));
     }
 
     String generateEmptyValues(ScanResult.EntityClass entity) {
