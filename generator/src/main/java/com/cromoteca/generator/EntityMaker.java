@@ -7,19 +7,19 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-public class EntityMaker {
-  private final MakerTools tools;
+class EntityMaker {
+  private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
   private final List<String> properties;
 
-  public EntityMaker(MakerTools tools, ScanResult.EntityClass entity) {
+  EntityMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
     tools.addKeyword(entity.getName());
     properties = generateProperties();
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from(
         """
         ${imports}${construct} ${name}${typeParams} {

@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MethodMaker {
-  private final MakerTools tools;
+class MethodMaker {
+  private final Generator.MakerTools tools;
   private final AnnotatedMethod method;
   private final String className;
   private final TypeHandler.EndpointMethodType methodType;
   private final String clientVariableName;
 
-  public MethodMaker(MakerTools tools, AnnotatedMethod method, String className) {
+  MethodMaker(Generator.MakerTools tools, AnnotatedMethod method, String className) {
     this.tools = tools;
     this.method = method;
     this.className = className;
@@ -25,7 +25,7 @@ public class MethodMaker {
     clientVariableName = tools.fromImport("client", "/connect-client.default", true, false);
   }
 
-  public String generate() {
+  String generate() {
     return switch (methodType) {
       case CALL -> StringTemplate.from(
           """

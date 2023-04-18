@@ -6,18 +6,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EndpointMaker {
-  private final MakerTools tools;
+class EndpointMaker {
+  private final Generator.MakerTools tools;
   private final ScanResult.EndpointClass endpoint;
   private final String methodImplementations;
 
-  public EndpointMaker(MakerTools tools, ScanResult.EndpointClass endpoint) {
+  EndpointMaker(Generator.MakerTools tools, ScanResult.EndpointClass endpoint) {
     this.tools = tools;
     this.endpoint = endpoint;
     methodImplementations = String.join("\n\n", generateMethodImplementations());
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from(
         """
                 ${imports}${methodImplementations}

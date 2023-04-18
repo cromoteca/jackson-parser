@@ -2,16 +2,16 @@ package com.cromoteca.generator;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
-public class PropertyMaker {
-  private final MakerTools tools;
+class PropertyMaker {
+  private final Generator.MakerTools tools;
   private final BeanPropertyDefinition property;
 
-  public PropertyMaker(MakerTools tools, BeanPropertyDefinition property) {
+  PropertyMaker(Generator.MakerTools tools, BeanPropertyDefinition property) {
     this.tools = tools;
     this.property = property;
   }
 
-  public String generate() {
+  String generate() {
     var propertyType = MultipleType.forProperty(property);
 
     return """

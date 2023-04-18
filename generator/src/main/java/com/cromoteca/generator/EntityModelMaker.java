@@ -5,14 +5,14 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.Comparator;
 import java.util.List;
 
-public class EntityModelMaker {
-  private final MakerTools tools;
+class EntityModelMaker {
+  private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
   private final String importedObjectModel;
   private final String importedModelType;
   private final List<String> properties;
 
-  public EntityModelMaker(MakerTools tools, ScanResult.EntityClass entity) {
+  EntityModelMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
     importedObjectModel = tools.fromImport("ObjectModel", "@hilla/form", false, false);
@@ -21,7 +21,7 @@ public class EntityModelMaker {
     properties = generateModelFunctions(entity);
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from(
         """
         ${imports}class ${name}Model<T extends ${name} = ${name}> extends ${objectModel}<T> {

@@ -3,16 +3,16 @@ package com.cromoteca.generator;
 import com.cromoteca.ScanResult;
 import java.util.stream.Collectors;
 
-public class FormikValidationMaker {
-  private final MakerTools tools;
+class FormikValidationMaker {
+  private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
 
-  public FormikValidationMaker(MakerTools tools, ScanResult.EntityClass entity) {
+  FormikValidationMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from(
         """
                 const emptyValue: ${className} = {

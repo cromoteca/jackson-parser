@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.lang.NonNullApi;
 
 public class Generator {
   private final ScanResult scan;
@@ -52,7 +53,7 @@ public class Generator {
             Collectors.toMap(
                 endpoint -> endpoint.type().getBeanClass().getName(),
                 endpoint -> {
-                  var worker = new Worker(endpoint);
+                  var worker = new MakerTools(endpoint);
                   var maker = new EndpointMaker(worker, endpoint);
                   return maker.generate();
                 }));
@@ -65,7 +66,7 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName(),
                 entity -> {
-                  var worker = new Worker(entity);
+                  var worker = new MakerTools(entity);
                   var maker = new EntityMaker(worker, entity);
                   return maker.generate();
                 }));
@@ -77,7 +78,7 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName() + "Model",
                 entity -> {
-                  var worker = new Worker(entity);
+                  var worker = new MakerTools(entity);
                   var maker = new EntityModelMaker(worker, entity);
                   return maker.generate();
                 }));
@@ -90,7 +91,7 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName() + "FormikValidation",
                 entity -> {
-                  var worker = new Worker(entity);
+                  var worker = new MakerTools(entity);
                   var maker = new FormikValidationMaker(worker, entity);
                   return maker.generate();
                 }));
@@ -103,13 +104,13 @@ public class Generator {
             Collectors.toMap(
                 entityClass -> entityClass.type().getName() + "YupSchema",
                 entity -> {
-                  var worker = new Worker(entity);
+                  var worker = new MakerTools(entity);
                   var maker = new YupSchemaMaker(worker, entity);
                   return maker.generate();
                 }));
   }
 
-  public class Worker implements MakerTools {
+  class MakerTools {
     // regular expression to match the last numeric suffix
     private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
 
@@ -118,9 +119,9 @@ public class Generator {
     private final String mainClass;
     private final boolean nonNullApi;
 
-    Worker(ScanResult.EndpointClass endpoint) {
+    MakerTools(ScanResult.EndpointClass endpoint) {
       mainClass = endpoint.type().getBeanClass().getPackageName();
-      nonNullApi = MakerTools.insideNonNullApi(endpoint.type().getType().getRawClass());
+      nonNullApi = insideNonNullApi(endpoint.type().getType().getRawClass());
       endpoint
           .methods()
           .forEach(
@@ -129,14 +130,23 @@ public class Generator {
                       .forEach(p -> addKeyword(p.getName())));
     }
 
-    Worker(ScanResult.EntityClass entity) {
+    MakerTools(ScanResult.EntityClass entity) {
       mainClass = entity.type().getName().replaceFirst("[.$][^.$]+$", "");
-      nonNullApi = MakerTools.insideNonNullApi(entity.type());
+      nonNullApi = insideNonNullApi(entity.type());
       entity.properties().forEach(property -> addKeyword(property.getName()));
     }
 
-    @Override
-    public String getImports() {
+    private static boolean insideNonNullApi(Class<?> cls) {
+      var classLoader = cls.getClassLoader();
+
+      return Stream.iterate(
+              cls.getPackageName(), n -> n.contains("."), n -> n.substring(0, n.lastIndexOf('.')))
+          .map(classLoader::getDefinedPackage)
+          .filter(Objects::nonNull)
+          .anyMatch(pkg -> pkg.isAnnotationPresent(NonNullApi.class));
+    }
+
+    String getImports() {
       var groupedImports = new TreeMap<String, String>();
 
       imports.stream()
@@ -187,8 +197,7 @@ public class Generator {
       return lines.isEmpty() ? lines : lines + '\n';
     }
 
-    @Override
-    public String fromImport(String variable, String from, boolean isDefault, boolean isType) {
+    String fromImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
           imports.stream()
               .filter(
@@ -237,13 +246,11 @@ public class Generator {
       return variable;
     }
 
-    @Override
-    public void addKeyword(String variable) {
+    void addKeyword(String variable) {
       keywords.add(variable);
     }
 
-    @Override
-    public String generateTypeParams(TypeVariable<?>[] typeParameters) {
+    String generateTypeParams(TypeVariable<?>[] typeParameters) {
       return typeParameters.length == 0
           ? ""
           : Arrays.stream(typeParameters)
@@ -251,13 +258,11 @@ public class Generator {
               .collect(Collectors.joining(", ", "<", ">"));
     }
 
-    @Override
-    public TypeHandler handlerFor(Class<?> cls) {
+    TypeHandler handlerFor(Class<?> cls) {
       return typeHandlers.get(cls);
     }
 
-    @Override
-    public String generateType(FullType type) {
+    String generateType(FullType type) {
       String result;
       var converted = scan.convertedClasses().get(type.getRawClass());
       if (converted != null) {

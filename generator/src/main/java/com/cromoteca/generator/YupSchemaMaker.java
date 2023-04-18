@@ -9,22 +9,22 @@ import java.util.HashSet;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class YupSchemaMaker {
-  private final MakerTools tools;
+class YupSchemaMaker {
+  private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
 
-  public YupSchemaMaker(MakerTools tools, ScanResult.EntityClass entity) {
+  YupSchemaMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from("""
                 ${validationSchema}
                 """, this);
   }
 
-  private String validationSchema() {
+  public String validationSchema() {
     return entity.properties().stream()
         .map(
             prop -> {

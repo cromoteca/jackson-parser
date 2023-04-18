@@ -2,20 +2,20 @@ package com.cromoteca.generator;
 
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 
-public class EntityModelFunctionMaker {
-  private final MakerTools tools;
+class EntityModelFunctionMaker {
+  private final Generator.MakerTools tools;
   private final BeanPropertyDefinition property;
   private final MultipleType propertyType;
   private final String _getPropertyModel;
 
-  public EntityModelFunctionMaker(MakerTools tools, BeanPropertyDefinition property) {
+  EntityModelFunctionMaker(Generator.MakerTools tools, BeanPropertyDefinition property) {
     this.tools = tools;
     this.property = property;
     propertyType = MultipleType.forProperty(property);
     _getPropertyModel = tools.fromImport("_getPropertyModel", "@hilla/form", false, false);
   }
 
-  public String generate() {
+  String generate() {
     return StringTemplate.from(
         """
 
