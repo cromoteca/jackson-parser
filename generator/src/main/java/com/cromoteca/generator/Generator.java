@@ -92,7 +92,7 @@ public class Generator {
                 entityClass -> entityClass.type().getName() + "FormikValidation",
                 entity -> {
                   var worker = new MakerTools(entity);
-                  var maker = new FormikValidationMaker(worker, entity);
+                  var maker = new FormikValidationMaker(worker, entity, Locale.getDefault());
                   return maker.generate();
                 }));
   }

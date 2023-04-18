@@ -20,14 +20,14 @@ class EndpointMaker {
   String generate() {
     return StringTemplate.from(
         """
-                ${imports}${methodImplementations}
+        ${imports}${methodImplementations}
 
-                const ${name} = {
-                ${methodList}
-                };
+        const ${name} = {
+        ${methodList}
+        };
 
-                export default ${name};
-                """,
+        export default ${name};
+        """,
         this);
   }
 

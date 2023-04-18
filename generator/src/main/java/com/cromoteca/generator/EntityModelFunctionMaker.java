@@ -19,9 +19,9 @@ class EntityModelFunctionMaker {
     return StringTemplate.from(
         """
 
-            \s   get ${name}(): ${modelType} {
-                    return this[${getPropertyModel}]('${name}', ${modelType}, [${nullable}]) as ${modelType};
-                }""",
+        \s   get ${name}(): ${modelType} {
+                return this[${getPropertyModel}]('${name}', ${modelType}, [${nullable}]) as ${modelType};
+            }""",
         this);
   }
 

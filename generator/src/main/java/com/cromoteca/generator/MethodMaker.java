@@ -29,15 +29,15 @@ class MethodMaker {
     return switch (methodType) {
       case CALL -> StringTemplate.from(
           """
-                    async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
-                        return ${client}.call('${className}', '${methodName}', {${paramNames}}, ${initParam});
-                    }""",
+          async function ${methodName}${typeParams}(${paramList}): Promise<${returnType}> {
+              return ${client}.call('${className}', '${methodName}', {${paramNames}}, ${initParam});
+          }""",
           this);
       case SUBSCRIBE -> StringTemplate.from(
           """
-                    function ${methodName}${typeParams}(${paramList}): ${subscription}<${returnType}> {
-                        return ${client}.subscribe('${className}', '${methodName}', {${paramNames}});
-                    }""",
+          function ${methodName}${typeParams}(${paramList}): ${subscription}<${returnType}> {
+              return ${client}.subscribe('${className}', '${methodName}', {${paramNames}});
+          }""",
           this);
     };
   }
