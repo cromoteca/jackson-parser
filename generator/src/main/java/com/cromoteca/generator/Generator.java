@@ -96,6 +96,19 @@ public class Generator {
                 }));
   }
 
+  public Map<String, String> generateYupSchema() {
+    return scan.entities().stream()
+        .filter(entity -> entity.type().getAnnotation(Valid.class) != null)
+        .collect(
+            Collectors.toMap(
+                entityClass -> entityClass.type().getName() + "YupSchema",
+                entity -> {
+                  var worker = new Worker(entity);
+                  var maker = new YupSchemaMaker(worker, entity);
+                  return maker.generate();
+                }));
+  }
+
   public class Worker implements MakerTools {
     // regular expression to match the last numeric suffix
     private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");
@@ -175,7 +188,7 @@ public class Generator {
     }
 
     @Override
-    public String addImport(String variable, String from, boolean isDefault, boolean isType) {
+    public String fromImport(String variable, String from, boolean isDefault, boolean isType) {
       var existing =
           imports.stream()
               .filter(
@@ -287,7 +300,7 @@ public class Generator {
       var clientType = handler.parameterType(type);
 
       if (clientType.contains(".")) {
-        clientType = addImport(clientType.replaceAll(".*[.$]", ""), clientType, true, true);
+        clientType = fromImport(clientType.replaceAll(".*[.$]", ""), clientType, true, true);
       }
 
       return clientType;

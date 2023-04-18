@@ -15,8 +15,8 @@ public class EntityModelMaker {
   public EntityModelMaker(MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
-    importedObjectModel = tools.addImport("ObjectModel", "@hilla/form", false, false);
-    importedModelType = tools.addImport(entity.getName(), entity.type().getName(), true, true);
+    importedObjectModel = tools.fromImport("ObjectModel", "@hilla/form", false, false);
+    importedModelType = tools.fromImport(entity.getName(), entity.type().getName(), true, true);
     tools.addKeyword("createEmptyValue");
     properties = generateModelFunctions(entity);
   }

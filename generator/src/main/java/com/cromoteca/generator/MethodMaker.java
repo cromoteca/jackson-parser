@@ -22,7 +22,7 @@ public class MethodMaker {
     this.method = method;
     this.className = className;
     methodType = tools.handlerFor(method.getRawType()).endpointMethodType();
-    clientVariableName = tools.addImport("client", "/connect-client.default", true, false);
+    clientVariableName = tools.fromImport("client", "/connect-client.default", true, false);
   }
 
   public String generate() {
@@ -43,7 +43,7 @@ public class MethodMaker {
   }
 
   public String subscription() {
-    return tools.addImport("Subscription", "@hilla/frontend", false, true);
+    return tools.fromImport("Subscription", "@hilla/frontend", false, true);
   }
 
   public String className() {
@@ -97,7 +97,7 @@ public class MethodMaker {
       params.add(
           initParam()
               + "?: "
-              + tools.addImport("EndpointRequestInit", "@hilla/frontend", false, true));
+              + tools.fromImport("EndpointRequestInit", "@hilla/frontend", false, true));
     }
 
     return String.join(", ", params);

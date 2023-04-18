@@ -9,7 +9,7 @@ import org.springframework.lang.NonNullApi;
 public interface MakerTools {
   String generateType(FullType type);
 
-  String addImport(String variable, String from, boolean isDefault, boolean isType);
+  String fromImport(String variable, String from, boolean isDefault, boolean isType);
 
   TypeHandler handlerFor(Class<?> cls);
 

@@ -12,7 +12,7 @@ public class EntityModelFunctionMaker {
     this.tools = tools;
     this.property = property;
     propertyType = MultipleType.forProperty(property);
-    _getPropertyModel = tools.addImport("_getPropertyModel", "@hilla/form", false, false);
+    _getPropertyModel = tools.fromImport("_getPropertyModel", "@hilla/form", false, false);
   }
 
   public String generate() {
@@ -34,7 +34,7 @@ public class EntityModelFunctionMaker {
   }
 
   private String modelType() {
-    return tools.addImport("StringModel", "@hilla/form", false, false);
+    return tools.fromImport("StringModel", "@hilla/form", false, false);
   }
 
   private String nullable() {
