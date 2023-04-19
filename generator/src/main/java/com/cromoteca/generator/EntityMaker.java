@@ -6,23 +6,30 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 class EntityMaker {
   private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
   private final List<String> properties;
+  private final SortedSet<String> typeVariables;
 
   EntityMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
+    typeVariables = new TreeSet<>();
     tools.addKeyword(entity.getName());
-    properties = generateProperties();
+    properties =
+        tools.handlerFor(entity.type()).generateEntityProperties()
+            ? generateProperties()
+            : List.of();
   }
 
   String generate() {
     return StringTemplate.from(
         """
-        ${imports}${construct} ${name}${typeParams} {
+        ${imports}${construct} ${name}${typeVars} {
         ${properties}
         }
 
@@ -43,8 +50,8 @@ class EntityMaker {
     return entity.getName();
   }
 
-  public String typeParams() {
-    return tools.generateTypeParams(entity.type().getTypeParameters());
+  public String typeVars() {
+    return tools.generateTypeVariables(typeVariables);
   }
 
   public String properties() {
@@ -74,7 +81,7 @@ class EntityMaker {
 
     return propertyStream
         .sorted(Comparator.comparing(BeanPropertyDefinition::getName))
-        .map(prop -> new PropertyMaker(tools, prop).generate())
+        .map(prop -> new PropertyMaker(tools, prop, typeVariables).generate())
         .toList();
   }
 }

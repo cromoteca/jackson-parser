@@ -1,12 +1,9 @@
 package com.cromoteca.generator.types;
 
-import java.util.Set;
+public class UnknownTypeHandler extends DefaultTypeHandler {
 
-public class UnknownTypeHandler extends TypeHandler {
-
-  @Override
-  public Set<Class<?>> supportedTypes() {
-    return Set.of(Object.class);
+  public boolean isSupported(Class<?> cls) {
+    return cls.getName().startsWith("java.");
   }
 
   @Override

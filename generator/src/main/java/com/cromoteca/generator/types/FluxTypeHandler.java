@@ -4,16 +4,12 @@ import dev.hilla.EndpointSubscription;
 import java.util.Set;
 import reactor.core.publisher.Flux;
 
-public class FluxTypeHandler extends TypeHandler {
+public class FluxTypeHandler extends DefaultTypeHandler {
 
-  @Override
-  public Set<Class<?>> supportedTypes() {
-    return Set.of(Flux.class, EndpointSubscription.class);
-  }
+  public static final Set<Class<?>> SUPPORTED = Set.of(Flux.class, EndpointSubscription.class);
 
-  @Override
-  public String returnType(Class<?> type) {
-    return "Subscription";
+  public boolean isSupported(Class<?> cls) {
+    return SUPPORTED.contains(cls);
   }
 
   @Override
@@ -22,7 +18,12 @@ public class FluxTypeHandler extends TypeHandler {
   }
 
   @Override
-  public boolean generateEntity() {
+  public boolean generateEntityProperties() {
+    return false;
+  }
+
+  @Override
+  public boolean canHaveGenerics() {
     return false;
   }
 }

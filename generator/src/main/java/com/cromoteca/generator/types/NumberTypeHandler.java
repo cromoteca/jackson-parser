@@ -2,23 +2,25 @@ package com.cromoteca.generator.types;
 
 import java.util.Set;
 
-public class NumberTypeHandler extends TypeHandler {
+public class NumberTypeHandler extends DefaultTypeHandler {
 
-  @Override
-  public Set<Class<?>> supportedTypes() {
-    return Set.of(
-        Byte.class,
-        Short.class,
-        Integer.class,
-        Long.class,
-        Float.class,
-        Double.class,
-        byte.class,
-        short.class,
-        int.class,
-        long.class,
-        float.class,
-        double.class);
+  public static final Set<Class<?>> SUPPORTED =
+      Set.of(
+          Byte.class,
+          Short.class,
+          Integer.class,
+          Long.class,
+          Float.class,
+          Double.class,
+          byte.class,
+          short.class,
+          int.class,
+          long.class,
+          float.class,
+          double.class);
+
+  public boolean isSupported(Class<?> cls) {
+    return SUPPORTED.contains(cls);
   }
 
   @Override

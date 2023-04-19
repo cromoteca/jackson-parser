@@ -128,13 +128,14 @@ public class FullType {
     return javaType.getRawClass().getName();
   }
 
-  Optional<String> typeVariableName() {
+  String typeVariableName() {
     return Arrays.stream(annotatedElements)
         .map(e -> castIfPossible(e, AnnotatedTypeVariable.class))
         .flatMap(Optional::stream)
         .map(AnnotatedTypeVariable::getType)
         .map(Type::getTypeName)
-        .findFirst();
+        .findFirst()
+        .orElse(null);
   }
 
   Optional<Stream<FullType>> parameterizedTypes() {

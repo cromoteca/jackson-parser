@@ -2,13 +2,12 @@ package com.cromoteca.generator;
 
 import com.cromoteca.ScanResult;
 import com.cromoteca.generator.types.BooleanTypeHandler;
+import com.cromoteca.generator.types.DefaultTypeHandler;
 import com.cromoteca.generator.types.FluxTypeHandler;
 import com.cromoteca.generator.types.NumberTypeHandler;
 import com.cromoteca.generator.types.StringTypeHandler;
-import com.cromoteca.generator.types.TypeHandler;
 import com.cromoteca.generator.types.UnknownTypeHandler;
 import jakarta.validation.Valid;
-import java.lang.reflect.TypeVariable;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,27 +16,28 @@ import org.springframework.lang.NonNullApi;
 
 public class Generator {
   private final ScanResult scan;
-  private final Map<Class<?>, TypeHandler> typeHandlers =
+  private final Map<Class<?>, DefaultTypeHandler> typeHandlers =
       new HashMap<>() {
-        private final TypeHandler defaultTypeHandler = new TypeHandler();
-        private final List<TypeHandler> _typeHandlers =
+        // Order matters in this list.
+        private final List<DefaultTypeHandler> _typeHandlers =
             List.of(
                 new NumberTypeHandler(),
                 new BooleanTypeHandler(),
                 new StringTypeHandler(),
+                new FluxTypeHandler(),
                 new UnknownTypeHandler(),
-                new FluxTypeHandler());
+                new DefaultTypeHandler());
 
         @Override
-        public TypeHandler get(Object key) {
+        public DefaultTypeHandler get(Object key) {
           if (key instanceof Class<?> cls) {
             return super.computeIfAbsent(
                 cls,
                 k ->
                     _typeHandlers.stream()
-                        .filter(h -> h.supportedTypes().contains(k))
+                        .filter(h -> h.isSupported(cls))
                         .findFirst()
-                        .orElse(defaultTypeHandler));
+                        .orElseThrow());
           }
           throw new IllegalArgumentException("key must be a Class<?>");
         }
@@ -61,7 +61,6 @@ public class Generator {
 
   public Map<String, String> generateEntities() {
     return scan.entities().stream()
-        .filter(entityClass -> typeHandlers.get(entityClass.type()).generateEntity())
         .collect(
             Collectors.toMap(
                 entityClass -> entityClass.type().getName(),
@@ -150,31 +149,25 @@ public class Generator {
       var groupedImports = new TreeMap<String, String>();
 
       imports.stream()
-          .collect(Collectors.groupingBy(Import::from))
+          .collect(Collectors.groupingBy(Import::getFrom))
           .forEach(
               (from, sameFrom) -> {
-                var type = sameFrom.stream().anyMatch(Import::isType) ? "type " : "";
-                var defaultImport = sameFrom.stream().filter(Import::isDefault).findFirst();
-                var namedImports =
+                var defaultImport =
+                    sameFrom.stream()
+                        .filter(Import::isDefault)
+                        .findFirst()
+                        .map(Import::toString)
+                        .orElse("");
+
+                var otherImports =
                     sameFrom.stream()
                         .filter(i -> !i.isDefault())
-                        .map(
-                            i ->
-                                i.variable().equals(i.alias())
-                                    ? i.alias()
-                                    : i.variable() + " as " + i.alias())
-                        .toList();
-
-                var imported =
-                    Stream.of(
-                            defaultImport.map(Import::alias).orElse(""),
-                            namedImports.isEmpty()
-                                ? ""
-                                : namedImports.stream()
-                                    .sorted()
-                                    .collect(Collectors.joining(", ", "{ ", " }")))
-                        .filter(s -> !s.isBlank())
+                        .map(Import::toString)
                         .collect(Collectors.joining(", "));
+
+                if (!otherImports.isEmpty()) {
+                  otherImports = "{ " + otherImports + " }";
+                }
 
                 var relativePath = NameResolver.resolve(from, mainClass);
 
@@ -182,13 +175,13 @@ public class Generator {
                     relativePath,
                     StringTemplate.from(
                         """
-                        import ${type}${imported} from '${path}';
+                        import ${imports} from '${path}';
                         """,
                         Map.of(
-                            "type",
-                            type,
-                            "imported",
-                            imported,
+                            "imports",
+                            Stream.of(defaultImport, otherImports)
+                                .filter(s -> !s.isEmpty())
+                                .collect(Collectors.joining(", ")),
                             "path",
                             relativePath.startsWith("@") ? relativePath : relativePath + ".js")));
               });
@@ -202,21 +195,29 @@ public class Generator {
           imports.stream()
               .filter(
                   i ->
-                      Objects.equals(i.variable(), variable)
-                          && Objects.equals(i.from(), from)
-                          && i.isDefault() == isDefault
-                          && i.isType() == isType)
+                      Objects.equals(i.getVariable(), variable)
+                          && Objects.equals(i.getFrom(), from))
               .findFirst();
 
-      return existing
-          .orElseGet(
+      Import result =
+          existing.orElseGet(
               () -> {
                 String alias = findAlias(variable);
                 var newImport = new Import(variable, from, isDefault, isType, alias);
                 imports.add(newImport);
                 return newImport;
-              })
-          .alias();
+              });
+
+      if (isDefault != result.isDefault()) {
+        throw new IllegalStateException(
+            variable + " is imported from " + from + " both as default and not-default");
+      }
+
+      if (!isType && result.isType()) {
+        result.setType(false);
+      }
+
+      return result.getAlias();
     }
 
     private String findAlias(String variable) {
@@ -250,39 +251,50 @@ public class Generator {
       keywords.add(variable);
     }
 
-    String generateTypeParams(TypeVariable<?>[] typeParameters) {
-      return typeParameters.length == 0
+    String generateTypeVariables(Collection<String> typeVars) {
+      return typeVars.isEmpty()
           ? ""
-          : Arrays.stream(typeParameters)
-              .map(TypeVariable::getName)
-              .collect(Collectors.joining(", ", "<", ">"));
+          : typeVars.stream().collect(Collectors.joining(", ", "<", ">"));
     }
 
-    TypeHandler handlerFor(Class<?> cls) {
+    DefaultTypeHandler handlerFor(Class<?> cls) {
       return typeHandlers.get(cls);
     }
 
-    String generateType(FullType type) {
+    String generateType(FullType type, Set<String> usedTypeVariables) {
       String result;
       var converted = scan.convertedClasses().get(type.getRawClass());
       if (converted != null) {
-        result = generateType(new FullType(converted));
+        result = generateType(new FullType(converted), usedTypeVariables);
       } else if (type.isOptional()) {
-        result = generateType(type.getBoundType());
+        result = generateType(type.getBoundType(), usedTypeVariables);
       } else if (type.isCollectionLikeType()) {
-        result = "Array<" + generateType(type.getContentType()) + '>';
+        result = "Array<" + generateType(type.getContentType(), usedTypeVariables) + '>';
       } else if (type.isArrayType()) {
-        result = "Array<" + generateType(type.getArrayType()) + '>';
+        result = "Array<" + generateType(type.getArrayType(), usedTypeVariables) + '>';
       } else if (type.isMapLikeType()) {
         var mapTypes = type.getMapTypes();
-        result = "Map<" + generateType(mapTypes[0]) + ", " + generateType(mapTypes[1]) + '>';
+        result =
+            "Map<"
+                + generateType(mapTypes[0], usedTypeVariables)
+                + ", "
+                + generateType(mapTypes[1], usedTypeVariables)
+                + '>';
       } else {
         result = clientType(type.getRawClass());
         var typeVariable = type.typeVariableName();
-        var parameterizedTypes =
-            type.parameterizedTypes()
-                .map(s -> s.map(this::generateType).collect(Collectors.joining(", ", "<", ">")));
-        result = typeVariable.orElse(result + parameterizedTypes.orElse(""));
+
+        if (typeVariable != null) {
+          usedTypeVariables.add(result = typeVariable);
+        } else if (handlerFor(type.getRawClass()).canHaveGenerics()) {
+          var parameterizedTypes =
+              type.parameterizedTypes()
+                  .map(
+                      s ->
+                          s.map(t -> generateType(t, usedTypeVariables))
+                              .collect(Collectors.joining(", ", "<", ">")));
+          result += parameterizedTypes.orElse("");
+        }
       }
 
       return isNullable(type) ? result + " | undefined" : result;

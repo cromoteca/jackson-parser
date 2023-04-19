@@ -1,6 +1,6 @@
 import client from '../../../../../connect-client.default.js';
 import type Nulls from './NullableEndpoint/Nulls.js';
-import type { EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@hilla/frontend';
 
 async function box(n: number, init?: EndpointRequestInit): Promise<number | undefined> {
     return client.call('com.cromoteca.samples.nullable.endpoints.NullableEndpoint', 'box', { n }, init);

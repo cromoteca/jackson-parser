@@ -47,9 +47,9 @@ public class GeneratorTest {
     var scanResult = parser.parseEndpoints(endpoints);
     var generator = new Generator(scanResult);
     return Stream.of(
-            generator.generateEndpoints(), generator.generateEntities()
-            // , generator.generateModels()
-            )
+            generator.generateEndpoints(),
+            generator.generateEntities(),
+            generator.generateYupSchema())
         .map(Map::entrySet)
         .flatMap(Collection::stream)
         .map(entry -> checkResult(entry.getKey(), entry.getValue()))

@@ -1,10 +1,8 @@
 package com.cromoteca.generator.types;
 
-import java.util.Set;
-
-public class TypeHandler {
-  public Set<Class<?>> supportedTypes() {
-    return Set.of();
+public class DefaultTypeHandler {
+  public boolean isSupported(Class<?> cls) {
+    return true;
   }
 
   public String parameterType(Class<?> type) {
@@ -23,20 +21,12 @@ public class TypeHandler {
     return EndpointMethodType.CALL;
   }
 
-  public boolean generateEntity() {
+  public boolean generateEntityProperties() {
     return true;
   }
 
   public String emptyValue() {
     return "undefined";
-  }
-
-  /**
-   * Type representation when the class is used as method return type. By default, it is the same as
-   * parameter type.
-   */
-  public String returnType(Class<?> cls) {
-    return parameterType(cls);
   }
 
   public enum EndpointMethodType {

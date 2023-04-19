@@ -127,7 +127,7 @@ class MultipleType extends FullType {
   }
 
   @Override
-  Optional<String> typeVariableName() {
+  String typeVariableName() {
     return mainType.typeVariableName();
   }
 

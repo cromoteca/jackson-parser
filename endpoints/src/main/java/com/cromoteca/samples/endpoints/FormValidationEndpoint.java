@@ -24,6 +24,6 @@ public class FormValidationEndpoint {
       @NotBlank String name,
       @NotBlank @Email String email,
       @Pattern(regexp = "^[0-9]+$") String phone,
-      @Size(min = 2, max = 2) String country,
+      @Size(min = 2, max = 3) String country,
       @AssertTrue boolean conditions) {}
 }

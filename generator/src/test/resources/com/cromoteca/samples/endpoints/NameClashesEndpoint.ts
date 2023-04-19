@@ -2,7 +2,7 @@ import client3 from '../../../../connect-client.default.js';
 import type EndpointRequestInit from './NameClashesEndpoint/EndpointRequestInit.js';
 import type MyOtherType1 from './NameClashesEndpoint/MyOtherType.js';
 import type MyOtherType from './entities/MyOtherType.js';
-import type { EndpointRequestInit as EndpointRequestInit1 } from '@hilla/frontend';
+import { type EndpointRequestInit as EndpointRequestInit1 } from '@hilla/frontend';
 
 async function clashWithEndpointRequestInitAndClientName(client: EndpointRequestInit, init?: EndpointRequestInit1): Promise<void> {
     return client3.call('com.cromoteca.samples.endpoints.NameClashesEndpoint', 'clashWithEndpointRequestInitAndClientName', { client }, init);

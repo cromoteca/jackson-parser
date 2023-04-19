@@ -4,6 +4,8 @@ import { Notification } from '@hilla/react-components/Notification.js';
 import { Select } from '@hilla/react-components/Select.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
+import FormValidationEndpoint from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint.js';
+import RegistrationInfo from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint/RegistrationInfo.js';
 import { Field, Form, Formik } from 'formik';
 import { ObjectSchema, boolean, object, string } from 'yup';
 
@@ -35,7 +37,7 @@ export default function HelloFormView() {
             initialValues={{ ...initialValues }}
             validationSchema={yupSchema}
             onSubmit={async values => {
-                const response = await HelloFormEndpoint.validate(values);
+                const response = await FormValidationEndpoint.validate(values);
                 Notification.show(response, { theme: 'success' });
             }}
         >

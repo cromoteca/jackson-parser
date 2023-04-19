@@ -12,20 +12,55 @@ import java.util.stream.Collectors;
 class YupSchemaMaker {
   private final Generator.MakerTools tools;
   private final ScanResult.EntityClass entity;
+  private final String objectSchema;
+  private final String object;
+  private final String name;
+  private final String type;
 
   YupSchemaMaker(Generator.MakerTools tools, ScanResult.EntityClass entity) {
     this.tools = tools;
     this.entity = entity;
+    objectSchema = tools.fromImport("ObjectSchema", "yup", false, true);
+    object = tools.fromImport("object", "yup", false, false);
+    name = entity.getName() + "YupSchema";
+    type = tools.fromImport(entity.getName(), entity.type().getName(), true, true);
   }
 
   String generate() {
-    return StringTemplate.from("""
-                ${validationSchema}
-                """, this);
+    return StringTemplate.from(
+        """
+        ${imports}const ${name}: ${objectSchema}<${type}> = ${object}({
+        ${validations}
+        });
+
+        export default ${name};
+        """,
+        this);
   }
 
-  public String validationSchema() {
+  public String getImports() {
+    return tools.getImports();
+  }
+
+  public String getObjectSchema() {
+    return objectSchema;
+  }
+
+  public String getObject() {
+    return object;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public String validations() {
     return entity.properties().stream()
+        .sorted()
         .map(
             prop -> {
               var constraints = new HashSet<String>();
@@ -44,7 +79,7 @@ class YupSchemaMaker {
 
               return constraints.isEmpty()
                   ? ""
-                  : prop.getName() + "." + String.join(".", constraints);
+                  : String.format("    %s: %s,", prop.getName(), String.join(".", constraints));
             })
         .collect(Collectors.joining("\n"));
   }

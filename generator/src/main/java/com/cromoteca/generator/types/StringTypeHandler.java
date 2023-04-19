@@ -2,11 +2,13 @@ package com.cromoteca.generator.types;
 
 import java.util.Set;
 
-public class StringTypeHandler extends TypeHandler {
+public class StringTypeHandler extends DefaultTypeHandler {
 
-  @Override
-  public Set<Class<?>> supportedTypes() {
-    return Set.of(String.class, CharSequence.class, char.class, Character.class);
+  public static final Set<Class<?>> SUPPORTED =
+      Set.of(String.class, CharSequence.class, char.class, Character.class);
+
+  public boolean isSupported(Class<?> cls) {
+    return SUPPORTED.contains(cls);
   }
 
   @Override
