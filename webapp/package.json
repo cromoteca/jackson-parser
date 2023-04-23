@@ -14,6 +14,7 @@
     "@hilla/generator-typescript-plugin-push": "2.0.3",
     "@hilla/generator-typescript-utils": "2.0.3",
     "@hilla/react-components": "2.0.2",
+    "@hookform/resolvers": "^3.1.0",
     "@polymer/polymer": "3.5.1",
     "@vaadin-component-factory/vcf-nav": "1.1.0",
     "@vaadin/bundles": "24.0.2",
@@ -28,10 +29,10 @@
     "@vaadin/vaadin-themable-mixin": "24.0.2",
     "classnames": "^2.3.2",
     "construct-style-sheets-polyfill": "3.1.0",
-    "formik": "^2.2.9",
     "lit": "2.6.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.9",
     "react-router-dom": "^6.4.2",
     "yup": "^1.1.0"
   },
@@ -85,8 +86,9 @@
     "@hilla/generator-typescript-plugin-backbone": "$@hilla/generator-typescript-plugin-backbone",
     "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli",
-    "formik": "$formik",
-    "yup": "$yup"
+    "yup": "$yup",
+    "react-hook-form": "$react-hook-form",
+    "@hookform/resolvers": "$@hookform/resolvers"
   },
   "vaadin": {
     "dependencies": {
@@ -131,6 +133,6 @@
       "workbox-core": "6.5.4",
       "workbox-precaching": "6.5.4"
     },
-    "hash": "0cf48f7de29a74adf8deb0ae931ff5b7de562a17a2f02b10381552c32b711a91"
+    "hash": "d01a5af6a42068cda66ec79740278b7a2a7191df7fe9170913116726f66112a3"
   }
 }
