@@ -23,7 +23,7 @@ function useForm<T extends Maybe<AnyObject>, U>(
         return ({
             ...parentRegister(name, options),
             invalid: !!errors[name],
-            errorMessage: `${errors[name]?.message}`
+            errorMessage: `${errors[name]?.message}`,
         });
     };
 
@@ -50,7 +50,6 @@ function useForm<T extends Maybe<AnyObject>, U>(
     const handleSubmit = function(event: any) {
         return parentHandleSubmit(onValid)(event);
     };
-
 
     return {
         ...parentForm,

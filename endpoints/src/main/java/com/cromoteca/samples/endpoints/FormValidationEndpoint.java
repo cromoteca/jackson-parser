@@ -26,7 +26,7 @@ import org.springframework.lang.Nullable;
 public class FormValidationEndpoint {
 
   @Nonnull
-  public String validate(@Nonnull RegistrationInfo info) {
+  public String handleRegistration(@Nonnull RegistrationInfo info) {
     return "Registration accepted";
   }
 
@@ -35,7 +35,7 @@ public class FormValidationEndpoint {
   @Target({ElementType.FIELD})
   @Retention(RetentionPolicy.RUNTIME)
   public @interface NotUsedBefore {
-    String message() default "Already used";
+    String message() default "Already exists in our database";
 
     Class<?>[] groups() default {};
 

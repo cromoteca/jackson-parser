@@ -6,7 +6,7 @@ import { TextField } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import FormValidationEndpoint from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint.js';
 import useForm from './HillaFormHook.js';
-import RegistrationInfoYupSchema from './RegistrationInfoSchema.js';
+import RegistrationInfoSchema from './RegistrationInfoSchema.js';
 import ValidatedCheckbox from './ValidatedCheckbox.js';
 
 export default function HelloFormView() {
@@ -17,10 +17,10 @@ export default function HelloFormView() {
   ];
 
   const { register, handleSubmit, formState: { isValid } } = useForm(
-    RegistrationInfoYupSchema,
-    FormValidationEndpoint.validate,
-    (message: string) => Notification.show(message, { theme: 'success' }),
-    (error: any) => Notification.show(error.message || 'Server error', { theme: 'error' }),
+    RegistrationInfoSchema,
+    FormValidationEndpoint.handleRegistration,
+    (message) => Notification.show(message, { theme: 'success' }),
+    (error) => Notification.show(error.message || 'Server error', { theme: 'error' }),
   );
 
   return (
