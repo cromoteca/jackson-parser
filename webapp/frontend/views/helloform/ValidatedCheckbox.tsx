@@ -2,11 +2,16 @@ import { Checkbox } from '@hilla/react-components/Checkbox.js';
 import { ComponentProps, Ref, forwardRef } from 'react';
 
 type CheckboxFieldProps = Omit<ComponentProps<typeof Checkbox>, 'onCheckedChanged'> & {
+    // These properties are set by `useForm`
     onChange?: (e: CustomEvent<any>) => void;
     invalid?: boolean | undefined;
     errorMessage?: string | undefined;
 };
 
+/**
+ * A checkbox that can be used in a form. It is a wrapper around the
+ * Vaadin Checkbox component that adds support for validation.
+ */
 const ValidatedCheckbox = forwardRef((
     { invalid, errorMessage, onChange, ...checkboxProps }: CheckboxFieldProps,
     //@ts-ignore
@@ -14,7 +19,7 @@ const ValidatedCheckbox = forwardRef((
 ) => (
     <div>
         <Checkbox {...checkboxProps} ref={ref} onCheckedChanged={onChange} />
-        {invalid && <span>{errorMessage}</span>}
+        {invalid && <div>{errorMessage}</div>}
     </div>
 ));
 

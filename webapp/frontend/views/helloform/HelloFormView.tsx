@@ -26,6 +26,8 @@ export default function HelloFormView() {
   return (
     <VerticalLayout className='p-m'>
       <HorizontalLayout theme="spacing padding">
+        {/* It should be possible to add "required" to the list of parameters set by "register",
+            if Yup can pass the information. */}
         <TextField label="Name" required {...register("name")} />
         <TextField label="Email" required {...register("email")} />
       </HorizontalLayout>

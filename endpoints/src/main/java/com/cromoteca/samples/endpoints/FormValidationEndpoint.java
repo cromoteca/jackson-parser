@@ -30,6 +30,9 @@ public class FormValidationEndpoint {
     return "Registration accepted";
   }
 
+  /**
+   * This annotation is used to demonstrate server-side custom validation.
+   */
   @Documented
   @Constraint(validatedBy = NotUsedBeforeValidator.class)
   @Target({ElementType.FIELD})
@@ -42,6 +45,9 @@ public class FormValidationEndpoint {
     Class<? extends Payload>[] payload() default {};
   }
 
+  /**
+   * This validator is used to validate that the email or phone number is not already used.
+   */
   public static class NotUsedBeforeValidator implements ConstraintValidator<NotUsedBefore, String> {
     private static final List<String> USED_EMAILS = List.of("john.doe@example.com");
     private static final List<String> USED_PHONES = List.of("0123456789");
@@ -53,6 +59,11 @@ public class FormValidationEndpoint {
     }
   }
 
+  /**
+   * This record is used to validate the registration form.
+   *
+   * <p>It uses the {@link NotUsedBefore} annotation.
+   */
   @Valid
   public static record RegistrationInfo(
       @NotBlank String name,
