@@ -1,5 +1,6 @@
 import { EndpointValidationError } from '@hilla/frontend';
 import { Button } from '@hilla/react-components/Button.js';
+import { HorizontalLayout } from '@hilla/react-components/HorizontalLayout.js';
 import { Notification } from '@hilla/react-components/Notification.js';
 import { Select } from '@hilla/react-components/Select.js';
 import { TextField } from '@hilla/react-components/TextField.js';
@@ -7,9 +8,9 @@ import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import { yupResolver } from '@hookform/resolvers/yup';
 import FormValidationEndpoint from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint.js';
 import RegistrationInfo from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint/RegistrationInfo.js';
-import { useForm } from 'react-hook-form';
 import { ObjectSchema, boolean, object, string } from 'yup';
-import CheckboxField from './CheckboxField.js';
+import { useForm } from './HillaFormHook.js';
+import ValidatedCheckbox from './ValidatedCheckbox.js';
 
 export default function HelloFormView() {
   const countries = [
@@ -26,7 +27,7 @@ export default function HelloFormView() {
     terms: boolean().oneOf([true]).required(),
   });
 
-  const { register, handleSubmit, setError, formState: { errors, isValid } } = useForm({
+  const { register, handleSubmit, setError, formState: { isValid } } = useForm({
     mode: 'all',
     resolver: yupResolver(yupSchema),
   });
@@ -52,13 +53,24 @@ export default function HelloFormView() {
   };
 
   return (
-    <VerticalLayout theme="spacing padding">
-      <TextField label="Name" required {...register("name")} invalid={!!errors.name} errorMessage={`${errors.name?.message}`} />
-      <TextField label="Email" required {...register("email")} invalid={!!errors.email} errorMessage={`${errors.email?.message}`} />
-      <TextField label="Phone" {...register("phone")} invalid={!!errors.phone} errorMessage={`${errors.phone?.message}`} />
-      <Select label="Country" required {...register("country")} items={countries} invalid={!!errors.country} errorMessage={`${errors.country?.message}`} />
-      <CheckboxField label="I accept terms and conditions" {...register("terms")} error={errors.terms} />
-      <Button theme="primary" onClick={handleSubmit(onSubmit)} disabled={!isValid}>Submit</Button>
+    <VerticalLayout className='p-m'>
+      <HorizontalLayout theme="spacing padding">
+        <TextField label="Name" required {...register("name")} />
+        <TextField label="Email" required {...register("email")} />
+      </HorizontalLayout>
+
+      <HorizontalLayout theme="spacing padding">
+        <TextField label="Phone" {...register("phone")} />
+        <Select label="Country" required {...register("country")} items={countries} />
+      </HorizontalLayout>
+
+      <HorizontalLayout theme="spacing padding">
+        <ValidatedCheckbox label="I agree to the terms and conditions" {...register("terms")} />
+      </HorizontalLayout>
+
+      <HorizontalLayout theme="spacing padding">
+        <Button theme="primary" onClick={handleSubmit(onSubmit)} disabled={!isValid}>Register</Button>
+      </HorizontalLayout>
     </VerticalLayout>
   );
 }

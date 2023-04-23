@@ -1,21 +1,21 @@
 import { Checkbox } from '@hilla/react-components/Checkbox.js';
 import { ComponentProps, Ref, forwardRef } from 'react';
-import { FieldError, FieldErrorsImpl, Merge } from 'react-hook-form';
 
 type CheckboxFieldProps = Omit<ComponentProps<typeof Checkbox>, 'onCheckedChanged'> & {
     onChange?: (e: CustomEvent<any>) => void;
-    error?: FieldError | Merge<FieldError, FieldErrorsImpl<any>> | undefined;
+    invalid?: boolean | undefined;
+    errorMessage?: string | undefined;
 };
 
-const CheckboxField = forwardRef((
-    { error, onChange, ...checkboxProps }: CheckboxFieldProps,
+const ValidatedCheckbox = forwardRef((
+    { invalid, errorMessage, onChange, ...checkboxProps }: CheckboxFieldProps,
     //@ts-ignore
     ref: Ref<Checkbox> | undefined
 ) => (
     <div>
         <Checkbox {...checkboxProps} ref={ref} onCheckedChanged={onChange} />
-        {error && <span>{`${error.message}`}</span>}
+        {invalid && <span>{errorMessage}</span>}
     </div>
 ));
 
-export default CheckboxField;
+export default ValidatedCheckbox;
