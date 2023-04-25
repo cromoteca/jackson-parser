@@ -6,7 +6,7 @@ import { TextField } from '@hilla/react-components/TextField.js';
 import { VerticalLayout } from '@hilla/react-components/VerticalLayout.js';
 import FormValidationEndpoint from 'Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint.js';
 import useForm from './HillaFormHook.js';
-import RegistrationInfoSchema from './RegistrationInfoSchema.js';
+import { RegistrationInfoSchema, country, email, name, phone, terms } from './RegistrationInfoSchema.js';
 import ValidatedCheckbox from './ValidatedCheckbox.js';
 
 export default function HelloFormView() {
@@ -26,19 +26,17 @@ export default function HelloFormView() {
   return (
     <VerticalLayout className='p-m'>
       <HorizontalLayout theme="spacing padding">
-        {/* It should be possible to add "required" to the list of parameters set by "register",
-            if Yup can pass the information. */}
-        <TextField label="Name" required {...register("name")} />
-        <TextField label="Email" required {...register("email")} />
+        <TextField label="Name" required {...register(name)} />
+        <TextField label="Email" required {...register(email)} />
       </HorizontalLayout>
 
       <HorizontalLayout theme="spacing padding">
-        <TextField label="Phone" {...register("phone")} />
-        <Select label="Country" items={countries} required {...register("country")} />
+        <TextField label="Phone" {...register(phone)} />
+        <Select label="Country" items={countries} required {...register(country)} />
       </HorizontalLayout>
 
       <HorizontalLayout theme="spacing padding">
-        <ValidatedCheckbox label="I agree to the terms and conditions" {...register("terms")} />
+        <ValidatedCheckbox label="I agree to the terms and conditions" {...register(terms)} />
       </HorizontalLayout>
 
       <HorizontalLayout theme="spacing padding">

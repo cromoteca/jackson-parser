@@ -9,4 +9,10 @@ const RegistrationInfoSchema: ObjectSchema<RegistrationInfo> = object({
     terms: boolean().oneOf([true]).required(),
 });
 
-export default RegistrationInfoSchema;
+const name = "name";
+const email = "email";
+const phone = "phone";
+const country = "country";
+const terms = "terms";
+
+export {RegistrationInfoSchema, name, email, phone, country, terms};
