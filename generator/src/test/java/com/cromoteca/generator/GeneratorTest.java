@@ -46,10 +46,7 @@ public class GeneratorTest {
   private Executable[] generateAndCheck(List<Class<?>> endpoints) {
     var scanResult = parser.parseEndpoints(endpoints);
     var generator = new Generator(scanResult);
-    return Stream.of(
-            generator.generateEndpoints(),
-            generator.generateEntities(),
-            generator.generateYupSchema())
+    return Stream.of(generator.generateEndpoints(), generator.generateEntities())
         .map(Map::entrySet)
         .flatMap(Collection::stream)
         .map(entry -> checkResult(entry.getKey(), entry.getValue()))

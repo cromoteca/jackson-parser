@@ -33,8 +33,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.43.9",
-    "react-router-dom": "^6.4.2",
-    "yup": "^1.1.0"
+    "react-router-dom": "^6.4.2"
   },
   "devDependencies": {
     "@lit-labs/react": "^1.1.0",
@@ -86,7 +85,6 @@
     "@hilla/generator-typescript-plugin-backbone": "$@hilla/generator-typescript-plugin-backbone",
     "@vaadin/vaadin-material-styles": "$@vaadin/vaadin-material-styles",
     "@hilla/generator-typescript-cli": "$@hilla/generator-typescript-cli",
-    "yup": "$yup",
     "react-hook-form": "$react-hook-form",
     "@hookform/resolvers": "$@hookform/resolvers"
   },
@@ -133,6 +131,6 @@
       "workbox-core": "6.5.4",
       "workbox-precaching": "6.5.4"
     },
-    "hash": "d01a5af6a42068cda66ec79740278b7a2a7191df7fe9170913116726f66112a3"
+    "hash": "2e9734e8f009477f2441d5d660d9f3b391de7659a5698db7fc431b936211756d"
   }
 }

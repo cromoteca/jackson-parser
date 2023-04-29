@@ -96,19 +96,6 @@ public class Generator {
                 }));
   }
 
-  public Map<String, String> generateYupSchema() {
-    return scan.entities().stream()
-        .filter(entity -> entity.type().getAnnotation(Valid.class) != null)
-        .collect(
-            Collectors.toMap(
-                entityClass -> entityClass.type().getName() + "YupSchema",
-                entity -> {
-                  var worker = new MakerTools(entity);
-                  var maker = new YupSchemaMaker(worker, entity);
-                  return maker.generate();
-                }));
-  }
-
   class MakerTools {
     // regular expression to match the last numeric suffix
     private static final Pattern SUFFIX_REGEX = Pattern.compile("^(.*?)(\\d+)?$");

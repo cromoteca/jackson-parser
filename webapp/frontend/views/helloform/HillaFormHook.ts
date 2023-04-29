@@ -2,11 +2,12 @@ import { EndpointValidationError } from '@hilla/frontend';
 import { FieldValues, Path, Resolver, UseFormRegister, useForm as parentUseForm } from 'react-hook-form';
 
 /**
- * A hook that wraps react-hook-form and adds support for Yup validation and Vaadin Components.
- * @param schema The Yup schema to use for validation.
+ * A hook that wraps react-hook-form and adds support for Hilla validation and Vaadin Components.
+ * @param resolver The generated resolver to use for validation.
  * @param submitHandler The function to call when the form is submitted and passes validation.
  * @param successHandler The function to call when the submitHandler succeeds.
  * @param errorHandler The function to call when the submitHandler fails with an unexpected error.
+ * @param preValidationHandler The function to call to check for server-side validation errors.
  */
 function useForm<T extends FieldValues, R, C = any>(options: {
     resolver: Resolver<T, C>,
