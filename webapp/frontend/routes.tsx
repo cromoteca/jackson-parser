@@ -2,7 +2,7 @@ import HelloReactView from 'Frontend/views/helloreact/HelloReactView.js';
 import MainLayout from 'Frontend/views/MainLayout.js';
 import { lazy } from 'react';
 import { createBrowserRouter, IndexRouteObject, NonIndexRouteObject, useMatches } from 'react-router-dom';
-import HelloFormView from './views/helloform/HelloFormView.js';
+import RegistrationView from './views/helloform/RegistrationView.js';
 import ReactiveView from './views/reactive/ReactiveView.js';
 
 const AboutView = lazy(async () => import('Frontend/views/about/AboutView.js'));
@@ -35,7 +35,7 @@ export const routes: readonly ViewRouteObject[] = [
     element: <MainLayout />,
     handle: { icon: 'null', title: 'Main' },
     children: [
-      { path: '/', element: <HelloFormView />, handle: { icon: 'pen-solid', title: 'Registration' } },
+      { path: '/', element: <RegistrationView />, handle: { icon: 'pen-solid', title: 'Registration' } },
       { path: '/hello', element: <HelloReactView />, handle: { icon: 'globe-solid', title: 'Hello React' } },
       { path: '/about', element: <AboutView />, handle: { icon: 'info-solid', title: 'About' } },
       { path: '/reactive', element: <ReactiveView />, handle: { icon: 'phone-solid', title: 'Reactive' } },

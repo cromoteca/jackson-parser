@@ -1,72 +1,54 @@
 import { EndpointValidationError } from '@hilla/frontend';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useForm as parentUseForm } from 'react-hook-form';
-import { AnyObject, Maybe, ObjectSchema } from 'yup';
+import { FieldValues, UseFormRegister, useForm } from 'react-hook-form';
 
 /**
- * A hook that wraps react-hook-form and adds support for Yup validation and Vaadin Components.
- * @param schema The Yup schema to use for validation.
- * @param submitHandler The function to call when the form is submitted and passes validation.
- * @param successHandler The function to call when the submitHandler succeeds.
- * @param errorHandler The function to call when the submitHandler fails with an unexpected error.
+ * A hook that wraps react-hook-form and adds support for validation and Vaadin Components.
  */
-function useForm<T extends Maybe<AnyObject>, U>(
-    schema: ObjectSchema<T>,
-    submitHandler: (data: T) => Promise<U>,
-    successHandler?: (result: U) => any,
-    errorHandler?: (error: any) => any,
-): Omit<ReturnType<typeof parentUseForm>, 'handleSubmit'> & {
-    handleSubmit: (event: any) => Promise<void>;
+function useHillaExtension<T extends FieldValues, C = any>(
+    parentForm: ReturnType<typeof useForm<T, C>>,
+): ReturnType<typeof useForm<T, C>> & {
+    field: UseFormRegister<T>,
+    handleEndpoint: <R>(returnValue: Promise<R>) => Promise<R | undefined>
 } {
-    const parentForm = parentUseForm({
-        mode: 'all', // Validates on all events
-        //@ts-ignore
-        resolver: yupResolver(schema),
-    });
+    const { register, formState: { errors }, setError } = parentForm;
 
-    const { register: parentRegister, handleSubmit: parentHandleSubmit, formState: { errors }, setError } = parentForm;
-
-    const register: typeof parentRegister = (name, options?) => {
+    const field: typeof register = (name, options?) => {
         return ({
-            ...parentRegister(name, options),
+            ...register(name, options),
             // Vaadin-specific properties
             invalid: !!errors[name],
             errorMessage: `${errors[name]?.message}`,
         });
     };
 
-    const onValid = async (data: any) => {
+    const handleEndpoint = async <R>(returnValue: Promise<R>) => {
         try {
-            const response = await submitHandler(data);
-            successHandler && successHandler(response);
+            return await returnValue;
         } catch (error: any) {
             if (error instanceof EndpointValidationError) {
                 // As in Lit, parse the error messages and set the errors on the corresponding fields
                 error.validationErrorData.forEach((data) => {
                     const res =
-                        /Object of type '(.+)' has invalid property '(.+)' with value '(.+)', validation error: '(.+)'/.exec(
+                        /Object of type '(.+)' has invalid property '(.+)' with value '(.*)', validation error: '(.+)'/.exec(
                             data.message,
                         );
                     const [property, , message] = res ? res.splice(2) : [data.parameterName, undefined, data.message];
-                    setError(property!, { type: 'server', message });
+                    //@ts-ignore
+                    setError(property!, { type: 'validate', message });
                 });
+
+                return undefined;
             } else {
-                // Other error, use passed error handler
-                errorHandler && errorHandler(error);
+                throw error;
             }
         }
     };
 
-    // Wrap the parent handleSubmit to call onValid
-    const handleSubmit = function(event: any) {
-        return parentHandleSubmit(onValid)(event);
-    };
-
     return {
         ...parentForm,
-        register,
-        handleSubmit,
+        field,
+        handleEndpoint,
     };
 };
 
-export default useForm;
+export default useHillaExtension;
