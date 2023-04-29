@@ -30,6 +30,8 @@ public class FormValidationEndpoint {
     return "Registration accepted";
   }
 
+  public void preValidate(@Nonnull RegistrationInfo info) {}
+
   /** This annotation is used to demonstrate server-side custom validation. */
   @Documented
   @Constraint(validatedBy = NotUsedBeforeValidator.class)

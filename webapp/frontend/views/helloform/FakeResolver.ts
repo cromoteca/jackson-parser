@@ -1,7 +1,5 @@
 import RegistrationInfo from "Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint/RegistrationInfo.js";
-import ValidationEndpoint from "Frontend/generated/com/example/application/endpoints/ValidationEndpoint.js";
 import { Resolver } from "react-hook-form";
-import { EndpointValidationError } from "@hilla/frontend";
 
 function isValidEmail(email: string): boolean {
     const emailInput = document.createElement('input');
@@ -31,31 +29,24 @@ export const FakeResolver: Resolver<RegistrationInfo, any> = async (values, _con
             message: 'invalid email',
         }
     }
-
-    try {
-        await ValidationEndpoint.preValidate(values);
-    } catch (error: any) {
-        if (error instanceof EndpointValidationError) {
-            // As in Lit, parse the error messages and set the errors on the corresponding fields
-            error.validationErrorData.forEach((data) => {
-                const res =
-                    /Object of type '(.+)' has invalid property '(.+)' with value '(.*)', validation error: '(.+)'/.exec(
-                        data.message,
-                    );
-                const [property, , message] = res ? res.splice(2) : [data.parameterName, undefined, data.message];
-                //@ts-ignore
-                if (property && !errors[property]) {
-                    errors[property] = {
-                        type: 'validate',
-                        message,
-                    }
-                }
-            });
-        } else {
-            throw error;
+    if (!errors.phone && values.phone && !/^\+?[0-9]*$/.test(values.phone)) {
+        errors.phone = {
+            type: 'invalid',
+            message: 'invalid phone, must be a number',
         }
     }
-
+    if (!errors.country && values.country && !/^[A-Z]{2,3}$/.test(values.country)) {
+        errors.country = {
+            type: 'invalid',
+            message: 'invalid country, must be a 2 or 3 letter country code',
+        }
+    }
+    if (!errors.terms && !values.terms) {
+        errors.terms = {
+            type: 'required',
+            message: 'terms must be accepted',
+        }
+    }
 
     return {
         values,
