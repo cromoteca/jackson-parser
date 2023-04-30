@@ -19,7 +19,7 @@ export default function RegistrationView() {
 
     const { field, handleSubmit, validate } = useHillaForm<RegistrationInfo>({
         mode: 'all',
-    resolver: GeneratedResolver,
+        resolver: GeneratedResolver,
         serverResolver: FormValidationEndpoint.preValidate,
     });
 
@@ -35,7 +35,7 @@ export default function RegistrationView() {
     return (
         <VerticalLayout className='p-m'>
             <TextField label="Name" required {...field("name")} />
-            <EmailField label="Email"  required {...field("email")} />
+            <EmailField label="Email" required {...field("email")} />
             <TextField label="Phone" {...field("phone")} />
             <Select label="Country" required items={countries} {...field("country")} />
             <ValidatedCheckbox label="I agree to the terms and conditions" {...field("terms")} />

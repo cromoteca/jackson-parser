@@ -25,11 +25,21 @@ import org.springframework.lang.Nullable;
 @AnonymousAllowed
 public class FormValidationEndpoint {
 
+  /**
+   * This method is used to handle the registration form.
+   *
+   * <p>It uses the {@link RegistrationInfo} record.
+   */
   @Nonnull
   public String handleRegistration(@Nonnull RegistrationInfo info) {
     return "Registration accepted";
   }
 
+  /**
+   * This method is used to pre-validate the registration form.
+   *
+   * <p>It does nothing, as the goal here is to take advantage of the validation which happens before invoking this method.
+   */
   public void preValidate(@Nonnull RegistrationInfo info) {}
 
   /** This annotation is used to demonstrate server-side custom validation. */

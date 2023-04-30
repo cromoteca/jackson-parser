@@ -3,14 +3,17 @@ import { type UseFormProps, useForm as parentUseForm, type FieldValues, type Pat
 
 /**
  * A hook that wraps react-hook-form and adds support for Hilla validation and Vaadin Components.
- * @param serverResolver And endpoint method to call to check for server-side validation errors.
+ * @param serverResolver And optional endpoint method to call to use server-side validation.
  */
 function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> & {
     serverResolver?: (data: T) => any | undefined,
 }): ReturnType<typeof parentUseForm<T, C>> & {
+    // A wrapper around endpoint submission calls that can parse validation errors
     validate: <R>(outcome: Promise<R>, setError?: typeof parentSetError | undefined) => Promise<R | undefined>,
+    // A wrapper around register that adds Vaadin-specific properties
     field: UseFormRegister<T>;
 } {
+    // Awaits for the outcome of an endpoint call and parses validation errors
     const validate = async <R>(outcome: Promise<R>) => {
         try {
             return await outcome;
@@ -27,6 +30,8 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
                     if (property) {
                         const path = property as Path<T>;
 
+                        // Set the error, but only if the field is dirty or the form is submitting
+                        // Note that `parentForm.formState.isSubmitting` must be called as such and not as `isSubmitting` which stays false
                         if (parentForm.formState.isSubmitting || (getFieldState(path).isDirty) && !errors[property]) {
                             parentSetError(path, { type: 'validate', message });
                         }
@@ -40,6 +45,7 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
         }
     }
 
+    // A wrapper that adds server-side validation to the resolver
     const resolverWrapper: Resolver<T, C> = async (values, c, o) => {
         const clientValidation = props.resolver ? props.resolver(values, c, o) : { values, errors: {} };
 
@@ -50,15 +56,16 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
         return await clientValidation;
     };
 
+    // A wrapper around register that adds Vaadin-specific properties
     const field: typeof register = (name, options?) => {
         return ({
             ...register(name, options),
-            // Vaadin-specific properties
             invalid: !!errors[name],
             errorMessage: errors[name] && `${errors[name]?.message}`,
         });
     };
 
+    // Call the parent hook wrapping the resolver if needed
     const parentForm = parentUseForm({
         ...props,
         resolver: props.serverResolver ? resolverWrapper : props.resolver,
