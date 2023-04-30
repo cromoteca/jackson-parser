@@ -22,7 +22,7 @@ function useForm<T extends FieldValues, R, C = any>(options: {
     const setServerValidationErrors = async <U>(
         values: T,
         endpointCall: (values: T) => Promise<U>,
-        setError1: typeof setError, // (name: keyof T, error: { type: string, message: string }) => void,
+        setError1: typeof setError,
         errorHandler?: (error: any) => any,
     ) => {
         try {
@@ -81,7 +81,13 @@ function useForm<T extends FieldValues, R, C = any>(options: {
         resolver: wrapResolver(options.resolver),
     });
 
-    const { register: parentRegister, handleSubmit: parentHandleSubmit, formState: { errors, isDirty }, setError, getFieldState } = parentForm;
+    const {
+        register: parentRegister,
+        handleSubmit: parentHandleSubmit,
+        formState: { errors, isDirty },
+        setError,
+        getFieldState
+    } = parentForm;
 
     const register: typeof parentRegister = (name, options?) => {
         return ({
@@ -93,7 +99,12 @@ function useForm<T extends FieldValues, R, C = any>(options: {
     };
 
     const onValid = async (data: any) => {
-        const response = await setServerValidationErrors(data, options.submitHandler, setError, options.errorHandler);
+        const response = await setServerValidationErrors(
+            data,
+            options.submitHandler,
+            setError,
+            options.errorHandler
+        );
         response && options.successHandler && options.successHandler(response);
     };
 
