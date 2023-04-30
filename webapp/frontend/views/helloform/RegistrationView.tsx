@@ -17,10 +17,10 @@ export default function RegistrationView() {
         { value: "US", label: "United States" },
     ];
 
-    const { field, handleSubmit, validate } = useHillaForm({
+    const { field, handleSubmit, validate } = useHillaForm<RegistrationInfo>({
         mode: 'all',
-        resolver: GeneratedResolver,
-        preValidationHandler: FormValidationEndpoint.preValidate,
+    resolver: GeneratedResolver,
+        serverResolver: FormValidationEndpoint.preValidate,
     });
 
     const onSubmit = async (data: RegistrationInfo) => {

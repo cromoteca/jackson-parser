@@ -64,9 +64,15 @@ public class FormValidationEndpoint {
    */
   @Valid
   public static record RegistrationInfo(
-      @NotBlank String name,
-      @NotBlank @Email @NotUsedBefore String email,
-      @Nullable @Pattern(regexp = "^\\+?[0-9]+$") @NotUsedBefore String phone,
-      @NotBlank @Size(min = 2, max = 3) String country,
-      @AssertTrue boolean terms) {}
+      @NotBlank(message = "Name is required") String name,
+      @NotBlank(message = "Email is required")
+          @Email(message = "Email must be valid")
+          @NotUsedBefore
+          String email,
+      @Nullable @Pattern(regexp = "^\\+?[0-9]*$", message = "Phone must be valid") @NotUsedBefore
+          String phone,
+      @NotBlank(message = "Country is required")
+          @Size(min = 2, max = 3, message = "Country code must be 2 or 3 characters")
+          String country,
+      @AssertTrue(message = "You must accept the terms and conditions") boolean terms) {}
 }

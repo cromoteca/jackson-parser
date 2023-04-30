@@ -29,7 +29,7 @@ export const GeneratedResolver: Resolver<RegistrationInfo, any> = async (values,
             message: 'invalid email',
         }
     }
-    if (!errors.phone && values.phone && !/^\+?[0-9]+$/.test(values.phone)) {
+    if (!errors.phone && values.phone && !/^\+?[0-9]*$/.test(values.phone)) {
         errors.phone = {
             type: 'invalid',
             message: 'invalid phone, must be a number',

@@ -3,22 +3,19 @@ import { type UseFormProps, useForm as parentUseForm, type FieldValues, type Pat
 
 /**
  * A hook that wraps react-hook-form and adds support for Hilla validation and Vaadin Components.
- * @param preValidationHandler The function to call to check for server-side validation errors.
+ * @param serverResolver And endpoint method to call to check for server-side validation errors.
  */
 function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> & {
-    preValidationHandler?: (data: T) => any | undefined,
+    serverResolver?: (data: T) => any | undefined,
 }): ReturnType<typeof parentUseForm<T, C>> & {
     validate: <R>(outcome: Promise<R>, setError?: typeof parentSetError | undefined) => Promise<R | undefined>,
     field: UseFormRegister<T>;
 } {
-    const validate = async <R>(
-        outcome: Promise<R>,
-        setError?: typeof parentSetError | undefined,
-    ) => {
+    const validate = async <R>(outcome: Promise<R>) => {
         try {
             return await outcome;
         } catch (error: any) {
-            if (setError && error instanceof EndpointValidationError) {
+            if (error instanceof EndpointValidationError) {
                 // As in Lit, parse the error messages and set the errors on the corresponding fields
                 error.validationErrorData.forEach((data) => {
                     const res =
@@ -30,8 +27,8 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
                     if (property) {
                         const path = property as Path<T>;
 
-                        if (getFieldState(path).isDirty && !errors[property]) {
-                            setError(path, { type: 'validate', message });
+                        if (parentForm.formState.isSubmitting || (getFieldState(path).isDirty) && !errors[property]) {
+                            parentSetError(path, { type: 'validate', message });
                         }
                     }
                 });
@@ -43,16 +40,14 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
         }
     }
 
-    const wrapResolver = (resolver: Resolver<T, C>): Resolver<T, C> => {
-        return (values, c, o) => {
-            const clientValidation = resolver(values, c, o);
+    const resolverWrapper: Resolver<T, C> = async (values, c, o) => {
+        const clientValidation = props.resolver ? props.resolver(values, c, o) : { values, errors: {} };
 
-            if (isDirty && props.preValidationHandler) {
-                validate(props.preValidationHandler(values), parentSetError);
-            }
+        if (isDirty && props.serverResolver) {
+            validate(props.serverResolver(values));
+        }
 
-            return clientValidation;
-        };
+        return await clientValidation;
     };
 
     const field: typeof register = (name, options?) => {
@@ -66,7 +61,7 @@ function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> 
 
     const parentForm = parentUseForm({
         ...props,
-        resolver: props.resolver && wrapResolver(props.resolver),
+        resolver: props.serverResolver ? resolverWrapper : props.resolver,
     });
 
     const {
