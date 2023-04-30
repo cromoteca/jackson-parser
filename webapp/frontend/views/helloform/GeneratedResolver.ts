@@ -9,7 +9,7 @@ function isValidEmail(email: string): boolean {
     return emailInput.validity.valid;
 }
 
-export const FakeResolver: Resolver<RegistrationInfo, any> = async (values, _context, options) => {
+export const GeneratedResolver: Resolver<RegistrationInfo, any> = async (values, _context, _options) => {
     const errors: any = {};
     if (!errors.name && !values.name) {
         errors.name = {
@@ -29,10 +29,16 @@ export const FakeResolver: Resolver<RegistrationInfo, any> = async (values, _con
             message: 'invalid email',
         }
     }
-    if (!errors.phone && values.phone && !/^\+?[0-9]*$/.test(values.phone)) {
+    if (!errors.phone && values.phone && !/^\+?[0-9]+$/.test(values.phone)) {
         errors.phone = {
             type: 'invalid',
             message: 'invalid phone, must be a number',
+        }
+    }
+    if (!errors.country && !values.country) {
+        errors.country = {
+            type: 'required',
+            message: 'country is required',
         }
     }
     if (!errors.country && values.country && !/^[A-Z]{2,3}$/.test(values.country)) {

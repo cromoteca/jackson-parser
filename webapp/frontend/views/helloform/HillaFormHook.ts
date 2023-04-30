@@ -1,34 +1,24 @@
 import { EndpointValidationError } from '@hilla/frontend';
-import { FieldValues, Path, Resolver, UseFormRegister, useForm as parentUseForm } from 'react-hook-form';
+import { type UseFormProps, useForm as parentUseForm, type FieldValues, type Path, type Resolver, type UseFormRegister } from 'react-hook-form';
 
 /**
  * A hook that wraps react-hook-form and adds support for Hilla validation and Vaadin Components.
- * @param resolver The generated resolver to use for validation.
- * @param submitHandler The function to call when the form is submitted and passes validation.
- * @param successHandler The function to call when the submitHandler succeeds.
- * @param errorHandler The function to call when the submitHandler fails with an unexpected error.
  * @param preValidationHandler The function to call to check for server-side validation errors.
  */
-function useForm<T extends FieldValues, R, C = any>(options: {
-    resolver: Resolver<T, C>,
-    submitHandler: (data: T) => Promise<R>,
-    successHandler?: (result: R) => any,
-    errorHandler?: (error: { message: string }) => any,
-    preValidationHandler?: (data: T) => any,
-}): Omit<ReturnType<typeof parentUseForm<T, C>>, 'handleSubmit'> & {
-    field: UseFormRegister<T>,
-    handleSubmit: (event: any) => Promise<void>;
+function useHillaForm<T extends FieldValues, C = any>(props: UseFormProps<T, C> & {
+    preValidationHandler?: (data: T) => any | undefined,
+}): ReturnType<typeof parentUseForm<T, C>> & {
+    validate: <R>(outcome: Promise<R>, setError?: typeof parentSetError | undefined) => Promise<R | undefined>,
+    field: UseFormRegister<T>;
 } {
-    const setServerValidationErrors = async <U>(
-        values: T,
-        endpointCall: (values: T) => Promise<U>,
-        setError1: typeof setError,
-        errorHandler?: (error: any) => any,
+    const validate = async <R>(
+        outcome: Promise<R>,
+        setError?: typeof parentSetError | undefined,
     ) => {
         try {
-            return await endpointCall(values);
+            return await outcome;
         } catch (error: any) {
-            if (error instanceof EndpointValidationError) {
+            if (setError && error instanceof EndpointValidationError) {
                 // As in Lit, parse the error messages and set the errors on the corresponding fields
                 error.validationErrorData.forEach((data) => {
                     const res =
@@ -41,17 +31,15 @@ function useForm<T extends FieldValues, R, C = any>(options: {
                         const path = property as Path<T>;
 
                         if (getFieldState(path).isDirty && !errors[property]) {
-                            setError1(path, { type: 'validate', message });
+                            setError(path, { type: 'validate', message });
                         }
                     }
                 });
-            } else if (errorHandler) {
-                errorHandler(error);
+
+                return undefined;
             } else {
                 throw error;
             }
-
-            return undefined;
         }
     }
 
@@ -59,8 +47,8 @@ function useForm<T extends FieldValues, R, C = any>(options: {
         return (values, c, o) => {
             const clientValidation = resolver(values, c, o);
 
-            if (isDirty && options.preValidationHandler) {
-                setServerValidationErrors(values, options.preValidationHandler, parentForm.setError);
+            if (isDirty && props.preValidationHandler) {
+                validate(props.preValidationHandler(values), parentSetError);
             }
 
             return clientValidation;
@@ -72,52 +60,27 @@ function useForm<T extends FieldValues, R, C = any>(options: {
             ...register(name, options),
             // Vaadin-specific properties
             invalid: !!errors[name],
-            errorMessage: `${errors[name]?.message}`,
+            errorMessage: errors[name] && `${errors[name]?.message}`,
         });
     };
 
     const parentForm = parentUseForm({
-        mode: 'all', // Validates on all events
-        resolver: wrapResolver(options.resolver),
+        ...props,
+        resolver: props.resolver && wrapResolver(props.resolver),
     });
 
     const {
-        register: parentRegister,
-        handleSubmit: parentHandleSubmit,
+        register,
         formState: { errors, isDirty },
-        setError,
+        setError: parentSetError,
         getFieldState
     } = parentForm;
-
-    const register: typeof parentRegister = (name, options?) => {
-        return ({
-            ...parentRegister(name, options),
-            // Vaadin-specific properties
-            invalid: !!errors[name],
-            errorMessage: `${errors[name]?.message}`,
-        });
-    };
-
-    const onValid = async (data: any) => {
-        const response = await setServerValidationErrors(
-            data,
-            options.submitHandler,
-            setError,
-            options.errorHandler
-        );
-        response && options.successHandler && options.successHandler(response);
-    };
-
-    // Wrap the parent handleSubmit to call onValid
-    const handleSubmit = function (event: any) {
-        return parentHandleSubmit(onValid)(event);
-    };
 
     return {
         ...parentForm,
         field,
-        handleSubmit,
+        validate,
     };
 };
 
-export default useForm;
+export default useHillaForm;

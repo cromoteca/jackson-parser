@@ -66,7 +66,7 @@ public class FormValidationEndpoint {
   public static record RegistrationInfo(
       @NotBlank String name,
       @NotBlank @Email @NotUsedBefore String email,
-      @Nullable @Pattern(regexp = "^[0-9]*$") @NotUsedBefore String phone,
-      @Size(min = 2, max = 3) String country,
+      @Nullable @Pattern(regexp = "^\\+?[0-9]+$") @NotUsedBefore String phone,
+      @NotBlank @Size(min = 2, max = 3) String country,
       @AssertTrue boolean terms) {}
 }
