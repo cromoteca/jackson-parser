@@ -3,6 +3,7 @@ import { Notification } from '@hilla/react-components/Notification.js';
 import { TextField } from '@hilla/react-components/TextField.js';
 import { useState } from 'react';
 import HelloReactEndpoint from "Frontend/generated/com/example/application/endpoints/helloreact/HelloReactEndpoint.js";
+import SpringEndpoint from 'Frontend/generated/com/cromoteca/samples/spring/SpringEndpoint';
 
 export default function HelloReactView() {
   const [name, setName] = useState('');
@@ -18,8 +19,12 @@ export default function HelloReactView() {
         />
         <Button
           onClick={async () => {
-            const serverResponse = await HelloReactEndpoint.sayHello(name);
-            Notification.show(serverResponse);
+            const drawer = await HelloReactEndpoint.getDrawer();
+            console.log(drawer, typeof drawer.date);
+            const response = await HelloReactEndpoint.verifyDrawer(drawer);
+            Notification.show(`Drawer: ${response}`);
+
+            Notification.show(await SpringEndpoint.hello());
           }}
         >
           Say hello

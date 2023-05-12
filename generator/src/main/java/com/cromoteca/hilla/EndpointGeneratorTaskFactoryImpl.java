@@ -10,6 +10,8 @@ import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
 import dev.hilla.Endpoint;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
@@ -53,6 +55,19 @@ public class EndpointGeneratorTaskFactoryImpl implements EndpointGeneratorTaskFa
                   throw new RuntimeException(e);
                 }
               });
+
+      var userDir = Path.of(System.getProperty("user.dir"));
+
+      if (Files.isDirectory(userDir.resolve("frontend"))) {
+        try {
+          Files.copy(
+              userDir.resolve("../generator/src/test/resources/connect-client.default.ts"),
+              userDir.resolve("frontend/generated/connect-client.default.ts"),
+              StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
     };
   }
 

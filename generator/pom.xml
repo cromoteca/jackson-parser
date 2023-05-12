@@ -31,11 +31,13 @@
             <groupId>com.cromoteca</groupId>
             <artifactId>hilla-generator-endpoint-library</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.cromoteca</groupId>
             <artifactId>hilla-generator-sample-library</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
     </dependencies>

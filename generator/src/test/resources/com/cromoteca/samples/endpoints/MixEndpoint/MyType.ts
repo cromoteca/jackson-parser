@@ -15,9 +15,9 @@ interface MyType {
     javaObjectArray: Array<string>;
     minMax: number;
     notBlankEmail: string;
-    nullable: string | undefined;
+    nullable?: string | undefined;
     objectMap: Map<unknown, unknown>;
-    optional: string | undefined;
+    optional?: string | undefined;
     primitive: number;
     primitiveArray: Array<number>;
     stringMap: Map<string, string>;

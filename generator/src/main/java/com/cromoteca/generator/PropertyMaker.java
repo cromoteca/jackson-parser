@@ -35,9 +35,10 @@ class PropertyMaker {
 
   String generate() {
     var propertyType = MultipleType.forProperty(property);
+    String type = tools.generateType(propertyType, typeVariables);
 
     return """
-      \s   %s: %s;"""
-        .formatted(property.getName(), tools.generateType(propertyType, typeVariables));
+      \s   %s%s: %s;"""
+        .formatted(property.getName(), type.endsWith(Generator.NULLABLE_SUFFIX) ? "?" : "", type);
   }
 }

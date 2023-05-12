@@ -17,12 +17,7 @@
 package com.cromoteca.generator;
 
 import com.cromoteca.ScanResult;
-import com.cromoteca.generator.types.BooleanTypeHandler;
 import com.cromoteca.generator.types.DefaultTypeHandler;
-import com.cromoteca.generator.types.FluxTypeHandler;
-import com.cromoteca.generator.types.NumberTypeHandler;
-import com.cromoteca.generator.types.StringTypeHandler;
-import com.cromoteca.generator.types.UnknownTypeHandler;
 import jakarta.validation.Valid;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -31,26 +26,18 @@ import java.util.stream.Stream;
 import org.springframework.lang.NonNullApi;
 
 public class Generator {
+  public static final String NULLABLE_SUFFIX = " | undefined";
+
   private final ScanResult scan;
   private final Map<Class<?>, DefaultTypeHandler> typeHandlers =
       new HashMap<>() {
-        // Order matters in this list.
-        private final List<DefaultTypeHandler> _typeHandlers =
-            List.of(
-                new NumberTypeHandler(),
-                new BooleanTypeHandler(),
-                new StringTypeHandler(),
-                new FluxTypeHandler(),
-                new UnknownTypeHandler(),
-                new DefaultTypeHandler());
-
         @Override
         public DefaultTypeHandler get(Object key) {
           if (key instanceof Class<?> cls) {
             return super.computeIfAbsent(
                 cls,
                 k ->
-                    _typeHandlers.stream()
+                    DefaultTypeHandler.ALL.stream()
                         .filter(h -> h.isSupported(cls))
                         .findFirst()
                         .orElseThrow());
@@ -300,7 +287,7 @@ public class Generator {
         }
       }
 
-      return isNullable(type) ? result + " | undefined" : result;
+      return isNullable(type) ? result + NULLABLE_SUFFIX : result;
     }
 
     private boolean isNullable(FullType type) {

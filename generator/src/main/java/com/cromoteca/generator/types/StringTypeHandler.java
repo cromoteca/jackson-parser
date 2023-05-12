@@ -17,11 +17,12 @@
 package com.cromoteca.generator.types;
 
 import java.util.Set;
+import java.util.UUID;
 
 public class StringTypeHandler extends DefaultTypeHandler {
 
   public static final Set<Class<?>> SUPPORTED =
-      Set.of(String.class, CharSequence.class, char.class, Character.class);
+      Set.of(String.class, CharSequence.class, char.class, Character.class, UUID.class);
 
   @Override
   public boolean isSupported(Class<?> cls) {

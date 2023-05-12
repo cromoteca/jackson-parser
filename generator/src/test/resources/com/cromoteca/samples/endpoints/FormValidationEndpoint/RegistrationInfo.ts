@@ -1,9 +1,9 @@
 interface RegistrationInfo {
-    conditions: boolean;
     country: string;
     email: string;
     name: string;
-    phone: string;
+    phone?: string | undefined;
+    terms: boolean;
 }
 
 export default RegistrationInfo;

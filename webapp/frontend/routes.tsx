@@ -35,9 +35,9 @@ export const routes: readonly ViewRouteObject[] = [
     element: <MainLayout />,
     handle: { icon: 'null', title: 'Main' },
     children: [
-      { path: '/', element: <RegistrationView />, handle: { icon: 'pen-solid', title: 'Registration' } },
-      { path: '/hello', element: <HelloReactView />, handle: { icon: 'globe-solid', title: 'Hello React' } },
+      { path: '/', element: <HelloReactView />, handle: { icon: 'globe-solid', title: 'Hello React' } },
       { path: '/about', element: <AboutView />, handle: { icon: 'info-solid', title: 'About' } },
+      { path: '/regisration', element: <RegistrationView />, handle: { icon: 'pen-solid', title: 'Registration' } },
       { path: '/reactive', element: <ReactiveView />, handle: { icon: 'phone-solid', title: 'Reactive' } },
     ],
   },

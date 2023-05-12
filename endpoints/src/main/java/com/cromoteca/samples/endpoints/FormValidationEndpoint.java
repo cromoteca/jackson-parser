@@ -38,7 +38,8 @@ public class FormValidationEndpoint {
   /**
    * This method is used to pre-validate the registration form.
    *
-   * <p>It does nothing, as the goal here is to take advantage of the validation which happens before invoking this method.
+   * <p>It does nothing, as the goal here is to take advantage of the validation which happens
+   * before invoking this method.
    */
   public void preValidate(@Nonnull RegistrationInfo info) {}
 
