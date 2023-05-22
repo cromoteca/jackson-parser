@@ -39,9 +39,7 @@
         </repository>
         <repository>
             <id>vaadin-prereleases</id>
-            <url>
-                https://maven.vaadin.com/vaadin-prereleases/
-            </url>
+            <url>https://maven.vaadin.com/vaadin-prereleases/</url>
         </repository>
     </repositories>
 
@@ -56,9 +54,7 @@
         </pluginRepository>
         <pluginRepository>
             <id>vaadin-prereleases</id>
-            <url>
-                https://maven.vaadin.com/vaadin-prereleases/
-            </url>
+            <url>https://maven.vaadin.com/vaadin-prereleases/</url>
         </pluginRepository>
     </pluginRepositories>
 
@@ -67,7 +63,7 @@
            <dependency>
                <groupId>org.springframework.boot</groupId>
                <artifactId>spring-boot-dependencies</artifactId>
-               <version>3.0.6</version>
+               <version>3.1.0</version>
                <type>pom</type>
                <scope>import</scope>
            </dependency>
