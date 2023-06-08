@@ -16,7 +16,7 @@
         <module>sample-library</module>
         <module>endpoints</module>
         <module>webapp</module>
-        <!-- add more modules as needed -->
+        <module>bfts-gui</module>
     </modules>
 
     <properties>
@@ -91,6 +91,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                    <parameters>true</parameters>
+                </configuration>
             </plugin>
 
             <plugin>
