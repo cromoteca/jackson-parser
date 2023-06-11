@@ -4,14 +4,14 @@
   "dependencies": {
     "@hilla/form": "2.1.0-rc2",
     "@hilla/frontend": "2.1.0-rc2",
-    "@hilla/generator-typescript-cli": "2.1.0-rc2",
-    "@hilla/generator-typescript-core": "2.1.0-rc2",
-    "@hilla/generator-typescript-plugin-backbone": "2.1.0-rc2",
-    "@hilla/generator-typescript-plugin-barrel": "2.1.0-rc2",
-    "@hilla/generator-typescript-plugin-client": "2.1.0-rc2",
-    "@hilla/generator-typescript-plugin-model": "2.1.0-rc2",
-    "@hilla/generator-typescript-plugin-push": "2.1.0-rc2",
-    "@hilla/generator-typescript-utils": "2.1.0-rc2",
+    "@hilla/generator-typescript-cli": "2.1.0",
+    "@hilla/generator-typescript-core": "2.1.0",
+    "@hilla/generator-typescript-plugin-backbone": "2.1.0",
+    "@hilla/generator-typescript-plugin-barrel": "2.1.0",
+    "@hilla/generator-typescript-plugin-client": "2.1.0",
+    "@hilla/generator-typescript-plugin-model": "2.1.0",
+    "@hilla/generator-typescript-plugin-push": "2.1.0",
+    "@hilla/generator-typescript-utils": "2.1.0",
     "@hilla/react-components": "2.1.0",
     "@polymer/polymer": "3.5.1",
     "@vaadin-component-factory/vcf-nav": "1.1.0",
@@ -88,14 +88,14 @@
     "dependencies": {
       "@hilla/form": "2.1.0-rc2",
       "@hilla/frontend": "2.1.0-rc2",
-      "@hilla/generator-typescript-cli": "2.1.0-rc2",
-      "@hilla/generator-typescript-core": "2.1.0-rc2",
-      "@hilla/generator-typescript-plugin-backbone": "2.1.0-rc2",
-      "@hilla/generator-typescript-plugin-barrel": "2.1.0-rc2",
-      "@hilla/generator-typescript-plugin-client": "2.1.0-rc2",
-      "@hilla/generator-typescript-plugin-model": "2.1.0-rc2",
-      "@hilla/generator-typescript-plugin-push": "2.1.0-rc2",
-      "@hilla/generator-typescript-utils": "2.1.0-rc2",
+      "@hilla/generator-typescript-cli": "2.1.0",
+      "@hilla/generator-typescript-core": "2.1.0",
+      "@hilla/generator-typescript-plugin-backbone": "2.1.0",
+      "@hilla/generator-typescript-plugin-barrel": "2.1.0",
+      "@hilla/generator-typescript-plugin-client": "2.1.0",
+      "@hilla/generator-typescript-plugin-model": "2.1.0",
+      "@hilla/generator-typescript-plugin-push": "2.1.0",
+      "@hilla/generator-typescript-utils": "2.1.0",
       "@hilla/react-components": "2.1.0",
       "@polymer/polymer": "3.5.1",
       "@vaadin/bundles": "24.1.0",
@@ -128,6 +128,6 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "fa54848e93d70f3c2b5876cfd76e6c386960e726f73a32abb02014cae37d5e47"
+    "hash": "38ea3d0bb74ba48dcc522776926408f4041f653c61a7f2551766fec6798689ce"
   }
 }
