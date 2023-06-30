@@ -23,7 +23,7 @@ import com.cromoteca.bfts.util.FilePath;
 import com.cromoteca.bfts.util.Util;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
-import jakarta.annotation.Nullable;
+import dev.hilla.Nullable;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;

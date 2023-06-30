@@ -1,7 +1,7 @@
 package com.cromoteca.parser.example;
 
 import dev.hilla.Endpoint;
-import jakarta.annotation.Nullable;
+import dev.hilla.Nullable;
 import java.util.Collection;
 import java.util.List;
 
@@ -59,9 +59,9 @@ public class BasicEndpoint extends NotExposedSuperclass<String> {
   }
 
   @ShouldBeParsed
-  public @Nullable BasicEntities.NullableType everythingIsNullableHere(
-      @Nullable BasicEntities.NullableType nullableParam1,
-      @Nullable BasicEntities.NullableType nullableParam2) {
+  public BasicEntities.@Nullable NullableType everythingIsNullableHere(
+      BasicEntities.@Nullable NullableType nullableParam1,
+      BasicEntities.@Nullable NullableType nullableParam2) {
     return new BasicEntities.NullableType(
         new BasicEntities.NullableType(new BasicEntities.NullableType(null)));
   }

@@ -2,7 +2,7 @@ package com.cromoteca.samples.endpoints;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
+import dev.hilla.Nullable;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -19,7 +19,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.List;
-import org.springframework.lang.Nullable;
 
 @Endpoint
 @AnonymousAllowed
@@ -30,8 +29,7 @@ public class FormValidationEndpoint {
    *
    * <p>It uses the {@link RegistrationInfo} record.
    */
-  @Nonnull
-  public String handleRegistration(@Nonnull RegistrationInfo info) {
+  public String handleRegistration(RegistrationInfo info) {
     return "Registration accepted";
   }
 
@@ -41,7 +39,7 @@ public class FormValidationEndpoint {
    * <p>It does nothing, as the goal here is to take advantage of the validation which happens
    * before invoking this method.
    */
-  public void preValidate(@Nonnull RegistrationInfo info) {}
+  public void preValidate(RegistrationInfo info) {}
 
   /** This annotation is used to demonstrate server-side custom validation. */
   @Documented

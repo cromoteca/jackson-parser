@@ -3,7 +3,7 @@ package com.cromoteca.samples.endpoints;
 import com.cromoteca.samples.endpoints.entities.MyOtherType;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import dev.hilla.Endpoint;
-import jakarta.annotation.Nullable;
+import dev.hilla.Nullable;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

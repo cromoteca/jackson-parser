@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
 import dev.hilla.Nonnull;
-import jakarta.annotation.Nullable;
+import dev.hilla.Nullable;
 import java.util.List;
 import java.util.Map;
 import net.minidev.json.annotate.JsonIgnore;
