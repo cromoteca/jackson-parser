@@ -38,7 +38,7 @@
     "@rollup/pluginutils": "5.0.2",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
-    "@vitejs/plugin-react": "~3.0.1",
+    "@vitejs/plugin-react": "4.0.0",
     "async": "3.2.2",
     "glob": "7.2.3",
     "mkdirp": "1.0.4",
@@ -126,7 +126,8 @@
       "vite-plugin-checker": "0.5.5",
       "workbox-build": "7.0.0",
       "workbox-core": "7.0.0",
-      "workbox-precaching": "7.0.0"
+      "workbox-precaching": "7.0.0",
+      "@vitejs/plugin-react": "4.0.0"
     },
     "hash": "38ea3d0bb74ba48dcc522776926408f4041f653c61a7f2551766fec6798689ce"
   }
