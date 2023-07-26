@@ -23,7 +23,7 @@
         <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
-        <hilla.version>2.1.1</hilla.version>
+        <hilla.version>2.1.4</hilla.version>
     </properties>
 
     <repositories>
