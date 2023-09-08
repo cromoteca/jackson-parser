@@ -55,6 +55,7 @@ public class Parser {
                     var typeContext = bean.getClassInfo();
                     var methods =
                         Arrays.stream(endpoint.getMethods())
+                            .filter(method -> !method.isSynthetic())
                             // Only public methods.
                             .filter(method -> Modifier.isPublic(method.getModifiers()))
                             // Only methods in annotated classes.
