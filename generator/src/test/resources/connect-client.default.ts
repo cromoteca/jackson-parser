@@ -11,11 +11,11 @@ class MyConnectClient extends ConnectClient {
         super(options);
     }
 
-    async call<P, R>(endpoint: string, method: string, params?: P, __init?: EndpointRequestInit): Promise<R> {
+    async call<T>(endpoint: string, method: string, params?: Record<string, unknown>, __init?: EndpointRequestInit): Promise<T> {
         return super.call(endpoint.replace(/.*[.$]/, ''), method, params, __init);
     }
 
-    subscribe<P, R>(endpoint: string, method: string, params?: P): Subscription<R> {
+    subscribe<T>(endpoint: string, method: string, params?: Record<string, unknown>): Subscription<T> {
         return super.subscribe(endpoint.replace(/.*[.$]/, ''), method, params);
     }
 }
