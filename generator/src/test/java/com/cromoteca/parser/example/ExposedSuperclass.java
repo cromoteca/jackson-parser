@@ -2,7 +2,7 @@ package com.cromoteca.parser.example;
 
 import static com.cromoteca.parser.example.BasicEntities.*;
 
-import dev.hilla.EndpointExposed;
+import com.vaadin.hilla.EndpointExposed;
 import java.util.Collection;
 
 @EndpointExposed

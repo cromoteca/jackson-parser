@@ -16,7 +16,7 @@
  */
 package com.cromoteca.generator.types;
 
-import dev.hilla.EndpointSubscription;
+import com.vaadin.hilla.EndpointSubscription;
 import java.util.Set;
 import reactor.core.publisher.Flux;
 

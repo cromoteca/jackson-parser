@@ -3,7 +3,7 @@ package com.cromoteca.samples.endpoints;
 import com.cromoteca.samples.endpoints.entities.MyOtherType;
 import com.example.library.MyLibraryType;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import java.util.List;
 
 @Endpoint

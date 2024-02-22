@@ -7,8 +7,8 @@ import com.cromoteca.entities.Group;
 import com.cromoteca.entities.Notebook;
 import com.cromoteca.entities.Strictness;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.Nonnull;
 import java.util.List;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 

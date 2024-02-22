@@ -1,6 +1,4 @@
-import { Button } from '@hilla/react-components/Button.js';
-import { Notification } from '@hilla/react-components/Notification.js';
-import { TextField } from '@hilla/react-components/TextField.js';
+import { Button, Notification, TextField } from '@vaadin/react-components';
 import { useState } from 'react';
 import HelloReactEndpoint from "Frontend/generated/com/example/application/endpoints/helloreact/HelloReactEndpoint.js";
 import SpringEndpoint from 'Frontend/generated/com/cromoteca/samples/spring/SpringEndpoint';

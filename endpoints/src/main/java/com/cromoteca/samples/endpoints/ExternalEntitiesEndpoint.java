@@ -2,7 +2,7 @@ package com.cromoteca.samples.endpoints;
 
 import com.cromoteca.samples.Simple;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import reactor.core.publisher.Flux;

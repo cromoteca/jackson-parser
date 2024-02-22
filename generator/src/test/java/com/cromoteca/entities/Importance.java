@@ -1,6 +1,6 @@
 package com.cromoteca.entities;
 
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Nonnull;
 import java.util.Set;
 
 public class Importance<T, U> {

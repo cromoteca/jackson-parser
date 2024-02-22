@@ -1,6 +1,6 @@
 package com.cromoteca.entities;
 
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Nonnull;
 
 public class Drum<T> {
   private final Dresser<Pile> partnership;

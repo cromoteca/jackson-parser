@@ -1,5 +1,5 @@
-import { ConnectClient, type ConnectClientOptions } from '@hilla/frontend';
-import { type EndpointRequestInit, type Subscription } from "@hilla/frontend/Connect.js";
+import { ConnectClient, type ConnectClientOptions } from '@vaadin/hilla-frontend';
+import { type EndpointRequestInit, type Subscription } from "@vaadin/hilla-frontend/Connect.js";
 
 // @ts-ignore
 BigInt.prototype.toJSON = function () {

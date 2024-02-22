@@ -3,7 +3,7 @@ import MyOtherTypeModel from '../entities/MyOtherTypeModel.js';
 import type MyEnum from './MyEnum.js';
 import MyEnumModel from './MyEnumModel.js';
 import type MyType from './MyType.js';
-import { ArrayModel, Email, Max, Min, NotBlank, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
+import { ArrayModel, Email, Max, Min, NotBlank, NumberModel, ObjectModel, StringModel, _getPropertyModel } from '@vaadin/hilla-lit-form';
 
 class MyTypeModel<T extends MyType = MyType> extends ObjectModel<T> {
     declare static createEmptyValue: () => MyType;

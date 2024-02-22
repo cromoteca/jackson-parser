@@ -1,6 +1,6 @@
 package com.cromoteca.entities;
 
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Nonnull;
 
 public class Aircraft<T> {
   private final Dirt<Innocence<Comeback<Luck>>> crew;

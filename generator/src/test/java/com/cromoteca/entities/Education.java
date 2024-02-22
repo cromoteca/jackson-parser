@@ -1,6 +1,6 @@
 package com.cromoteca.entities;
 
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Nonnull;
 
 public class Education<T, U> {
   private final Haircut<Blouse<Guest<Intelligence, Maturity<Horsefly>>>> access;

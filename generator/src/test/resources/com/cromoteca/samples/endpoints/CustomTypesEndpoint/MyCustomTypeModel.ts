@@ -1,5 +1,5 @@
 import type MyCustomType from './MyCustomType.js';
-import { ObjectModel, StringModel, _getPropertyModel } from '@hilla/form';
+import { ObjectModel, StringModel, _getPropertyModel } from '@vaadin/hilla-lit-form';
 
 class MyCustomTypeModel<T extends MyCustomType = MyCustomType> extends ObjectModel<T> {
     declare static createEmptyValue: () => MyCustomType;

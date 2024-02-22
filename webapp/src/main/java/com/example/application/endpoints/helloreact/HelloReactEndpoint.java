@@ -1,8 +1,8 @@
 package com.example.application.endpoints.helloreact;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import dev.hilla.Endpoint;
-import dev.hilla.EndpointSubscription;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.EndpointSubscription;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.time.Instant;

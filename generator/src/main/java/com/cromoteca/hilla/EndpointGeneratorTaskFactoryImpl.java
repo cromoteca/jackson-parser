@@ -7,7 +7,7 @@ import com.vaadin.flow.server.frontend.EndpointGeneratorTaskFactory;
 import com.vaadin.flow.server.frontend.Options;
 import com.vaadin.flow.server.frontend.TaskGenerateEndpoint;
 import com.vaadin.flow.server.frontend.TaskGenerateOpenAPI;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

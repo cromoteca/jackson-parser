@@ -1,4 +1,4 @@
-import { EndpointValidationError } from '@hilla/frontend';
+import { EndpointValidationError } from '@vaadin/hilla-frontend';
 import { type UseFormProps, useForm as parentUseForm, type FieldValues, type Path, type Resolver, type UseFormRegister } from 'react-hook-form';
 
 /**

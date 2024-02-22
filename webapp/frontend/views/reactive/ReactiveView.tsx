@@ -1,6 +1,5 @@
-import { Subscription } from "@hilla/frontend";
-import { Button } from "@hilla/react-components/Button.js";
-import { TextField } from "@hilla/react-components/TextField.js";
+import { Subscription } from "@vaadin/hilla-frontend";
+import { Button, TextField } from "@vaadin/react-components";
 import { useState } from "react";
 import HelloReactEndpoint from "Frontend/generated/com/example/application/endpoints/helloreact/HelloReactEndpoint.js";
 

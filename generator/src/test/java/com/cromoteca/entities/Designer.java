@@ -1,6 +1,6 @@
 package com.cromoteca.entities;
 
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Nonnull;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Set;

@@ -1,9 +1,4 @@
-import { Button } from "@hilla/react-components/Button.js";
-import { EmailField } from "@hilla/react-components/EmailField.js";
-import { Notification } from "@hilla/react-components/Notification.js";
-import { Select } from "@hilla/react-components/Select.js";
-import { TextField } from "@hilla/react-components/TextField.js";
-import { VerticalLayout } from "@hilla/react-components/VerticalLayout.js";
+import { Button, EmailField, Notification, Select, TextField, VerticalLayout } from "@vaadin/react-components";
 import FormValidationEndpoint from "Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint.js";
 import RegistrationInfo from "Frontend/generated/com/cromoteca/samples/endpoints/FormValidationEndpoint/RegistrationInfo.js";
 import { GeneratedResolver } from "./GeneratedResolver.js";

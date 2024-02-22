@@ -1,7 +1,7 @@
 package com.cromoteca.parser.example;
 
-import dev.hilla.Endpoint;
-import dev.hilla.Nullable;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.Nullable;
 import java.util.Collection;
 import java.util.List;
 

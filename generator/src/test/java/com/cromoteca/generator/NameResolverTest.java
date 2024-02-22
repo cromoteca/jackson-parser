@@ -30,7 +30,7 @@ public class NameResolverTest {
         NameResolver.resolve("/connect-client.default.js", "com.cromoteca.generator.basic"));
 
     assertEquals(
-        "@hilla/frontend",
-        NameResolver.resolve("@hilla/frontend", "com.cromoteca.generator.basic"));
+        "@vaadin/hilla-frontend",
+        NameResolver.resolve("@vaadin/hilla-frontend", "com.cromoteca.generator.basic"));
   }
 }

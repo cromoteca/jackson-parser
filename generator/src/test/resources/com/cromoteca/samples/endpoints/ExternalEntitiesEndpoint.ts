@@ -3,7 +3,7 @@ import type Page from '../../../../org/springframework/data/domain/Page.js';
 import type Flux from '../../../../reactor/core/publisher/Flux.js';
 import type Simple from '../Simple.js';
 import type Inner from './ExternalEntitiesEndpoint/Inner.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function flux(argument: Flux, init?: EndpointRequestInit): Promise<void> {
     return client.call('com.cromoteca.samples.endpoints.ExternalEntitiesEndpoint', 'flux', { argument }, init);

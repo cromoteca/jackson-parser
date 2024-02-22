@@ -1,8 +1,8 @@
 package com.cromoteca.samples.nullable.endpoints;
 
 import com.vaadin.flow.server.auth.AnonymousAllowed;
-import dev.hilla.Endpoint;
-import dev.hilla.Nonnull;
+import com.vaadin.hilla.Endpoint;
+import com.vaadin.hilla.Nonnull;
 import java.util.List;
 import java.util.Map;
 

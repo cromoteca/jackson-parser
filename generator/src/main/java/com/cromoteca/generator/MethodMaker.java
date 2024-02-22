@@ -68,7 +68,7 @@ class MethodMaker {
   }
 
   public String subscription() {
-    return tools.fromImport("Subscription", "@hilla/frontend", false, true);
+    return tools.fromImport("Subscription", "@vaadin/hilla-frontend", false, true);
   }
 
   public String className() {
@@ -127,7 +127,7 @@ class MethodMaker {
       params.add(
           initParam()
               + "?: "
-              + tools.fromImport("EndpointRequestInit", "@hilla/frontend", false, true));
+              + tools.fromImport("EndpointRequestInit", "@vaadin/hilla-frontend", false, true));
     }
     return params;
   }

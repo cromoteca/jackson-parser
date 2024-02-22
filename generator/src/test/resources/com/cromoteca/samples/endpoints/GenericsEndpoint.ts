@@ -1,6 +1,6 @@
 import client from '../../../../connect-client.default.js';
 import type GenericClass from './GenericsEndpoint/GenericClass.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function opt(init?: EndpointRequestInit): Promise<string | undefined> {
     return client.call('com.cromoteca.samples.endpoints.GenericsEndpoint', 'opt', {}, init);

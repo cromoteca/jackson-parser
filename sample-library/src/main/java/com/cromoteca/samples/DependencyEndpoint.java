@@ -1,6 +1,6 @@
 package com.cromoteca.samples;
 
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 
 @Endpoint
 public class DependencyEndpoint {

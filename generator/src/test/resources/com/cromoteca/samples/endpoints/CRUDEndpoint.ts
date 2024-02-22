@@ -1,6 +1,6 @@
 import client from '../../../../connect-client.default.js';
 import type MyLibraryType from '../../../example/library/MyLibraryType.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function doSomethingWith(t: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> {
     return client.call('com.cromoteca.samples.endpoints.CRUDEndpoint', 'doSomethingWith', { t }, init);

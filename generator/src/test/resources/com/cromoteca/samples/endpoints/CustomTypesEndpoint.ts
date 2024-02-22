@@ -2,7 +2,7 @@ import client from '../../../../connect-client.default.js';
 import type MyLibraryType from '../../../example/library/MyLibraryType.js';
 import type MyCustomType from './CustomTypesEndpoint/MyCustomType.js';
 import type MyOtherType from './entities/MyOtherType.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function externalLibraryType(argument: MyLibraryType, init?: EndpointRequestInit): Promise<MyLibraryType> {
     return client.call('com.cromoteca.samples.endpoints.CustomTypesEndpoint', 'externalLibraryType', { argument }, init);

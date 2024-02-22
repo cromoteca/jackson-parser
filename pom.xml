@@ -23,7 +23,8 @@
         <java.version>17</java.version>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.source>${java.version}</maven.compiler.source>
-        <hilla.version>2.3.0.beta1</hilla.version>
+        <vaadin.version>24.4.0.alpha5</vaadin.version>
+        <spring-boot.version>3.2.2</spring-boot.version>
     </properties>
 
     <repositories>
@@ -72,9 +73,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>endpoint</artifactId>
-            <version>2.3-SNAPSHOT</version>
+            <groupId>com.vaadin</groupId>
+            <artifactId>hilla-endpoint</artifactId>
+            <version>24.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

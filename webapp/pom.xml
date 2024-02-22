@@ -31,9 +31,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>dev.hilla</groupId>
+                <groupId>com.vaadin</groupId>
                 <artifactId>hilla-bom</artifactId>
-                <version>${hilla.version}</version>
+                <version>${vaadin.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -52,12 +52,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>dev.hilla</groupId>
-            <artifactId>hilla-react-spring-boot-starter</artifactId>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <version>${vaadin.version}</version>
             <exclusions>
                 <exclusion>
-                    <groupId>dev.hilla</groupId>
-                    <artifactId>engine-runtime</artifactId>
+                    <groupId>com.vaadin</groupId>
+                    <artifactId>hilla-engine-runtime</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -89,25 +90,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <jvmArguments>-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5269</jvmArguments>
-                    <wait>500</wait>
-                    <maxAttempts>240</maxAttempts>
-                </configuration>
+                <version>${spring-boot.version}</version>
             </plugin>
 
             <plugin>
-                <groupId>dev.hilla</groupId>
-                <artifactId>hilla-maven-plugin</artifactId>
-                <version>${hilla.version}</version>
-                <configuration>
-                    <parser>
-                        <packages>
-                            <package>com.example.application</package>
-                            <package>com.cromoteca.samples</package>
-                        </packages>
-                    </parser>
-                </configuration>
+                <groupId>com.vaadin</groupId>
+                <artifactId>vaadin-maven-plugin</artifactId>
+                <version>${vaadin.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -139,17 +128,9 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>dev.hilla</groupId>
-                        <artifactId>hilla-maven-plugin</artifactId>
-                        <version>${hilla.version}</version>
-                        <configuration>
-                            <parser>
-                                <packages>
-                                    <package>com.example.application</package>
-                                    <package>com.cromoteca.samples</package>
-                                </packages>
-                            </parser>
-                        </configuration>
+                        <groupId>com.vaadin</groupId>
+                        <artifactId>vaadin-maven-plugin</artifactId>
+                        <version>${vaadin.version}</version>
                         <executions>
                             <execution>
                                 <goals>

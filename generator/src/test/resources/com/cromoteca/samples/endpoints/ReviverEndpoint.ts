@@ -1,6 +1,6 @@
 import client from '../../../../connect-client.default.js';
 import type Level2 from './ReviverEndpoint/Level2.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function bigInteger(arg: BigInt, init?: EndpointRequestInit): Promise<BigInt> {
     return client.call('com.cromoteca.samples.endpoints.ReviverEndpoint', 'bigInteger', { arg }, init);

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.*;
 
 import com.cromoteca.parser.Parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;

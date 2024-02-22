@@ -1,5 +1,5 @@
 import client from '../../../../connect-client.default.js';
-import { type EndpointRequestInit } from '@hilla/frontend';
+import { type EndpointRequestInit } from '@vaadin/hilla-frontend';
 
 async function booleanArrayType(arg: Array<boolean>, init?: EndpointRequestInit): Promise<void> {
     return client.call('com.cromoteca.samples.endpoints.BasicTypesEndpoint', 'booleanArrayType', { arg }, init);

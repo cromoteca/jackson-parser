@@ -1,7 +1,7 @@
 package com.cromoteca.samples.endpoints;
 
 import com.cromoteca.samples.annotations.Nullable;
-import dev.hilla.Endpoint;
+import com.vaadin.hilla.Endpoint;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;

@@ -1,4 +1,4 @@
-import { Checkbox } from '@hilla/react-components/Checkbox.js';
+import { Checkbox } from '@vaadin/react-components';
 import { ComponentProps, Ref, forwardRef } from 'react';
 
 type CheckboxFieldProps = Omit<ComponentProps<typeof Checkbox>, 'onCheckedChanged'> & {
