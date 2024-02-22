@@ -28,7 +28,7 @@
     "@vaadin/field-highlighter": "24.4.0-alpha13",
     "@vaadin/form-layout": "24.4.0-alpha13",
     "@vaadin/grid": "24.4.0-alpha13",
-    "@vaadin/hilla-frontend": "24.4.0-alpha4",
+    "@vaadin/hilla-frontend": "file:../../forks/cromoteca_hilla/packages/ts/frontend/vaadin-hilla-frontend-24.4.0-alpha5.tgz",
     "@vaadin/hilla-lit-form": "24.4.0-alpha4",
     "@vaadin/hilla-react-auth": "24.4.0-alpha4",
     "@vaadin/hilla-react-crud": "24.4.0-alpha4",

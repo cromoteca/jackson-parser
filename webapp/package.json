@@ -30,7 +30,7 @@
     "@vaadin/field-highlighter": "24.4.0-alpha13",
     "@vaadin/form-layout": "24.4.0-alpha13",
     "@vaadin/grid": "24.4.0-alpha13",
-    "@vaadin/hilla-frontend": "24.4.0-alpha4",
+    "@vaadin/hilla-frontend": "file:../../forks/cromoteca_hilla/packages/ts/frontend/vaadin-hilla-frontend-24.4.0-alpha5.tgz",
     "@vaadin/hilla-lit-form": "24.4.0-alpha4",
     "@vaadin/hilla-react-auth": "24.4.0-alpha4",
     "@vaadin/hilla-react-crud": "24.4.0-alpha4",
@@ -304,6 +304,6 @@
       "workbox-core": "7.0.0",
       "workbox-precaching": "7.0.0"
     },
-    "hash": "3a97df3efc941bdf9d1b18e4b3959e5980dedd8820279260f8bf6433b09e9077"
+    "hash": "b87a9b832f05aa8ded9d1c80c47975246953ad8bc84cb57f3b41cfc60921dc70"
   }
 }
