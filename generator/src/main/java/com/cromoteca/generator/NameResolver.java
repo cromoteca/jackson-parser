@@ -22,7 +22,7 @@ import java.util.Arrays;
 public class NameResolver {
 
   public static String[] split(String name) {
-    String[] parts = name.split("\\.|\\$");
+    String[] parts = name.split("[.$]");
     if (parts.length == 1) {
       return new String[] {"", parts[0]};
     } else {
@@ -32,13 +32,17 @@ public class NameResolver {
     }
   }
 
+  public static boolean isLibrary(String name) {
+    return name.startsWith("@")
+        || (Character.isLowerCase(name.charAt(0)) && name.indexOf('.') == -1);
+  }
+
   public static String resolve(String name, String packageName) {
-    if (name.startsWith("@")) {
+    if (isLibrary(name)) {
       return name;
     }
 
-    var namePath =
-        Path.of(name.contains("/") ? name : '/' + String.join("/", name.split("\\.|\\$")));
+    var namePath = Path.of(name.contains("/") ? name : '/' + String.join("/", name.split("[.$]")));
     var packagePath = Path.of('/' + String.join("/", packageName.split("\\.")));
     var relativePath = packagePath.relativize(namePath).toString().replace('\\', '/');
 

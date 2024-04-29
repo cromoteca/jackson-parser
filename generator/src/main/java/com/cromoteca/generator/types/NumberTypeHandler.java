@@ -46,6 +46,11 @@ public class NumberTypeHandler extends DefaultTypeHandler {
   }
 
   @Override
+  public String caster() {
+    return "Number(%s)";
+  }
+
+  @Override
   public String modelType(Class<?> type) {
     return "NumberModel";
   }

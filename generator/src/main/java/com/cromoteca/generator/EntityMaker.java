@@ -79,8 +79,11 @@ class EntityMaker {
       return Arrays.stream(entity.type().getEnumConstants())
           .map(Object::toString)
           .sorted()
-          .map(value -> """
-                \s   %s = "%s",""".formatted(value, value))
+          .map(
+              value ->
+                      """
+                \s   %s = "%s","""
+                      .formatted(value, value))
           .toList();
     }
 

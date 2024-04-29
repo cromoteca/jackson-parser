@@ -55,6 +55,10 @@ public class DefaultTypeHandler {
     return type.getName();
   }
 
+  public String caster() {
+    return null;
+  }
+
   /**
    * Returns the Hilla model name for this class.
    *

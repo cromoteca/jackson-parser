@@ -71,8 +71,11 @@ class EndpointMaker {
   public String methodList() {
     return endpoint.methods().stream()
         .sorted(Comparator.comparing(AnnotatedMethod::getName))
-        .map(method -> """
-              \s   %s,""".formatted(method.getName()))
+        .map(
+            method ->
+                    """
+              \s   %s,"""
+                    .formatted(method.getName()))
         .collect(Collectors.joining("\n"));
   }
 }

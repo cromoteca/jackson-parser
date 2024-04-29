@@ -48,10 +48,12 @@ public class StringTemplateTest {
         Hello,
         World!
         """,
-        StringTemplate.from("""
+        StringTemplate.from(
+            """
             Hello,
             ${hello}!
-            """, bean),
+            """,
+            bean),
         "String block");
     assertEquals("Goodbye!", StringTemplate.from("${goodbye}!", bean));
   }

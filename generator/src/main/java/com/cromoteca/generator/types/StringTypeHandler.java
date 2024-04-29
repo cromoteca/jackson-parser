@@ -35,6 +35,11 @@ public class StringTypeHandler extends DefaultTypeHandler {
   }
 
   @Override
+  public String caster() {
+    return "String(%s)";
+  }
+
+  @Override
   public String modelType(Class<?> type) {
     return "StringModel";
   }

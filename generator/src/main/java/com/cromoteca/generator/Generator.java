@@ -173,7 +173,9 @@ public class Generator {
                                 .filter(s -> !s.isEmpty())
                                 .collect(Collectors.joining(", ")),
                             "path",
-                            relativePath.startsWith("@") ? relativePath : relativePath + ".js")));
+                            NameResolver.isLibrary(relativePath)
+                                ? relativePath
+                                : relativePath + ".js")));
               });
 
       var lines = String.join("", groupedImports.values());

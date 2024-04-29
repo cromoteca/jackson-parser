@@ -20,6 +20,7 @@ import static com.cromoteca.generator.types.DefaultTypeHandler.EndpointMethodTyp
 
 import com.cromoteca.generator.types.DefaultTypeHandler;
 import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
+import com.vaadin.hilla.Loader;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,20 +52,53 @@ class MethodMaker {
   }
 
   String generate() {
-    return switch (methodType) {
-      case CALL -> StringTemplate.from(
+    if (method.hasAnnotation(Loader.class)) {
+      return StringTemplate.from(
           """
+          async function ${methodName}${typeVars}({ params }: ${loaderParamType}): Promise<${returnType}> {
+              return ${client}.call('${className}', '${methodName}', {${loaderParams}});
+          }""",
+          this);
+    }
+
+    return switch (methodType) {
+      case CALL ->
+          StringTemplate.from(
+              """
           async function ${methodName}${typeVars}(${paramList}): Promise<${returnType}> {
               return ${client}.call('${className}', '${methodName}', {${paramNames}}, ${initParam});
           }""",
-          this);
-      case SUBSCRIBE -> StringTemplate.from(
-          """
+              this);
+      case SUBSCRIBE ->
+          StringTemplate.from(
+              """
           function ${methodName}${typeVars}(${paramList}): ${subscription}<${returnType}> {
               return ${client}.subscribe('${className}', '${methodName}', {${paramNames}});
           }""",
-          this);
+              this);
     };
+  }
+
+  public String loaderParamType() {
+    return tools.fromImport("LoaderFunctionArgs", "react-router-dom", false, true);
+  }
+
+  public String loaderParams() {
+    var params =
+        Arrays.stream(method.getAnnotated().getParameters())
+            .map(
+                p -> {
+                  var name = "params." + p.getName();
+                  var caster = tools.handlerFor(p.getType()).caster();
+
+                  if (caster != null) {
+                    name = String.format(caster, name);
+                  }
+
+                  return p.getName() + ": " + name;
+                })
+            .collect(Collectors.joining(", "));
+    return params.isEmpty() ? "" : ' ' + params + ' ';
   }
 
   public String subscription() {
