@@ -16,9 +16,11 @@
  */
 package com.cromoteca.experiments;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.BeanSerializer;
 import com.fasterxml.jackson.databind.ser.DefaultSerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.JsonValueSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.databind.util.Converter;
@@ -48,7 +51,7 @@ public class PropertyDiscover {
             .createInstance(
                 objectMapper.getSerializationConfig(), objectMapper.getSerializerFactory());
 
-    Stream.of(MyClass.class, Distance.class, WillBeConverted.class)
+    Stream.of(MyClass.class, Distance.class, WillBeConverted.class, MyPrimitive.class)
         .forEach(
             cls -> {
               try {
@@ -75,9 +78,16 @@ public class PropertyDiscover {
                     prop.isRequired() ? "" : " not");
               });
     } else if (serializer instanceof StdDelegatingSerializer delegatingSerializer) {
+      System.out.println("(Delegating serializer for class: " + cls.getSimpleName() + ")");
       useSerializer(cls, delegatingSerializer.getDelegatee());
-    } else {
+    } else if (serializer instanceof JsonValueSerializer jsonValueSerializer) {
+      System.out.println("Class: " + cls.getSimpleName());
+      System.out.println("  will be serialized as: " + jsonValueSerializer.handledType().getName());
+    } else if (serializer == null) {
       System.out.println("Class: " + cls.getName() + " has no BeanSerializer");
+    } else {
+      System.out.println(
+          "Class: " + cls.getName() + " has serializer of type " + serializer.getClass().getName());
     }
   }
 
@@ -109,26 +119,25 @@ public class PropertyDiscover {
     }
   }
 
-  private record MyClass(String field1, int field2, WillBeConverted willBeConverted) {
+  private static class MyPrimitive {
+    private final String value;
 
-    @Override
-    @JsonProperty(value = "renamed1", required = true)
-    public String field1() {
-      return field1;
+    @JsonCreator
+    public MyPrimitive(String value) {
+      this.value = value;
     }
 
-    @Override
-    @JsonIgnore
-    public int field2() {
-      return field2;
-    }
-
-    @Override
-    @JsonProperty(required = true)
-    public WillBeConverted willBeConverted() {
-      return willBeConverted;
+    @JsonValue
+    public String value() {
+      return value;
     }
   }
+
+  private record MyClass(
+      @JsonProperty(value = "renamed1", required = true) String field1,
+      @JsonIgnore int field2,
+      @JsonProperty(required = true) WillBeConverted willBeConverted,
+      MyPrimitive primitive) {}
 
   @JsonFormat(shape = JsonFormat.Shape.OBJECT)
   public static enum Distance {
@@ -182,7 +191,8 @@ public class PropertyDiscover {
       implements Converter<HasBeenConverted, WillBeConverted> {
     @Override
     public WillBeConverted convert(HasBeenConverted value) {
-      return new WillBeConverted(new MyClass("a", 1, new WillBeConverted(null)));
+      return new WillBeConverted(
+          new MyClass("a", 1, new WillBeConverted(null), new MyPrimitive(null)));
     }
 
     @Override
